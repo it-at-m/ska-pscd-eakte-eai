@@ -5,17 +5,17 @@
     <parent>
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-starter-parent</artifactId>
-        <version>3.5.16</version> <!-- must match the chosen Camel version in properties -> camel-spring-boot-dependencies.version, see e.g. https://central.sonatype.com/artifact/org.apache.camel.springboot/camel-spring-boot/dependencies and search for 'spring-boot-starter' -->
+        <version>4.0.5</version> <!-- must match the chosen Camel version in properties -> camel-spring-boot-dependencies.version, see e.g. https://central.sonatype.com/artifact/org.apache.camel.springboot/camel-spring-boot/dependencies and search for 'spring-boot-starter' -->
         <relativePath />
     </parent>
 
-    <groupId>de.muenchen.oss.refarch</groupId>
-    <artifactId>refarch-eai</artifactId>
+    <groupId>de.muenchen.oss.ska</groupId>
+    <artifactId>pscd-eakte-eai</artifactId>
     <version>0.0.1-SNAPSHOT</version>
 
-    <name>refarch-eai</name>
-    <description>This is the default starting project for a EAI project based on the reference architecture of it@M</description>
-    <url>https://github.com/it-at-m/refarch-templates</url>
+    <name>pscd-eakte-eai</name>
+    <description>EAI for transferring Data from SAP PSCD to Fabasoft eAkte</description>
+    <url>https://github.com/it-at-m/ska-pscd-eakte-eai</url>
     <licenses>
         <license>
             <name>MIT</name>
@@ -24,9 +24,9 @@
         </license>
     </licenses>
     <scm>
-        <url>https://github.com/it-at-m/refarch-templates.git</url>
-        <connection>scm:git:https://github.com/it-at-m/refarch-templates.git</connection>
-        <developerConnection>scm:git:https://github.com/it-at-m/refarch-templates.git</developerConnection>
+        <url>https://github.com/it-at-m/ska-pscd-eakte-eai.git</url>
+        <connection>scm:git:https://github.com/it-at-m/ska-pscd-eakte-eai.git</connection>
+        <developerConnection>scm:git:https://github.com/it-at-m/ska-pscd-eakte-eai.git</developerConnection>
         <tag>HEAD</tag>
     </scm>
     <developers>
@@ -45,7 +45,8 @@
         <maven.compiler.release>${java.version}</maven.compiler.release>
 
         <!-- Core Frameworks -->
-        <camel-spring-boot-dependencies.version>4.18.3</camel-spring-boot-dependencies.version>
+        <camel-spring-boot-dependencies.version>4.21.0</camel-spring-boot-dependencies.version>
+        <lombok.version>1.18.46</lombok.version>
 
         <!-- Linting & Formatting -->
         <spotless-maven-plugin.version>3.8.0</spotless-maven-plugin.version>
@@ -99,6 +100,38 @@
             <groupId>org.apache.camel.springboot</groupId>
             <artifactId>camel-servlet-starter</artifactId>
         </dependency>
+        <dependency>
+            <groupId>org.apache.camel.springboot</groupId>
+            <artifactId>camel-file-starter</artifactId>
+            <version>4.21.0</version>
+            <scope>compile</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.camel</groupId>
+            <artifactId>camel-bindy-starter</artifactId>
+            <version>2.25.4</version>
+            <scope>compile</scope>
+        </dependency>
+
+        <!-- db -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-data-jpa</artifactId>
+            <version>4.1.0</version>
+            <scope>compile</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.flywaydb</groupId>
+            <artifactId>flyway-core</artifactId>
+            <version>12.10.0</version>
+            <scope>compile</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>de.muenchen.oss.refarch</groupId>
+            <artifactId>refarch-dms-integration-starter</artifactId>
+            <version>3.0.1</version>
+        </dependency>
 
         <!--  Spring-Boot-Actuator (https://docs.spring.io/spring-boot/docs/current/reference/html/actuator.html#actuator.enabling) -->
         <dependency>
@@ -130,6 +163,13 @@
             <groupId>com.tngtech.archunit</groupId>
             <artifactId>archunit</artifactId>
             <version>${archunit.version}</version>
+            <scope>test</scope>
+        </dependency>
+<!--        v6 wegen sonst NoSuchMethod -->
+        <dependency>
+            <groupId>org.junit.jupiter</groupId>
+            <artifactId>junit-jupiter-api</artifactId>
+            <version>6.1.1</version>
             <scope>test</scope>
         </dependency>
 
