@@ -1,0 +1,14 @@
+# Workflow that runs license check for used dependencies
+name: dependency-review
+
+on:
+  pull_request:
+
+jobs:
+  dependency-review:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pull-requests: write
+    steps:
+      - uses: it-at-m/lhm_actions/action-templates/actions/action-dependency-review@6db6885319cb1f85f75cd2947caa96596047711b # v1.1.0
