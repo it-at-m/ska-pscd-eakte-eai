@@ -12,3 +12,14 @@ logging:
 camel:
   main:
     tracing: false
+
+refarch:
+  dms:
+    fabasoft:
+      businessapp:	ska-pscd-eakte-eai
+      url:
+      ui-url:	https://eakte26-k2.muenchen.de/
+      username:
+      password:
+      enable-mtom:	true
+#    supported-file-extensions.*	Map of allowed file extensions in the format "extension (key): mime-type (value)". I.e. "pdf: application/pdf"

@@ -3,7 +3,9 @@ package de.muenchen.oss.ska_pscd_eakte_eai.data;
 import lombok.Data;
 import org.apache.camel.dataformat.bindy.annotation.CsvRecord;
 import org.apache.camel.dataformat.bindy.annotation.DataField;
+import org.springframework.stereotype.Component;
 
+@Component
 @Data
 @CsvRecord( separator = ",", skipFirstLine = true)
 public class PscdData {
