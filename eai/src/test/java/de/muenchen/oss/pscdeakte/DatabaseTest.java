@@ -1,21 +1,23 @@
 package de.muenchen.oss.pscdeakte;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.fail;
+
 import de.muenchen.oss.pscdeakte.database.entity.PscdImport;
 import de.muenchen.oss.pscdeakte.database.repository.PscdImportRepository;
+import java.time.Instant;
 import java.util.Optional;
-import lombok.RequiredArgsConstructor;
 import org.apache.camel.test.spring.junit5.CamelSpringBootTest;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.junit.jupiter.api.Assertions.fail;
-
-@SpringBootTest(classes = {Application.class})
+@SpringBootTest(classes = { Application.class })
 @CamelSpringBootTest
 @ActiveProfiles(TestConstants.SPRING_TEST_PROFILE)
 public class DatabaseTest {
@@ -33,7 +35,10 @@ public class DatabaseTest {
         PscdImport pscdImport = new PscdImport();
         pscdImport.setName("name");
         pscdImport.setVorname("vorname");
-        pir.save(pscdImport);
+        PscdImport saved = pir.save(pscdImport);
+        assertNotNull(saved.getLastUpdate());
+
+        Instant insertInstant = saved.getLastUpdate();
 
         Iterable<PscdImport> imports = pir.findAll();
         assertTrue(imports.iterator().hasNext(), "Insert and find should work");
@@ -46,6 +51,7 @@ public class DatabaseTest {
         Optional<PscdImport> updated = pir.findById(id);
 
         updated.ifPresentOrElse(u -> assertEquals("updateName", u.getName()), () -> fail("Update failed"));
+        updated.ifPresentOrElse(u -> assertNotEquals(0, u.getLastUpdate().compareTo(insertInstant)), () -> fail("Lastupdate is not updated"));
 
         pir.delete(updated.get());
 

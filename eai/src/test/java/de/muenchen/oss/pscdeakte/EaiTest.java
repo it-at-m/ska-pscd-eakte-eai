@@ -1,13 +1,10 @@
 package de.muenchen.oss.pscdeakte;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 import de.muenchen.oss.pscdeakte.database.entity.PscdImport;
 import java.util.List;
 import org.apache.camel.EndpointInject;
-import org.apache.camel.Produce;
-import org.apache.camel.ProducerTemplate;
 import org.apache.camel.component.mock.MockEndpoint;
 import org.apache.camel.test.spring.junit5.CamelSpringBootTest;
 import org.junit.jupiter.api.Test;

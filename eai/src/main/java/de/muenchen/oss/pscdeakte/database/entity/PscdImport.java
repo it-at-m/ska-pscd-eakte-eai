@@ -6,18 +6,16 @@ import jakarta.persistence.PrePersist;
 import jakarta.persistence.Table;
 import java.time.Instant;
 import lombok.Data;
-import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 import org.springframework.data.annotation.LastModifiedDate;
 
-@EqualsAndHashCode(callSuper = true)
 @Data
 @Entity
 @Table(name = "pscd_import", schema = "pscdeakte")
 @NoArgsConstructor
 public class PscdImport extends BaseEntity {
 
- //   GP-ID,Name,Vorname,Geb.-Datum,Zentralakt
+    //   GP-ID,Name,Vorname,Geb.-Datum,Zentralakt
 
     @Column(name = "geschaeftspartner_id")
     private String geschaeftspartnerId;
@@ -40,6 +38,7 @@ public class PscdImport extends BaseEntity {
 
     @PrePersist
     protected void onCreate() {
-        lastUpdate = Instant.now();}
+        lastUpdate = Instant.now();
+    }
 
 }

@@ -10,7 +10,6 @@ import jakarta.persistence.Id;
 import jakarta.persistence.MappedSuperclass;
 import java.io.Serial;
 import java.io.Serializable;
-import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -21,7 +20,6 @@ import lombok.ToString;
 @Getter
 @Setter
 @ToString
-@EqualsAndHashCode
 public abstract class BaseEntity implements Serializable {
 
     @Serial
@@ -30,5 +28,17 @@ public abstract class BaseEntity implements Serializable {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof BaseEntity that)) return false;
+        return id != null && id.equals(that.id);
+    }
+
+    @Override
+    public int hashCode() {
+        return id != null ? id.hashCode() : 0;
+    }
 
 }
