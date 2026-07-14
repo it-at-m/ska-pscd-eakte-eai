@@ -1,4 +1,4 @@
-package de.muenchen.oss.ska_pscd_eakte_eai.data;
+package de.muenchen.oss.pscdeakte.data;
 
 import lombok.Data;
 import org.apache.camel.dataformat.bindy.annotation.CsvRecord;

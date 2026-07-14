@@ -3,6 +3,19 @@ management:
     access:
       default: none
 
+spring:
+  datasource:
+    url: jdbc:tc:postgresql:///testdb?TC_TMPFS=/testtmpfs:rw
+#    url: jdbc:postgresql://localhost:5432/postgres
+    username: admin
+    password: admin
+  jpa:
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+  flyway:
+    schemas: pscdeakte
+
 logging:
   include-application-group: false # disabled because application group is only relevant when deployed
   structured:

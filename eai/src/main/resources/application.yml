@@ -1,10 +1,26 @@
 spring:
   main:
     banner-mode: console
+    web-application-type: none
   application:
     name: @project.artifactId@
     group: @project.groupId@
     version: @project.version@
+  datasource:
+    url:     # Must be configured
+    username: # Must be configured
+    password:  # Must be configured
+  jpa:
+    hibernate:
+      ddl-auto: validate
+    show-sql: true
+    properties:
+      hibernate:
+        dialect: # Must be configured
+  flyway:
+    enabled: true
+    baseline-on-migrate: false
+    schemas: # Must be configured
 
 server:
   error:
