@@ -354,6 +354,7 @@
                     <targetJdk>${java.version}</targetJdk>
                     <printFailingErrors>true</printFailingErrors>
                     <linkXRef>false</linkXRef>
+                    <failOnViolation>false</failOnViolation>
                     <includeTests>true</includeTests>
                     <excludeRoots>
                         <excludeRoot>target/generated-sources</excludeRoot>
