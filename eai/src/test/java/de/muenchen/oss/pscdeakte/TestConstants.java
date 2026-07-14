@@ -1,4 +1,4 @@
-package de.muenchen.oss.ska_pscd_eakte_eai;
+package de.muenchen.oss.pscdeakte;
 
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;

@@ -1,10 +1,10 @@
-package de.muenchen.oss.refarch.eai;
+package de.muenchen.oss.pscdeakte;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
+import de.muenchen.oss.pscdeakte.database.entity.PscdImport;
+import java.util.List;
 import org.apache.camel.EndpointInject;
-import org.apache.camel.Produce;
-import org.apache.camel.ProducerTemplate;
 import org.apache.camel.component.mock.MockEndpoint;
 import org.apache.camel.test.spring.junit5.CamelSpringBootTest;
 import org.junit.jupiter.api.Test;
@@ -21,21 +21,19 @@ import org.springframework.test.context.ActiveProfiles;
 @ActiveProfiles(TestConstants.SPRING_TEST_PROFILE)
 class EaiTest {
 
-    @Produce(EaiRouteBuilder.DIRECT_ROUTE)
-    private ProducerTemplate producer;
-
     @EndpointInject("mock:example")
     private MockEndpoint output;
 
     @Test
     void givenMessage_thenSendToMockShouldSucceed() throws InterruptedException {
-        final String message = "Hello Test !";
+
         output.expectedMessageCount(1);
 
-        producer.sendBody(message);
-
         output.assertIsSatisfied();
-        assertEquals(message, output.getExchanges().getFirst().getMessage().getBody(String.class));
+
+        List<PscdImport> imports = output.getExchanges().getFirst().getMessage().getBody(List.class);
+        assertEquals(10, imports.size());
+
     }
 
 }
