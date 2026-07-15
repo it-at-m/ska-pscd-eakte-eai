@@ -7,10 +7,10 @@ import org.springframework.stereotype.Component;
 
 @Component
 @Data
-@CsvRecord( separator = ",", skipFirstLine = true)
+@CsvRecord( separator = ",", skipFirstLine = true) //TODO csv export evtl. ohne Titelzeile
 public class PscdData {
 
-    @DataField(pos = 1)
+    @DataField(pos = 1, required = true)
     String gpId;
     @DataField(pos = 2)
     String name;

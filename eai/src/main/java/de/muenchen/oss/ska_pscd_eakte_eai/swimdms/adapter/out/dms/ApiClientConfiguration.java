@@ -1,0 +1,61 @@
+package de.muenchen.oss.ska_pscd_eakte_eai.swimdms.adapter.out.dms;
+
+import de.muenchen.oss.refarch.integration.dms.ApiClient;
+import de.muenchen.oss.refarch.integration.dms.api.ContentObjectsApi;
+import de.muenchen.oss.refarch.integration.dms.api.IncomingFromInboxApi;
+import de.muenchen.oss.refarch.integration.dms.api.IncomingsApi;
+import de.muenchen.oss.refarch.integration.dms.api.ObjectAndImportToInboxApi;
+import de.muenchen.oss.refarch.integration.dms.api.ProcedureObjectsApi;
+import de.muenchen.oss.refarch.integration.dms.api.ProceduresApi;
+import de.muenchen.oss.refarch.integration.dms.api.SearchObjNamesApi;
+import org.springframework.context.annotation.Bean;
+import org.springframework.stereotype.Component;
+import org.springframework.web.reactive.function.client.WebClient;
+
+@Component
+class ApiClientConfiguration {
+    @Bean
+    protected ApiClient apiClient(final DmsProperties dmsProperties) {
+        final WebClient webClient = WebClient.builder().build();
+        final ApiClient apiClient = new ApiClient(webClient);
+        apiClient.setBasePath(dmsProperties.getBaseUrl());
+        apiClient.setUsername(dmsProperties.getUsername());
+        apiClient.setPassword(dmsProperties.getPassword());
+        return apiClient;
+    }
+
+    @Bean
+    protected ObjectAndImportToInboxApi objectAndImportToInboxApi(final ApiClient apiClient) {
+        return new ObjectAndImportToInboxApi(apiClient);
+    }
+
+    @Bean
+    protected IncomingsApi incomingsApi(final ApiClient apiClient) {
+        return new IncomingsApi(apiClient);
+    }
+
+    @Bean
+    protected ProceduresApi proceduresApi(final ApiClient apiClient) {
+        return new ProceduresApi(apiClient);
+    }
+
+    @Bean
+    protected ProcedureObjectsApi procedureObjectsApi(final ApiClient apiClient) {
+        return new ProcedureObjectsApi(apiClient);
+    }
+
+    @Bean
+    protected ContentObjectsApi contentObjectsApi(final ApiClient apiClient) {
+        return new ContentObjectsApi(apiClient);
+    }
+
+    @Bean
+    protected SearchObjNamesApi searchObjNamesApi(final ApiClient apiClient) {
+        return new SearchObjNamesApi(apiClient);
+    }
+
+    @Bean
+    protected IncomingFromInboxApi incomingFromInboxApi(final ApiClient apiClient) {
+        return new IncomingFromInboxApi(apiClient);
+    }
+}

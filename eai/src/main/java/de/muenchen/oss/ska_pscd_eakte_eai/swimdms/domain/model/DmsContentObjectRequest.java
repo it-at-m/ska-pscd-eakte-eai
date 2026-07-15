@@ -1,0 +1,28 @@
+package de.muenchen.oss.ska_pscd_eakte_eai.swimdms.domain.model;
+
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
+
+import java.io.InputStream;
+
+/**
+ * Properties for creating a new ContentObject.
+ *
+ * @param name The name of the new ContentObject including the file extension.
+ * @param subject The subject of the new ContentObject.
+ * @param inputStream The content of the new ContentObject.
+ */
+public record DmsContentObjectRequest(@NotBlank String name, String subject, @NotNull InputStream inputStream) {
+    /**
+     * Get the name without the file extension.
+     *
+     * @return The name without the file extension.
+     */
+    public String getNameWithoutExtension() {
+        final int lastDotIndex = name.lastIndexOf('.');
+        if (lastDotIndex == -1) {
+            return name;
+        }
+        return name.substring(0, lastDotIndex);
+    }
+}

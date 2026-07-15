@@ -1,0 +1,94 @@
+package de.muenchen.oss.ska_pscd_eakte_eai.swimdms.application.port.out;
+
+import de.muenchen.oss.ska_pscd_eakte_eai.swimdms.domain.model.DmsContentObjectRequest;
+import de.muenchen.oss.ska_pscd_eakte_eai.swimdms.domain.model.DmsIncomingRequest;
+import de.muenchen.oss.ska_pscd_eakte_eai.swimdms.domain.model.DmsRequestContext;
+import de.muenchen.oss.ska_pscd_eakte_eai.swimdms.domain.model.DmsResourceType;
+import de.muenchen.oss.ska_pscd_eakte_eai.swimdms.domain.model.DmsTarget;
+import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotEmpty;
+import jakarta.validation.constraints.NotNull;
+import java.util.List;
+import java.util.Optional;
+import org.springframework.validation.annotation.Validated;
+
+@Validated
+public interface DmsOutPort {
+    /**
+     * Create ContentObject inside an Inbox.
+     *
+     * @param dmsTarget The target Inbox.
+     * @param contentObjectRequest The values and content of the new ContentObject.
+     * @return The coo of the new ContentObject.
+     */
+    String createContentObjectInInbox(@NotNull @Valid DmsTarget dmsTarget, @NotNull @Valid DmsContentObjectRequest contentObjectRequest);
+
+    /**
+     * Create Incoming with ContentObject inside an Inbox.
+     *
+     * @param dmsTarget The target Inbox.
+     * @param incomingRequest The values for the new Incoming.
+     * @param contentObjectRequests The values and content of the new ContentObject.
+     * @return The coo of the new Incoming.
+     */
+    String createIncomingInInbox(@NotNull @Valid DmsTarget dmsTarget, @NotNull @Valid DmsIncomingRequest incomingRequest,
+            @NotEmpty @Valid List<DmsContentObjectRequest> contentObjectRequests);
+
+    /**
+     * Create Incoming with ContentObjects.
+     * Either inside given Procedure {@link DmsTarget#getCoo()} or OU work queue of
+     * {@link DmsTarget#getUsername()}.
+     *
+     * @param dmsTarget The target. If {@link DmsTarget#getCoo()} is defined: Procedure, if not: OU work
+     *            queue.
+     * @param incomingRequest The values for the new Incoming.
+     * @param contentObjectRequests The files to add as ContentObjects.
+     * @return The coo of the new Incoming.
+     */
+    String createProcedureIncoming(@NotNull @Valid DmsTarget dmsTarget, @NotNull @Valid DmsIncomingRequest incomingRequest,
+            @NotEmpty @Valid List<DmsContentObjectRequest> contentObjectRequests);
+
+    /**
+     * Add ContentObjects to existing Incoming.
+     *
+     * @param dmsTarget The Incoming to add the ContentObjects to.
+     * @param contentObjectRequests The files to add as ContentObjects.
+     */
+    void addContentObjectsToIncoming(@NotNull @Valid DmsTarget dmsTarget, @NotEmpty @Valid List<DmsContentObjectRequest> contentObjectRequests);
+
+    /**
+     * Get name of Procedure by coo.
+     *
+     * @param dmsTarget The Procedure to get the name of.
+     * @return The name of the Procedure.
+     */
+    String getProcedureName(@NotNull @Valid DmsTarget dmsTarget);
+
+    /**
+     * Get the coo of the first Incoming where the name starts with the given name.
+     *
+     * @param dmsTarget The Procedure to search in.
+     * @param incomingNamePrefix The prefix the Incoming name needs to start with.
+     * @return The coo of the procedure. Null if it doesn't exist.
+     */
+    Optional<String> getIncomingCooByName(@NotNull @Valid DmsTarget dmsTarget, @NotNull String incomingNamePrefix);
+
+    /**
+     * Create ContentObject inside Incoming.
+     *
+     * @param dmsTarget The Incoming to create the ContentObject in.
+     * @param contentObjectRequest The values and content of the new ContentObject.
+     * @return The coo of the new ContentObject.
+     */
+    String createContentObject(@NotNull @Valid DmsTarget dmsTarget, @NotNull @Valid DmsContentObjectRequest contentObjectRequest);
+
+    /**
+     * Find dms object via name and resource type.
+     *
+     * @param resourceType The type of the dms resource to search for.
+     * @param objectName The name of the object to search for.
+     * @param requestContext The context (username, joboe, jobposition) to make the search request with.
+     * @return The COOs of all matching objects.
+     */
+    List<String> findObjectsByName(@NotNull DmsResourceType resourceType, @NotNull String objectName, @NotNull @Valid DmsRequestContext requestContext);
+}
