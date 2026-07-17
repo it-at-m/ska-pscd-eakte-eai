@@ -92,3 +92,11 @@ camel:
   servlet:
     mapping:
       context-path: /api/*
+
+dms:
+  XAnwendung: "PSCD-eAkte-EAI"
+  base-url: "https://dmsresteai-test-dmsresteai.apps.capk.muenchen.de/api"
+  einzelakte: "COO.2150.8819.2.1652"
+  jobposition: "DocumentManager"
+  joboe: "COO.2150.8800.1.237"
+
