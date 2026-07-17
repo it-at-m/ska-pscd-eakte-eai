@@ -26,19 +26,19 @@ public class DmsService {
     private final ProceduresApi proceduresApi;
 
     public ReadApentryAntwortDTO getApentries(){
-        return apentriesApi.readApentry(dmsProperties.getEinzelakte(), dmsProperties.getXAnwendung(), dmsProperties.getUserlogin(), dmsProperties.getJoboe(), dmsProperties.getJobposition()).block();
+        return apentriesApi.readApentry(dmsProperties.getCooEinzelakte(), dmsProperties.getXAnwendung(), dmsProperties.getUserlogin(), dmsProperties.getJoboe(), dmsProperties.getJobposition()).block();
     }
 
-    public DmsObjektResponse createSubjectAreaUnit(){
+    public DmsObjektResponse createSubjectAreaUnit(int laufendeNr, String bereich){
         CreateSubjectAreaUnitAnfrageDTO dto = new CreateSubjectAreaUnitAnfrageDTO();
-        dto.setBasenr("9512.3");
-        dto.setShortterm("20000010000 - 20000014999"); //TODO echte Werte einfuegen
+        dto.setBasenr(dmsProperties.getAktenplannummer() + "." + laufendeNr);
+        dto.setShortterm(bereich);
         return subjectAreaUnitsApi.createSubjectAreaUnit(dto, dmsProperties.getXAnwendung(), dmsProperties.getUserlogin(), dmsProperties.getJoboe(), dmsProperties.getJobposition()).block();
     }
 
-    public DmsObjektResponse createFile(PscdData data){
+    public DmsObjektResponse createFile(PscdData data, String cooSubjectArea){
         CreateFileDTO dto = new CreateFileDTO();
-        dto.shortname(data.getGpId()).filesubj("2506").apentry("coo").definition("coo"); //TODO echte Werte einfuegen
+        dto.shortname(data.getGpId()).filesubj(data.getZentralaktkennung()).apentry(cooSubjectArea).definition(dmsProperties.getCooKmAkte());
         if (data.getVorname() != null && !data.getVorname().isEmpty()) {
             UserFormsReferenz vornameReferenz = new UserFormsReferenz();
             vornameReferenz.lhMBAI151700Ufreference("BusinessDataGPFirstname").addLhMBAI151700UfvalueItem(data.getVorname());

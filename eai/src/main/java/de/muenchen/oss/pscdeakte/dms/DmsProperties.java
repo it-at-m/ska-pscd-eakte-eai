@@ -20,11 +20,15 @@ public class DmsProperties {
     @NotBlank
     private String password;
     @NotBlank
-    private String einzelakte;
+    private String cooEinzelakte;
+    @NotBlank
+    private String cooKmAkte;
     @NotBlank
     private String jobposition;
     @NotBlank
     private String joboe;
     @NotBlank
     private String userlogin;
+    @NotBlank
+    private String aktenplannummer;
 }
