@@ -21,7 +21,7 @@ class ApiClientConfiguration {
         return apiClient;
     }
 
-   @Bean
+    @Bean
     public ApentriesApi apentriesApi(final ApiClient apiClient) {
         return new ApentriesApi(apiClient);
     }
