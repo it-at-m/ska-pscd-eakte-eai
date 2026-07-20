@@ -95,7 +95,7 @@ camel:
 
 dms:
   XAnwendung: "PSCD-eAkte-EAI"
-  base-url: "https://dmsresteai-test-dmsresteai.apps.capk.muenchen.de/api"
+  base-url: "https://cap-eakte-resteai-test-bay-eakte-resteai.apps.test.capk.muenchen.de/api"
   aktenplannummer: "9512"
   coo-einzelakte: "COO.2150.8819.2.1652"
   coo-km-akte: "COO.2150.8801.2.1055475"

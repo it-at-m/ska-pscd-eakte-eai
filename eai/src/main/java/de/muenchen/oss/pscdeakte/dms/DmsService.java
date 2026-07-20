@@ -1,6 +1,7 @@
 package de.muenchen.oss.pscdeakte.dms;
 
 import de.muenchen.oss.pscdeakte.data.PscdData;
+import de.muenchen.oss.pscdeakte.helper.DateHelper;
 import de.muenchen.oss.refarch.integration.dms.api.ApentriesApi;
 import de.muenchen.oss.refarch.integration.dms.api.FilesApi;
 import de.muenchen.oss.refarch.integration.dms.api.ProceduresApi;
@@ -33,6 +34,7 @@ public class DmsService {
         CreateSubjectAreaUnitAnfrageDTO dto = new CreateSubjectAreaUnitAnfrageDTO();
         dto.setBasenr(dmsProperties.getAktenplannummer() + "." + laufendeNr);
         dto.setShortterm(bereich);
+        dto.setObjaddress(dmsProperties.getCooEinzelakte());
         return subjectAreaUnitsApi.createSubjectAreaUnit(dto, dmsProperties.getXAnwendung(), dmsProperties.getUserlogin(), dmsProperties.getJoboe(), dmsProperties.getJobposition()).block();
     }
 
@@ -51,7 +53,7 @@ public class DmsService {
         }
         if (data.getGebDat() != null && !data.getGebDat().isEmpty()) {
             UserFormsReferenz gebDatReferenz = new UserFormsReferenz();
-            gebDatReferenz.lhMBAI151700Ufreference("BusinessDataGPBirthDate").addLhMBAI151700UfvalueItem(data.getGebDat());
+            gebDatReferenz.lhMBAI151700Ufreference("BusinessDataGPBirthDate").addLhMBAI151700UfvalueItem(DateHelper.format(data.getGebDat()));
             dto.addUserformsdataItem(gebDatReferenz);
         }
         return filesApi.createFile(dto, dmsProperties.getXAnwendung(), dmsProperties.getUserlogin(), dmsProperties.getJoboe(), dmsProperties.getJobposition()).block();
