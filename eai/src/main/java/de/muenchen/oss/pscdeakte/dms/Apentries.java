@@ -47,6 +47,7 @@ public class Apentries {
             DmsObjektResponse response = dmsService.createSubjectAreaUnit(lfdnr, this.buildObjname(lfdnr));
             log.info("new apentry name: {} coo: {}", response.getObjname(), response.getObjid());
             apentryMap.put(lfdnr, response.getObjid());
+            coo = response.getObjid();
         }
         return coo;
     }
