@@ -31,10 +31,10 @@ class DmsTest {
     @Test
     void createFileTest(){
         PscdData data = new PscdData();
-        data.setGpId("9000000001");
-        data.setName("name");
-        data.setVorname("vorname");
-        data.setGebDat("31.01.2020");
+        data.setGpId("9000000003");
+        data.setName("Gebdat ohne Zeit");
+        data.setVorname("Gebdat ohne Zeit");
+        data.setGebDat("31.01.3210");
         data.setZentralaktkennung("9999");
         DmsObjektResponse response = dmsService.createFile(data, "COO.2150.8819.2.1120806");
         System.out.println(response.toString());

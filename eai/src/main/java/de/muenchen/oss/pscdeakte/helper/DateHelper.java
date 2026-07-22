@@ -1,5 +1,8 @@
 package de.muenchen.oss.pscdeakte.helper;
 
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
+
 public class DateHelper {
 
     private DateHelper(){
@@ -7,6 +10,6 @@ public class DateHelper {
     }
 
     public static String format(String date){
-        return date.substring(6) + "-" + date.substring(3, 5) + "-" + date.substring(0, 2) + "T00:00:00.000+01:00";
+        return LocalDate.parse(date, DateTimeFormatter.ofPattern("dd.MM.yyyy")).format(DateTimeFormatter.ISO_LOCAL_DATE);
     }
 }
