@@ -24,7 +24,7 @@ public class EaiRouteBuilder extends RouteBuilder {
                 .routeId("eai-route")
                 .split(body().tokenize(lineBreak))
                 .unmarshal().bindy(BindyType.Csv, PscdData.class)
-                .log(LoggingLevel.WARN, "de.muenchen",
+                .log(LoggingLevel.INFO, "de.muenchen",
                         "${body.toString()}")
                 .process("eAkteConnector")
                 .to("mock:example");

@@ -46,8 +46,8 @@ public class Apentries {
                 }
             }
         }
-        int lfdnr = this.generateLfdNr(gpId);
-        return apentryMap.computeIfAbsent(lfdnr, newLfdnr -> {
+        int lfdNr = this.generateLfdNr(gpId);
+        return apentryMap.computeIfAbsent(lfdNr, newLfdnr -> {
             log.info("creating new apentry");
             DmsObjektResponse response = dmsService.createSubjectAreaUnit(newLfdnr, this.buildObjname(newLfdnr));
             log.info("new apentry name: {} coo: {}", response.getObjname(), response.getObjid());

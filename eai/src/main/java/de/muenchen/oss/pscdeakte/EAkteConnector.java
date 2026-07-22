@@ -26,14 +26,14 @@ public class EAkteConnector implements Processor {
         }
         log.info("processing gpid {}", data.getGpId());
         String apentryCoo = apentries.getApentryCoo(data.getGpId());
-        log.info("saving gp into apentry {}", apentryCoo);
+        log.info("saving gp {} into apentry {}", data.getGpId(), apentryCoo);
         log.info("creating file");
-        String filecoo = dmsService.createFile(data, apentryCoo).getObjid();
-        log.info("file {} created", filecoo);
+//        String filecoo = dmsService.createFile(data, apentryCoo).getObjid();
+//        log.info("file {} created", filecoo);
         log.info("creating procedures");
-        String procedurecoo = dmsService.createProcedureBestandsakte(filecoo).getObjid();
-        log.info("Bestandsakten created: {}", procedurecoo);
-        procedurecoo = dmsService.createProcedureAV(filecoo).getObjid();
-        log.info("AVs, Titel, Haftbefehle created: {}", procedurecoo);
+//        String procedurecoo = dmsService.createProcedureBestandsakte(filecoo).getObjid();
+//        log.info("Bestandsakten created: {}", procedurecoo);
+//        procedurecoo = dmsService.createProcedureAV(filecoo).getObjid();
+//        log.info("AVs, Titel, Haftbefehle created: {}", procedurecoo);
     }
 }
