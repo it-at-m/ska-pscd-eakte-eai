@@ -18,9 +18,9 @@ public class EAkteConnector implements Processor {
     private final Apentries apentries;
 
     @Override
-    public void process(Exchange exchange) throws Exception {
-        PscdData data = exchange.getIn().getBody(PscdData.class);
-        if (data == null){
+    public void process(final Exchange exchange) throws Exception {
+        final PscdData data = exchange.getIn().getBody(PscdData.class);
+        if (data == null) {
             log.error("data is null");
             return;
         }

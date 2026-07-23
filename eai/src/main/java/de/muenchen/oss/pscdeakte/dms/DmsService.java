@@ -30,7 +30,7 @@ public class DmsService {
         return apentriesApi.readApentry(dmsProperties.getCooEinzelakte(), dmsProperties.getXAnwendung(), dmsProperties.getUserlogin(), dmsProperties.getJoboe(), dmsProperties.getJobposition()).block();
     }
 
-    public DmsObjektResponse createSubjectAreaUnit(int laufendeNr, String bereich){
+    public DmsObjektResponse createSubjectAreaUnit(final int laufendeNr, final String bereich){
         CreateSubjectAreaUnitAnfrageDTO dto = new CreateSubjectAreaUnitAnfrageDTO();
         dto.setBasenr(dmsProperties.getAktenplannummer() + "." + laufendeNr);
         dto.setShortterm(bereich);
@@ -38,7 +38,7 @@ public class DmsService {
         return subjectAreaUnitsApi.createSubjectAreaUnit(dto, dmsProperties.getXAnwendung(), dmsProperties.getUserlogin(), dmsProperties.getJoboe(), dmsProperties.getJobposition()).block();
     }
 
-    public DmsObjektResponse createFile(PscdData data, String cooSubjectArea){
+    public DmsObjektResponse createFile(final PscdData data, final String cooSubjectArea){
         CreateFileDTO dto = new CreateFileDTO();
         dto.shortname(data.getGpId()).filesubj(data.getZentralaktkennung()).apentry(cooSubjectArea).definition(dmsProperties.getCooKmAkte());
         if (data.getVorname() != null && !data.getVorname().isEmpty()) {
@@ -59,13 +59,13 @@ public class DmsService {
         return filesApi.createFile(dto, dmsProperties.getXAnwendung(), dmsProperties.getUserlogin(), dmsProperties.getJoboe(), dmsProperties.getJobposition()).block();
     }
 
-    public DmsObjektResponse createProcedureBestandsakte(String referrednumber){
+    public DmsObjektResponse createProcedureBestandsakte(final String referrednumber){
         CreateProcedureDTO dto = new CreateProcedureDTO();
         dto.shortname("Bestandsakten").accdef("Aktengebunden").referrednumber(referrednumber);
         return proceduresApi.createProcedure(dto, dmsProperties.getXAnwendung(), dmsProperties.getUserlogin(), dmsProperties.getJoboe(), dmsProperties.getJobposition()).block();
     }
 
-    public DmsObjektResponse createProcedureAV(String referrednumber){
+    public DmsObjektResponse createProcedureAV(final String referrednumber){
         CreateProcedureDTO dto = new CreateProcedureDTO();
         dto.shortname("AVs, Titel, Haftbefehle").accdef("Aktengebunden").referrednumber(referrednumber);
         return proceduresApi.createProcedure(dto, dmsProperties.getXAnwendung(), dmsProperties.getUserlogin(), dmsProperties.getJoboe(), dmsProperties.getJobposition()).block();
