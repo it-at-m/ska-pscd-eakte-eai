@@ -117,6 +117,12 @@
             <artifactId>camel-bindy-starter</artifactId>
         </dependency>
 
+        <dependency>
+            <groupId>de.muenchen.oss.refarch</groupId>
+            <artifactId>refarch-dms-integration-fabasoft-rest-api</artifactId>
+            <version>3.1.0</version>
+        </dependency>
+
         <!-- Database -->
         <dependency>
             <groupId>org.springframework.boot</groupId>
