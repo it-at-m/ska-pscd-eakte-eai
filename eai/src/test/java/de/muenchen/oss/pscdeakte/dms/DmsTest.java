@@ -4,6 +4,7 @@ import de.muenchen.oss.pscdeakte.TestConstants;
 import de.muenchen.oss.pscdeakte.data.PscdData;
 import de.muenchen.oss.refarch.integration.dms.model.DmsObjektResponse;
 import de.muenchen.oss.refarch.integration.dms.model.ReadApentryAntwortDTO;
+import static  org.junit.jupiter.api.Assertions.*;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -20,6 +21,8 @@ class DmsTest {
     void getApentriesTest(){
        ReadApentryAntwortDTO response = dmsService.getApentries();
        response.getGiobjecttype().forEach(System.out::println);
+       assertEquals(1, response.getGiobjecttype().size());
+       assertEquals("COO.2150.8819.2.1120806", response.getGiobjecttype().get(0).getObjaddress());
     }
 
     @Test
