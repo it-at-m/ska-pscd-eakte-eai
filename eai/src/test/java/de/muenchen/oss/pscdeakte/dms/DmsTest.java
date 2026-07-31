@@ -4,7 +4,7 @@ import de.muenchen.oss.pscdeakte.TestConstants;
 import de.muenchen.oss.pscdeakte.data.PscdData;
 import de.muenchen.oss.refarch.integration.dms.model.DmsObjektResponse;
 import de.muenchen.oss.refarch.integration.dms.model.ReadApentryAntwortDTO;
-import static  org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.*;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -12,7 +12,7 @@ import org.springframework.test.context.ActiveProfiles;
 
 @SpringBootTest
 @ActiveProfiles(TestConstants.SPRING_TEST_PROFILE)
-class DmsTest {
+class DmsTest extends WiremockTest {
 
     @Autowired
     public DmsService dmsService;
@@ -22,13 +22,14 @@ class DmsTest {
        ReadApentryAntwortDTO response = dmsService.getApentries();
        response.getGiobjecttype().forEach(System.out::println);
        assertEquals(1, response.getGiobjecttype().size());
-       assertEquals("COO.2150.8819.2.1120806", response.getGiobjecttype().get(0).getObjaddress());
+       assertEquals("COO.2150.8819.2.1120806", response.getGiobjecttype().getFirst().getObjaddress());
     }
 
     @Test
     void createSubjectAreaUnitTest(){
         DmsObjektResponse response = dmsService.createSubjectAreaUnit(999, "9000000001-9000005000");
         System.out.println(response.toString());
+        assertEquals("9512.999/9000000001-9000005000", response.getObjname());
     }
 
     @Test
