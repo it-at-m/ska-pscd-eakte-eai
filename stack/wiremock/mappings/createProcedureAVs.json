@@ -1,0 +1,21 @@
+{
+  "request": {
+    "method": "POST",
+    "url": "/procedures",
+    "bodyPatterns": [
+      {
+        "contains": "AVs, Titel, Haftbefehle"
+      }
+    ]
+  },
+  "response": {
+    "status": 200,
+    "headers": {
+      "Content-Type": "application/json"
+    },
+    "jsonBody": {
+          "objid": "COO.2150.8819.2.1120851",
+          "objname": "AVs, Titel, Haftbefehle (9512.999-1-0002)"
+    }
+  }
+}
