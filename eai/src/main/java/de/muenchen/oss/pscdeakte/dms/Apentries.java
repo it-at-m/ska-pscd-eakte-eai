@@ -3,13 +3,12 @@ package de.muenchen.oss.pscdeakte.dms;
 import de.muenchen.oss.refarch.integration.dms.model.DmsObjektResponse;
 import de.muenchen.oss.refarch.integration.dms.model.Objektreferenz;
 import de.muenchen.oss.refarch.integration.dms.model.ReadApentryAntwortDTO;
-import lombok.extern.log4j.Log4j2;
-import org.springframework.stereotype.Component;
-
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import lombok.extern.log4j.Log4j2;
+import org.springframework.stereotype.Component;
 
 @Log4j2
 @Component

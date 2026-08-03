@@ -123,6 +123,12 @@
             <artifactId>refarch-dms-integration-fabasoft-rest-api</artifactId>
             <version>3.1.0</version>
         </dependency>
+<!--        <dependency>-->
+<!--            <groupId>de.muenchen.oss.refarch</groupId>-->
+<!--            <artifactId>refarch-s3-integration-starter</artifactId>-->
+<!--            <version>4.0.0</version>-->
+<!--        </dependency>-->
+
 
         <!-- Database -->
         <dependency>

@@ -27,12 +27,18 @@ class ApiClientConfiguration {
     }
 
     @Bean
-    public SubjectAreaUnitsApi subjectAreaUnitsApi(final ApiClient apiClient) { return new SubjectAreaUnitsApi(apiClient); }
+    public SubjectAreaUnitsApi subjectAreaUnitsApi(final ApiClient apiClient) {
+        return new SubjectAreaUnitsApi(apiClient);
+    }
 
     @Bean
-    public FilesApi filesApi(final ApiClient apiClient) { return new FilesApi(apiClient); }
+    public FilesApi filesApi(final ApiClient apiClient) {
+        return new FilesApi(apiClient);
+    }
 
     @Bean
-    public ProceduresApi proceduresApi(final ApiClient apiClient) { return new ProceduresApi(apiClient); }
+    public ProceduresApi proceduresApi(final ApiClient apiClient) {
+        return new ProceduresApi(apiClient);
+    }
 
 }
