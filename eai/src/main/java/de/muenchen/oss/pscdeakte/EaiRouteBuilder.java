@@ -17,7 +17,8 @@ public class EaiRouteBuilder extends RouteBuilder {
     public void configure() {
         onException(Exception.class).handled(true).log(LoggingLevel.ERROR, "${exception}");
 
-        from("file://testdata?noop=true")
+//        from("file://testdata?noop=true")
+        from("file://testdata")
                 .routeId("eai-route")
                 .unmarshal().bindy(BindyType.Csv, PscdData.class)
                 .log(LoggingLevel.INFO, "de.muenchen",
@@ -27,6 +28,8 @@ public class EaiRouteBuilder extends RouteBuilder {
                 .end()
                 .process(exchange -> log.info("end"))
                 .to("mock:example");
+
+
     }
 
 }

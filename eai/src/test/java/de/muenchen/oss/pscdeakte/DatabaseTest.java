@@ -20,7 +20,7 @@ import org.springframework.test.context.ActiveProfiles;
 @SpringBootTest(classes = { Application.class })
 @CamelSpringBootTest
 @ActiveProfiles(TestConstants.SPRING_TEST_PROFILE)
-public class DatabaseTest {
+class DatabaseTest {
 
     private final PscdImportRepository pir;
 

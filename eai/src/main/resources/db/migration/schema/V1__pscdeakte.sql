@@ -7,10 +7,22 @@ CREATE TABLE pscdeakte.pscd_import
     geschaeftspartner_id    VARCHAR(10),
     name                    VARCHAR(50),
     vorname                 VARCHAR(50),
-    geburtsdatum            VARCHAR(8),
-    zentralakt              VARCHAR(50),
+    geburtsdatum            VARCHAR(10),
+    zentralakt              VARCHAR(4),
+    coo                     VARCHAR(30),
     created_at              TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at              TIMESTAMPTZ NOT NULL
+
+);
+
+CREATE TABLE pscdeakte.logs
+(
+
+    id                   SERIAL PRIMARY KEY,    -- INT PK
+    level                   VARCHAR(5),
+    message                 VARCHAR(50),
+    exception               VARCHAR(100),
+    created_at              TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
 
 );
 

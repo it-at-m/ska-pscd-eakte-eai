@@ -6,9 +6,11 @@ import jakarta.persistence.PrePersist;
 import jakarta.persistence.Table;
 import java.time.Instant;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 import org.springframework.data.annotation.LastModifiedDate;
 
+@EqualsAndHashCode(callSuper = true)
 @Data
 @Entity
 @Table(name = "pscd_import", schema = "pscdeakte")
@@ -31,6 +33,9 @@ public class PscdImport extends BaseEntity {
 
     @Column(name = "zentralakt")
     private String zentralakt;
+
+    @Column(name = "coo")
+    private String coo;
 
     @LastModifiedDate
     @Column(name = "updated_at", nullable = false)

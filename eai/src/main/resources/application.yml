@@ -102,3 +102,6 @@ dms:
   jobposition: "DocumentManager"
   joboe: "COO.2150.8800.1.237"
 
+refarch:
+  s3:
+    url: https://s3k.muenchen.de:443

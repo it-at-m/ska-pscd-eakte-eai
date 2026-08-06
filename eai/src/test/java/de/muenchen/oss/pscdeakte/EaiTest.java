@@ -7,6 +7,7 @@ import java.util.List;
 import org.apache.camel.EndpointInject;
 import org.apache.camel.component.mock.MockEndpoint;
 import org.apache.camel.test.spring.junit5.CamelSpringBootTest;
+import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
 
@@ -23,7 +24,7 @@ class EaiTest {
     @EndpointInject("mock:example")
     private MockEndpoint output;
 
-    //    @Test
+    @Test
     void givenMessage_thenSendToMockShouldSucceed() throws InterruptedException {
 
         output.expectedMessageCount(1);
