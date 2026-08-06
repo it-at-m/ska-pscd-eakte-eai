@@ -10,8 +10,8 @@ import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 import org.springframework.data.annotation.LastModifiedDate;
 
-@EqualsAndHashCode(callSuper = true)
 @Data
+@EqualsAndHashCode(callSuper = true)
 @Entity
 @Table(name = "pscd_import", schema = "pscdeakte")
 @NoArgsConstructor
@@ -47,3 +47,6 @@ public class PscdImport extends BaseEntity {
     }
 
 }
+
+
+

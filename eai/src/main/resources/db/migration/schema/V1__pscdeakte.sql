@@ -22,7 +22,7 @@ CREATE TABLE pscdeakte.logs
     level                   VARCHAR(5),
     message                 VARCHAR(50),
     exception               VARCHAR(100),
-    created_at              TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    created_at              TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 
 );
 

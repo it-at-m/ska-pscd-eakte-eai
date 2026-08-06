@@ -2,16 +2,15 @@ package de.muenchen.oss.pscdeakte.database.entity;
 
 import jakarta.persistence.*;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 
 @Data
+@EqualsAndHashCode(callSuper = true)
 @Entity
 @Table(name = "logs", schema = "pscdeakte")
 @NoArgsConstructor
-public class LogEntry {
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+public class LogEntry extends BaseEntity{
 
     private String level;
     private String message;
