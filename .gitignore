@@ -1,5 +1,6 @@
 # =============== eigene ===============
 eai/src/test/resources/application-test.yml
+eai/src/main/resources/application-local.yml
 
 # ========= Frontend specific ==========
 route-map.d.ts
