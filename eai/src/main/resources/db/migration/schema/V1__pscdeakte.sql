@@ -10,6 +10,7 @@ CREATE TABLE pscdeakte.pscd_import
     geburtsdatum            VARCHAR(10),
     zentralakt              VARCHAR(4),
     coo                     VARCHAR(30),
+    status                  VARCHAR(50),
     created_at              TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at              TIMESTAMPTZ NOT NULL
 

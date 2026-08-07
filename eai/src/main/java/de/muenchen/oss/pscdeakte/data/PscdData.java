@@ -6,7 +6,7 @@ import org.apache.camel.dataformat.bindy.annotation.DataField;
 
 @Data
 //@CsvRecord(separator = ",", skipFirstLine = true)
-@CsvRecord(separator = ",")
+@CsvRecord(separator = ";")
 public class PscdData {
 
     @DataField(pos = 1)

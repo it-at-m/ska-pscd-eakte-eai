@@ -1,6 +1,9 @@
 package de.muenchen.oss.pscdeakte.s3;
 
+import de.muenchen.oss.pscdeakte.CsvToDb;
 import de.muenchen.oss.pscdeakte.TestConstants;
+import de.muenchen.oss.pscdeakte.database.entity.PscdImport;
+import de.muenchen.oss.pscdeakte.database.repository.PscdImportRepository;
 import de.muenchen.oss.refarch.integration.s3.application.port.out.S3OutPort;
 import de.muenchen.oss.refarch.integration.s3.domain.exception.S3Exception;
 import de.muenchen.oss.refarch.integration.s3.domain.model.FileReference;
@@ -16,6 +19,7 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.util.List;
 
 @SpringBootTest
 @ActiveProfiles(TestConstants.SPRING_TEST_PROFILE)
@@ -24,15 +28,19 @@ class S3Test {
 
     private final S3OutPort s3OutPort;
     private final S3Properties props;
+    private final CsvToDb csvToDb;
+    private final PscdImportRepository repo;
 
     @Autowired
-    S3Test(S3OutPort s3, S3Properties props){
+    S3Test(S3OutPort s3, S3Properties props, CsvToDb csvToDb, PscdImportRepository repo) {
         this.s3OutPort = s3;
         this.props = props;
+        this.csvToDb = csvToDb;
+        this.repo = repo;
     }
 
     @Test
-    void s3Test() throws S3Exception, IOException {
+    void simpleS3Test() throws S3Exception, IOException {
 
         final String testfile = "testdata/s3/s3testfile";
 
@@ -48,5 +56,19 @@ class S3Test {
 
         Assertions.assertDoesNotThrow(() -> s3OutPort.deleteFile(fileReference1));
 
+    }
+
+    @Test
+    void integratedTest() {
+        final String filename = "BP_Export_Test.csv";
+        FileReference fileReference = new FileReference(props.getBucket(), filename);
+        Assertions.assertDoesNotThrow(() -> s3OutPort.saveFile(fileReference, new File("testdata/s3/" + filename)));
+        Assertions.assertDoesNotThrow(() -> csvToDb.saveFilesToDb(props.getPrefix()));
+        Assertions.assertDoesNotThrow(() -> s3OutPort.deleteFile(fileReference));
+        String gpId = "2000000000";
+        List<PscdImport> list = repo.findByGeschaeftspartnerId(gpId);
+        Assertions.assertEquals(1, list.size());
+        Assertions.assertEquals(gpId, list.getFirst().getGeschaeftspartnerId());
+        Assertions.assertEquals("01.02.2012", list.getFirst().getGeburtsdatum());
     }
 }

@@ -8,7 +8,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 @Service
-public class LogService {
+public class DBLogger {
     @PersistenceContext
     private EntityManager entityManager;
 

@@ -105,3 +105,9 @@ dms:
 refarch:
   s3:
     url: https://s3k.muenchen.de:443
+
+s3csv:
+  bucket: "int-eheaik-importrueckstandsakt"
+  prefix: "BP_Export_"
+  delimiter: ";"
+  skip-header: false
