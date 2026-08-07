@@ -1,6 +1,6 @@
 package de.muenchen.oss.pscdeakte.dms;
 
-import de.muenchen.oss.pscdeakte.data.PscdData;
+import de.muenchen.oss.pscdeakte.database.entity.PscdImport;
 import de.muenchen.oss.pscdeakte.helper.DateHelper;
 import de.muenchen.oss.refarch.integration.dms.api.ApentriesApi;
 import de.muenchen.oss.refarch.integration.dms.api.FilesApi;
@@ -41,9 +41,9 @@ public class DmsService {
                 dmsProperties.getJobposition()).timeout(Duration.ofSeconds(30)).block();
     }
 
-    public DmsObjektResponse createFile(final PscdData data, final String cooSubjectArea) {
+    public DmsObjektResponse createFile(final PscdImport data, final String cooSubjectArea) {
         CreateFileDTO dto = new CreateFileDTO();
-        dto.shortname(data.getGpId()).filesubj(data.getZentralaktkennung()).apentry(cooSubjectArea).definition(dmsProperties.getCooKmAkte());
+        dto.shortname(data.getGeschaeftspartnerId()).filesubj(data.getZentralakt()).apentry(cooSubjectArea).definition(dmsProperties.getCooKmAkte());
         if (data.getVorname() != null && !data.getVorname().isEmpty()) {
             UserFormsReferenz vornameReferenz = new UserFormsReferenz();
             vornameReferenz.lhMBAI151700Ufreference("BusinessDataGPFirstname").addLhMBAI151700UfvalueItem(data.getVorname());
@@ -54,9 +54,9 @@ public class DmsService {
             nameReferenz.lhMBAI151700Ufreference("BusinessDataGPSurname").addLhMBAI151700UfvalueItem(data.getName());
             dto.addUserformsdataItem(nameReferenz);
         }
-        if (data.getGebDat() != null && !data.getGebDat().isEmpty()) {
+        if (data.getGeburtsdatum() != null && !data.getGeburtsdatum().isEmpty()) {
             UserFormsReferenz gebDatReferenz = new UserFormsReferenz();
-            gebDatReferenz.lhMBAI151700Ufreference("BusinessDataGPBirthDate").addLhMBAI151700UfvalueItem(DateHelper.format(data.getGebDat()));
+            gebDatReferenz.lhMBAI151700Ufreference("BusinessDataGPBirthDate").addLhMBAI151700UfvalueItem(DateHelper.format(data.getGeburtsdatum()));
             dto.addUserformsdataItem(gebDatReferenz);
         }
         return filesApi.createFile(dto, dmsProperties.getXAnwendung(), dmsProperties.getUserlogin(), dmsProperties.getJoboe(), dmsProperties.getJobposition())

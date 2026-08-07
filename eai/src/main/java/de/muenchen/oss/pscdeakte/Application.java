@@ -18,6 +18,7 @@ public class Application {
     private final ApplicationContext context;
     private final CsvToDb csvToDb;
     private final S3Properties props;
+    private final DbToEakte dbToEakte;
     public static void main(final String[] args) {
         SpringApplication.run(Application.class, args);
     }
@@ -25,10 +26,10 @@ public class Application {
     @EventListener(ApplicationReadyEvent.class)
     public void csvToDb() throws S3Exception {
         this.csvToDb.saveFilesToDb(props.getPrefix());
-//        SpringApplication.exit(context);
+        this.dbToEakte.start();
+        SpringApplication.exit(context);
         // fail with "Socket accept failed" is ok
     }
-
 
 }
 

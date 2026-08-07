@@ -32,6 +32,7 @@ public class CsvToDb {
     public void saveFilesToDb(String prefix) throws S3Exception {
         ListResult list = this.getFilesWithPrefix(prefix);
         list.files().forEach(file -> saveFileToDb(file.path()));
+//        TODO verarbeitete csv loeschen?
     }
 
     public ListResult getFilesWithPrefix(final String prefix) throws S3Exception {

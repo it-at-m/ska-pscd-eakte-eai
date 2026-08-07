@@ -1,6 +1,7 @@
 package de.muenchen.oss.pscdeakte;
 
-import de.muenchen.oss.pscdeakte.data.PscdData;
+import de.muenchen.oss.pscdeakte.database.DatensatzStatus;
+import de.muenchen.oss.pscdeakte.database.entity.PscdImport;
 import de.muenchen.oss.pscdeakte.dms.Apentries;
 import de.muenchen.oss.pscdeakte.dms.DmsService;
 import lombok.RequiredArgsConstructor;
@@ -18,22 +19,30 @@ public class EAkteConnector implements Processor {
     private final Apentries apentries;
 
     @Override
-    public void process(final Exchange exchange) throws Exception {
-        final PscdData data = exchange.getIn().getBody(PscdData.class);
+    public void process(final Exchange exchange){
+        throw new UnsupportedOperationException();
+    }
+
+    public void process(final PscdImport data){
         if (data == null) {
             log.error("data is null");
             return;
         }
-        log.info("processing gpid {}", data.getGpId());
-        String apentryCoo = apentries.getApentryCoo(data.getGpId());
-        log.info("saving gp {} into apentry {}", data.getGpId(), apentryCoo);
+        log.info("processing gpid {}", data.getGeschaeftspartnerId());
+        data.setStatus(DatensatzStatus.STARTED.getValue());
+        String apentryCoo = apentries.getApentryCoo(data.getGeschaeftspartnerId());
+        data.setStatus(DatensatzStatus.APENTRY_EXISTS.getValue());
+        log.info("saving gp {} into apentry {}", data.getGeschaeftspartnerId(), apentryCoo);
         log.info("creating file");
-        //        String filecoo = dmsService.createFile(data, apentryCoo).getObjid();
-        //        log.info("file {} created", filecoo);
+        String filecoo = dmsService.createFile(data, apentryCoo).getObjid();
+        data.setStatus(DatensatzStatus.FILE_CREATED.getValue());
+        log.info("file {} created", filecoo);
         log.info("creating procedures");
-        //        String procedurecoo = dmsService.createProcedureBestandsakte(filecoo).getObjid();
-        //        log.info("Bestandsakten created: {}", procedurecoo);
-        //        procedurecoo = dmsService.createProcedureAV(filecoo).getObjid();
-        //        log.info("AVs, Titel, Haftbefehle created: {}", procedurecoo);
+        String procedurecoo = dmsService.createProcedureBestandsakte(filecoo).getObjid();
+        data.setStatus(DatensatzStatus.BESTANDSAKT_CREATED.getValue());
+        log.info("Bestandsakten created: {}", procedurecoo);
+        procedurecoo = dmsService.createProcedureAV(filecoo).getObjid();
+        data.setStatus(DatensatzStatus.AV_CREATED.getValue());
+        log.info("AVs, Titel, Haftbefehle created: {}", procedurecoo);
     }
 }

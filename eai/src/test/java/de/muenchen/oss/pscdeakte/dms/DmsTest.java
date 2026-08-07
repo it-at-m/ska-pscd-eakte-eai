@@ -3,7 +3,7 @@ package de.muenchen.oss.pscdeakte.dms;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import de.muenchen.oss.pscdeakte.TestConstants;
-import de.muenchen.oss.pscdeakte.data.PscdData;
+import de.muenchen.oss.pscdeakte.database.entity.PscdImport;
 import de.muenchen.oss.refarch.integration.dms.model.DmsObjektResponse;
 import de.muenchen.oss.refarch.integration.dms.model.ReadApentryAntwortDTO;
 import org.junit.jupiter.api.Test;
@@ -35,12 +35,12 @@ class DmsTest extends WiremockTest {
 
     @Test
     void createFileTest() {
-        PscdData data = new PscdData();
-        data.setGpId("9000000001");
+        PscdImport data = new PscdImport();
+        data.setGeschaeftspartnerId("9000000001");
         data.setName("Gebdat ohne Zeit");
         data.setVorname("Gebdat ohne Zeit");
-        data.setGebDat("31.01.3210");
-        data.setZentralaktkennung("9999");
+        data.setGeburtsdatum("31.01.3210");
+        data.setZentralakt("9999");
         DmsObjektResponse response = dmsService.createFile(data, "COO.2150.8819.2.1120806");
         System.out.println(response.toString());
         assertEquals("9512.999-9000000001-1", response.getObjname());
