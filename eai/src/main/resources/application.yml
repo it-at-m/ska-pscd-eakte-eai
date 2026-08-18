@@ -101,6 +101,7 @@ dms:
   coo-km-akte: "COO.2150.8801.2.1055475"
   jobposition: "DocumentManager"
   joboe: "COO.2150.8800.1.237"
+  initialbefuellung: true
 
 refarch:
   s3:

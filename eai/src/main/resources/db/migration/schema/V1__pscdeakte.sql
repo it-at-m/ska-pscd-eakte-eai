@@ -9,8 +9,11 @@ CREATE TABLE pscdeakte.pscd_import
     vorname                 VARCHAR(50),
     geburtsdatum            VARCHAR(10),
     zentralakt              VARCHAR(4),
-    coo                     VARCHAR(30),
-    status                  VARCHAR(50),
+    betreffseinheit         VARCHAR(30),
+    akte                    VARCHAR(30),
+    bestandsakt             VARCHAR(30),
+    av                      VARCHAR(30),
+    status                  SMALLINT,
     created_at              TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at              TIMESTAMPTZ NOT NULL
 

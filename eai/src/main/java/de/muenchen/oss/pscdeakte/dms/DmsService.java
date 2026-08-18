@@ -11,6 +11,8 @@ import de.muenchen.oss.refarch.integration.dms.model.CreateProcedureDTO;
 import de.muenchen.oss.refarch.integration.dms.model.CreateSubjectAreaUnitAnfrageDTO;
 import de.muenchen.oss.refarch.integration.dms.model.DmsObjektResponse;
 import de.muenchen.oss.refarch.integration.dms.model.ReadApentryAntwortDTO;
+import de.muenchen.oss.refarch.integration.dms.model.SearchApentryDTO;
+import de.muenchen.oss.refarch.integration.dms.model.SearchApentryResponseDTO;
 import de.muenchen.oss.refarch.integration.dms.model.UserFormsReferenz;
 import java.time.Duration;
 import lombok.RequiredArgsConstructor;
@@ -32,6 +34,13 @@ public class DmsService {
                 dmsProperties.getJobposition()).timeout(Duration.ofSeconds(30)).block();
     }
 
+    public SearchApentryResponseDTO getApentryFor(final int lfdnr) {
+        SearchApentryDTO dto = new SearchApentryDTO();
+        dto.setBasenr(dmsProperties.getAktenplannummer() + "." + lfdnr);
+        return apentriesApi.searchApentry(dto, dmsProperties.getXAnwendung(), dmsProperties.getUserlogin(), dmsProperties.getJoboe(),
+                dmsProperties.getJobposition()).timeout(Duration.ofSeconds(30)).block();
+    }
+
     public DmsObjektResponse createSubjectAreaUnit(final int laufendeNr, final String bereich) {
         CreateSubjectAreaUnitAnfrageDTO dto = new CreateSubjectAreaUnitAnfrageDTO();
         dto.setBasenr(dmsProperties.getAktenplannummer() + "." + laufendeNr);
@@ -41,9 +50,10 @@ public class DmsService {
                 dmsProperties.getJobposition()).timeout(Duration.ofSeconds(30)).block();
     }
 
-    public DmsObjektResponse createFile(final PscdImport data, final String cooSubjectArea) {
+    public DmsObjektResponse createFile(final PscdImport data) {
         CreateFileDTO dto = new CreateFileDTO();
-        dto.shortname(data.getGeschaeftspartnerId()).filesubj(data.getZentralakt()).apentry(cooSubjectArea).definition(dmsProperties.getCooKmAkte());
+//        TODO fallback falls data.getBetreffseinheit().isEmpty()?
+        dto.shortname(data.getGeschaeftspartnerId()).filesubj(data.getZentralakt()).apentry(data.getBetreffseinheit()).definition(dmsProperties.getCooKmAkte());
         if (data.getVorname() != null && !data.getVorname().isEmpty()) {
             UserFormsReferenz vornameReferenz = new UserFormsReferenz();
             vornameReferenz.lhMBAI151700Ufreference("BusinessDataGPFirstname").addLhMBAI151700UfvalueItem(data.getVorname());

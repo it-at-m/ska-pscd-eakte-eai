@@ -41,7 +41,8 @@ class DmsTest extends WiremockTest {
         data.setVorname("Gebdat ohne Zeit");
         data.setGeburtsdatum("31.01.3210");
         data.setZentralakt("9999");
-        DmsObjektResponse response = dmsService.createFile(data, "COO.2150.8819.2.1120806");
+        data.setBetreffseinheit("COO.2150.8819.2.1120806");
+        DmsObjektResponse response = dmsService.createFile(data);
         System.out.println(response.toString());
         assertEquals("9512.999-9000000001-1", response.getObjname());
     }

@@ -1,8 +1,10 @@
 package de.muenchen.oss.pscdeakte;
 
 import de.muenchen.oss.pscdeakte.database.DBLogger;
+import de.muenchen.oss.pscdeakte.database.DatensatzStatus;
 import de.muenchen.oss.pscdeakte.database.entity.PscdImport;
 import de.muenchen.oss.pscdeakte.database.repository.PscdImportRepository;
+import de.muenchen.oss.pscdeakte.dms.DmsProperties;
 import de.muenchen.oss.pscdeakte.s3.S3Properties;
 import de.muenchen.oss.refarch.integration.s3.application.port.out.S3OutPort;
 import de.muenchen.oss.refarch.integration.s3.domain.exception.S3Exception;
@@ -22,6 +24,7 @@ public class CsvToDb {
 
     private final S3OutPort s3;
     private final S3Properties props;
+    private final DmsProperties dmsProps;
     private final PscdImportRepository pir;
     private final DBLogger log;
 
@@ -49,6 +52,7 @@ public class CsvToDb {
         try {
             records = csvFormat.parse(new InputStreamReader(s3.getFileContent(new FileReference(props.getBucket(), filename))));
             records.forEach(csvRecord -> pir.save(this.mapData(csvRecord)));
+//            TODO Datenbankfehler abfangen
         } catch (IOException | S3Exception e) {
             log.log("ERROR", "reading file " + filename + "failed", e.getMessage());
         }
@@ -62,9 +66,12 @@ public class CsvToDb {
         data.setVorname(csvRecord.get(HEADERS.VORNAME));
         data.setGeburtsdatum(csvRecord.get(HEADERS.GEB_DAT));
         data.setZentralakt(csvRecord.get(HEADERS.ZENTRALAKTKENNUNG));
+        if (dmsProps.isInitialbefuellung()){
+            data.setStatus(DatensatzStatus.NEW);
+        } else {
+            data.setStatus(pir.countByGeschaeftspartnerId(data.getGeschaeftspartnerId()) == 0 ? DatensatzStatus.NEW : DatensatzStatus.DUPLICATE);
+        }
         return data;
     }
-
-
 
 }

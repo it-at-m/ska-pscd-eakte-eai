@@ -1,5 +1,6 @@
 package de.muenchen.oss.pscdeakte.database.entity;
 
+import de.muenchen.oss.pscdeakte.database.DatensatzStatus;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.PrePersist;
@@ -34,11 +35,20 @@ public class PscdImport extends BaseEntity {
     @Column(name = "zentralakt")
     private String zentralakt;
 
-    @Column(name = "coo")
-    private String coo;
+    @Column(name = "betreffseinheit")
+    private String betreffseinheit;
+
+    @Column(name = "akte")
+    private String akte;
+
+    @Column(name = "bestandsakt")
+    private String bestandsakt;
+
+    @Column(name = "av")
+    private String av;
 
     @Column(name = "status")
-    private String status;
+    private DatensatzStatus status;
 
     @LastModifiedDate
     @Column(name = "updated_at", nullable = false)

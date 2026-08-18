@@ -21,4 +21,5 @@ public class DmsProperties {
     @NotBlank private String joboe;
     @NotBlank private String userlogin;
     @NotBlank private String aktenplannummer;
+    private boolean initialbefuellung = false;
 }

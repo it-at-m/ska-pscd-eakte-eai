@@ -3,6 +3,8 @@ package de.muenchen.oss.pscdeakte.dms;
 import de.muenchen.oss.refarch.integration.dms.model.DmsObjektResponse;
 import de.muenchen.oss.refarch.integration.dms.model.Objektreferenz;
 import de.muenchen.oss.refarch.integration.dms.model.ReadApentryAntwortDTO;
+
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.regex.Matcher;
@@ -16,6 +18,7 @@ public class Apentries {
 
     public Apentries(final DmsService dmsService, final DmsProperties properties) {
         this.dmsService = dmsService;
+        this.props = properties;
         pattern = Pattern.compile(Pattern.quote(properties.getAktenplannummer()) + "\\.([0-9]+)/[0-9]{10}-[0-9]{10}");
     }
 
@@ -23,8 +26,27 @@ public class Apentries {
     private final Map<Integer, String> apentryMap = new ConcurrentHashMap<>();
     private volatile boolean mapInitialized = false;
     private final Pattern pattern;
+    private final DmsProperties props;
 
-    public String getApentryCoo(final String gpId) {
+    public String getApentryCoo(final String gpId){
+        final int lfdNr = this.generateLfdNr(gpId);
+        if (props.isInitialbefuellung()){
+            return getApentryFromMap(lfdNr);
+        } else {
+            return this.getSingleApentry(lfdNr);
+        }
+    }
+
+    private String getSingleApentry(final int lfdNr) {
+        List<Objektreferenz> obj = dmsService.getApentryFor(lfdNr).getGiobjecttype();
+        if (obj == null || obj.isEmpty()){
+            return this.getNewApentry(lfdNr);
+        } else {
+            return obj.getFirst().getObjaddress();
+        }
+    }
+
+    public String getApentryFromMap(final int lfdNr) {
         if (!mapInitialized) {
             synchronized (this) {
                 if (!mapInitialized) {
@@ -38,12 +60,14 @@ public class Apentries {
                 }
             }
         }
-        return apentryMap.computeIfAbsent(this.generateLfdNr(gpId), newLfdnr -> {
-            log.info("creating new apentry");
-            DmsObjektResponse response = dmsService.createSubjectAreaUnit(newLfdnr, this.buildObjname(newLfdnr));
-            log.info("new apentry name: {} coo: {}", response.getObjname(), response.getObjid());
-            return response.getObjid();
-        });
+        return apentryMap.computeIfAbsent(lfdNr, this::getNewApentry);
+    }
+
+    private String getNewApentry(Integer lfdNr) {
+        log.info("creating new apentry");
+        DmsObjektResponse response = dmsService.createSubjectAreaUnit(lfdNr, this.buildObjname(lfdNr));
+        log.info("new apentry name: {} coo: {}", response.getObjname(), response.getObjid());
+        return response.getObjid();
     }
 
     private void fillMap(final Objektreferenz ref) {
