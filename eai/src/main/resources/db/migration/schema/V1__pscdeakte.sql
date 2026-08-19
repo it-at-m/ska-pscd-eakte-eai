@@ -14,6 +14,7 @@ CREATE TABLE pscdeakte.pscd_import
     bestandsakt             VARCHAR(30),
     av                      VARCHAR(30),
     status                  SMALLINT,
+    statustext              VARCHAR(50),
     created_at              TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at              TIMESTAMPTZ NOT NULL
 

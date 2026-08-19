@@ -50,6 +50,9 @@ public class PscdImport extends BaseEntity {
     @Column(name = "status")
     private DatensatzStatus status;
 
+    @Column(name = "statustext")
+    private String statustext;
+
     @LastModifiedDate
     @Column(name = "updated_at", nullable = false)
     private Instant lastUpdate;

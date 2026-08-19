@@ -11,8 +11,6 @@ import lombok.extern.log4j.Log4j2;
 import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.client.WebClientResponseException;
 
-import java.util.List;
-
 @RequiredArgsConstructor
 @Component
 @Log4j2
@@ -24,8 +22,7 @@ public class DbToEakte {
     private final Apentries apentries;
 
     public void start(){
-        List<PscdImport> list = repo.streamAllByStatusIsNot(DatensatzStatus.DONE);
-        list.forEach(this::process);
+        repo.streamAllByStatusIsNot(DatensatzStatus.DONE).forEach(this::process);
     }
 
     public void process(final PscdImport data){
@@ -43,33 +40,24 @@ public class DbToEakte {
     private void datensatzVerarbeitung(final PscdImport data) {
         switch (data.getStatus()) {
             case DatensatzStatus.NEW:
-                data.setStatus(DatensatzStatus.STARTED);
-                log.info(DatensatzStatus.STARTED.getValue());
+                this.log(data, DatensatzStatus.STARTED);
 //              fallthrough
             case DatensatzStatus.STARTED:
                 data.setBetreffseinheit(apentries.getApentryCoo(data.getGeschaeftspartnerId()));
-                data.setStatus(DatensatzStatus.APENTRY_EXISTS);
-                log.info(DatensatzStatus.APENTRY_EXISTS.getValue());
+                this.log(data, DatensatzStatus.APENTRY_EXISTS);
 //              fallthrough
             case DatensatzStatus.APENTRY_EXISTS:
                 data.setAkte(dmsService.createFile(data).getObjid());
-                data.setStatus(DatensatzStatus.FILE_CREATED);
-                log.info(DatensatzStatus.FILE_CREATED.getValue());
+                this.log(data, DatensatzStatus.FILE_CREATED);
 //              fallthrough
             case DatensatzStatus.FILE_CREATED:
                 data.setBestandsakt(dmsService.createProcedureBestandsakte(data.getAkte()).getObjid());
-                data.setStatus(DatensatzStatus.BESTANDSAKT_CREATED);
-                log.info(DatensatzStatus.BESTANDSAKT_CREATED.getValue());
+                this.log(data, DatensatzStatus.BESTANDSAKT_CREATED);
 //              fallthrough
             case DatensatzStatus.BESTANDSAKT_CREATED:
                 data.setAv(dmsService.createProcedureAV(data.getAkte()).getObjid());
-                data.setStatus(DatensatzStatus.DONE);
-                log.info(DatensatzStatus.DONE.getValue());
+                this.log(data, DatensatzStatus.DONE);
 //              fallthrough
-            case DatensatzStatus.DONE:
-//              sollte nicht von der DB geladen werden
-                log.info(DatensatzStatus.DONE.getValue());
-                break;
             case DatensatzStatus.DUPLICATE:
 //                TODO Update Funktion fuer Akte
                 dbLog.log("info", "Geschaeftspartner " + data.getGeschaeftspartnerId() + " mehrfach vorhanden", null);
@@ -83,6 +71,12 @@ public class DbToEakte {
             default:
                 log.warn("Status steht auf {}", data.getStatus().getValue());
         }
+    }
+
+    private void log(final PscdImport data, final DatensatzStatus status){
+        data.setStatus(status);
+        data.setStatustext(status.getValue());
+        log.info(status.getValue());
     }
 
 }
