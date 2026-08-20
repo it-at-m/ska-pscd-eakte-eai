@@ -27,8 +27,7 @@ public class Application {
     public void csvToDb() throws S3Exception {
         this.csvToDb.saveFilesToDb(props.getPrefix());
         this.dbToEakte.start();
-        SpringApplication.exit(context);
-        // fail with "Socket accept failed" is ok
+//        SpringApplication.exit(context);
     }
 
 }

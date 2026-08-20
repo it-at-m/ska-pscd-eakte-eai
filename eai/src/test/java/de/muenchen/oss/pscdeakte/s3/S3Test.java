@@ -70,5 +70,6 @@ class S3Test {
         Assertions.assertEquals(1, list.size());
         Assertions.assertEquals(gpId, list.getFirst().getGeschaeftspartnerId());
         Assertions.assertEquals("01.02.2012", list.getFirst().getGeburtsdatum());
+        Assertions.assertDoesNotThrow(() -> repo.delete(list.getFirst()));
     }
 }
