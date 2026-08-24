@@ -24,9 +24,10 @@ public class Application {
     }
 
     @EventListener(ApplicationReadyEvent.class)
-    public void csvToDb() throws S3Exception {
+    public void csvToDb() throws S3Exception, InterruptedException {
         this.csvToDb.saveFilesToDb(props.getPrefix());
         this.dbToEakte.start();
+        Thread.sleep(20000);
 //        SpringApplication.exit(context);
     }
 
