@@ -10,6 +10,7 @@ import de.muenchen.oss.refarch.integration.s3.application.port.out.S3OutPort;
 import de.muenchen.oss.refarch.integration.s3.domain.exception.S3Exception;
 import de.muenchen.oss.refarch.integration.s3.domain.model.FileReference;
 import de.muenchen.oss.refarch.integration.s3.domain.model.ListResult;
+import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVRecord;
@@ -22,6 +23,7 @@ import java.io.InputStreamReader;
 @RequiredArgsConstructor
 public class CsvToDb {
 
+    @Getter
     private final S3OutPort s3;
     private final S3Properties props;
     private final DmsProperties dmsProps;

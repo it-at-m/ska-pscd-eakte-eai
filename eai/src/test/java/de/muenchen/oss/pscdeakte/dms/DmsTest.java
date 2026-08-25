@@ -2,10 +2,14 @@ package de.muenchen.oss.pscdeakte.dms;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
+import com.github.tomakehurst.wiremock.WireMockServer;
+import com.github.tomakehurst.wiremock.core.WireMockConfiguration;
 import de.muenchen.oss.pscdeakte.TestConstants;
 import de.muenchen.oss.pscdeakte.database.entity.PscdImport;
 import de.muenchen.oss.refarch.integration.dms.model.DmsObjektResponse;
 import de.muenchen.oss.refarch.integration.dms.model.ReadApentryAntwortDTO;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -13,10 +17,25 @@ import org.springframework.test.context.ActiveProfiles;
 
 @SpringBootTest
 @ActiveProfiles(TestConstants.SPRING_TEST_PROFILE)
-class DmsTest extends WiremockTest {
+class DmsTest {
 
     @Autowired
     public DmsService dmsService;
+    private WireMockServer wireMockServer;
+
+    @BeforeEach
+    void setUp() {
+        wireMockServer = new WireMockServer(
+                WireMockConfiguration.wireMockConfig().port(8080).withRootDirectory("../stack/wiremock"));
+        wireMockServer.start();
+    }
+
+    @AfterEach
+    void teardown() {
+        if (wireMockServer != null) {
+            wireMockServer.stop();
+        }
+    }
 
     @Test
     void getApentriesTest() {
