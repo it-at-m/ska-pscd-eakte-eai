@@ -12,11 +12,14 @@ import de.muenchen.oss.refarch.integration.s3.domain.model.FileReference;
 import de.muenchen.oss.refarch.integration.s3.domain.model.ListResult;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.nio.charset.StandardCharsets;
+
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVRecord;
+import org.apache.tomcat.util.digester.DocumentProperties;
 import org.springframework.stereotype.Component;
 
 @Component
@@ -59,7 +62,7 @@ public class CsvToDb {
                 .get();
         final Iterable<CSVRecord> records;
         try {
-            records = csvFormat.parse(new InputStreamReader(s3.getFileContent(new FileReference(props.getBucket(), filename))));
+            records = csvFormat.parse(new InputStreamReader(s3.getFileContent(new FileReference(props.getBucket(), filename)), StandardCharsets.ISO_8859_1));
             records.forEach(csvRecord -> pir.save(this.mapData(csvRecord)));
             //            TODO Datenbankfehler abfangen
         } catch (IOException | S3Exception e) {
