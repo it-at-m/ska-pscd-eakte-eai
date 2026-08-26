@@ -12,6 +12,7 @@ import de.muenchen.oss.refarch.integration.s3.domain.model.FileReference;
 import de.muenchen.oss.refarch.integration.s3.domain.model.ListResult;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVRecord;
 import org.springframework.stereotype.Component;
@@ -21,6 +22,7 @@ import java.io.InputStreamReader;
 
 @Component
 @RequiredArgsConstructor
+@Slf4j
 public class CsvToDb {
 
     @Getter
@@ -28,7 +30,7 @@ public class CsvToDb {
     private final S3Properties props;
     private final DmsProperties dmsProps;
     private final PscdImportRepository pir;
-    private final DBLogger log;
+    private final DBLogger logDb;
 
     enum HEADERS{
         GP_ID, NAME, VORNAME, GEB_DAT, ZENTRALAKTKENNUNG
@@ -36,6 +38,7 @@ public class CsvToDb {
 
     public void saveFilesToDb(String prefix) throws S3Exception {
         ListResult list = this.getFilesWithPrefix(prefix);
+        log.info("{} files found", list.files().size());
         list.files().forEach(file -> saveFileToDb(file.path()));
 //        TODO verarbeitete csv loeschen?
     }
@@ -45,6 +48,7 @@ public class CsvToDb {
     }
 
     public void saveFileToDb(final String filename) {
+        log.info("reading file {}", filename);
         final CSVFormat csvFormat = CSVFormat.DEFAULT.builder()
                 .setDelimiter(props.getDelimiter())
                 .setHeader(HEADERS.class)
@@ -56,12 +60,13 @@ public class CsvToDb {
             records.forEach(csvRecord -> pir.save(this.mapData(csvRecord)));
 //            TODO Datenbankfehler abfangen
         } catch (IOException | S3Exception e) {
-            log.log("ERROR", "reading file " + filename + "failed", e.getMessage());
+            logDb.log("ERROR", "reading file " + filename + "failed", e.getMessage());
         }
 
     }
 
     private PscdImport mapData(final CSVRecord csvRecord){
+        log.info("mapping GP {}",csvRecord.get(HEADERS.GP_ID));
         final PscdImport data = new PscdImport();
         data.setGeschaeftspartnerId(csvRecord.get(HEADERS.GP_ID));
         data.setName(csvRecord.get(HEADERS.NAME));
