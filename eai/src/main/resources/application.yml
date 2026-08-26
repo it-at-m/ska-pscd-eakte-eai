@@ -92,3 +92,23 @@ camel:
   servlet:
     mapping:
       context-path: /api/*
+
+dms:
+  XAnwendung: "PSCD-eAkte-EAI"
+  base-url: "https://cap-eakte-resteai-test-bay-eakte-resteai.apps.test.capk.muenchen.de/api"
+  aktenplannummer: "9512"
+  coo-einzelakte: "COO.2150.8819.2.1652"
+  coo-km-akte: "COO.2150.8801.2.1055475"
+  jobposition: "DocumentManager"
+  joboe: "COO.2150.8800.1.237"
+  initialbefuellung: true
+
+refarch:
+  s3:
+    url: https://s3k.muenchen.de:443
+
+s3csv:
+  bucket: "int-eheaik-importrueckstandsakt"
+  prefix: "BP_Export_"
+  delimiter: ";"
+  skip-header: false

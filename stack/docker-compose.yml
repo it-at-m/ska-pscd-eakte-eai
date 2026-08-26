@@ -1,4 +1,4 @@
-name: pcsdeakte-stack
+name: pscdeakte-stack
 
 services:
   postgres:
@@ -48,3 +48,51 @@ services:
         chmod 600 /tmp/pgpass;
         /entrypoint.sh
       "
+  wiremock:
+    image: wiremock/wiremock:3.13.2@sha256:27c4b74404f58ceedc6899f73abdfe228d8f80d5efa4d8bd42d6c155558b677c
+    container_name: wiremock
+    ports:
+      - "8181:8181"
+    volumes:
+      - ./wiremock/mappings:/home/wiremock/mappings
+      - ./wiremock/openapi:/home/wiremock/openapi
+    command:
+      - "--global-response-templating"
+      - "--verbose"
+
+  minio:
+    image: minio/minio:RELEASE.2025-09-07T16-13-09Z-cpuv1@sha256:13582eff79c6605a2d315bdd0e70164142ea7e98fc8411e9e10d089502a6d883
+    command: server /data --console-address ":9001"
+    environment:
+      MINIO_ROOT_USER: minio
+      MINIO_ROOT_PASSWORD: Test1234
+    ports:
+      - '9000:9000'
+      - '9001:9001'
+    volumes:
+      - ./minio:/data
+    networks:
+      - internal
+    healthcheck:
+      <<: *healthcheck
+      test: ["CMD-SHELL",  "curl http://localhost:9000/minio/health/live"]
+    security_opt: *security_settings
+
+  init-minio:
+    image: minio/mc:RELEASE.2025-08-13T08-35-41Z-cpuv1@sha256:95b5f3f7969a5c5a9f3a700ba72d5c84172819e13385aaf916e237cf111ab868
+    depends_on:
+      - minio
+    entrypoint: >
+      /bin/sh -c "
+        until curl -fsS http://minio:9000/minio/health/ready; do sleep 2; done;
+        mc config host add minio http://minio:9000 minio Test1234;
+        mc mb minio/test-bucket || true;
+        exit 0;
+      "
+    networks:
+      - internal
+    security_opt: *security_settings
+
+networks:
+  keycloak:
+  internal:

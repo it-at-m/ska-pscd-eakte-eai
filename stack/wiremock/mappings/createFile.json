@@ -1,0 +1,16 @@
+{
+  "request": {
+    "method": "POST",
+    "url": "/files"
+  },
+  "response": {
+    "status": 200,
+    "headers": {
+      "Content-Type": "application/json"
+    },
+    "jsonBody": {
+          "objid": "COO.2150.8819.2.1120843",
+          "objname": "9512.999-9000000001-1"
+    }
+  }
+}

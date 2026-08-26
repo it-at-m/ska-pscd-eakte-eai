@@ -26,3 +26,15 @@ logging:
 camel:
   main:
     tracing: false
+
+dms:
+  userlogin: "admin"
+  username: "admin"
+  password: "password"
+  base-url: "http://localhost:8080"
+
+refarch:
+  s3:
+    url: http://localhost:9000
+    access-key: "minio"
+    secret-key: "Test1234"
