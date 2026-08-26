@@ -1,24 +1,15 @@
 CREATE SCHEMA IF NOT EXISTS pscdeakte;
 
-CREATE TABLE pscdeakte.pscd_import
-(
 
-    id                   SERIAL PRIMARY KEY,    -- INT PK
-    geschaeftspartner_id    VARCHAR(10),
-    name                    VARCHAR(50),
-    vorname                 VARCHAR(50),
-    geburtsdatum            VARCHAR(10),
-    zentralakt              VARCHAR(4),
-    betreffseinheit         VARCHAR(30),
-    akte                    VARCHAR(30),
-    bestandsakt             VARCHAR(30),
-    av                      VARCHAR(30),
-    status                  SMALLINT,
-    statustext              VARCHAR(50),
-    created_at              TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    updated_at              TIMESTAMPTZ NOT NULL
-
-);
+ALTER TABLE pscdeakte.pscd_import
+    ALTER COLUMN geburtsdatum TYPE VARCHAR(10),
+    ADD COLUMN updated_at      TIMESTAMPTZ,
+    ADD COLUMN betreffseinheit VARCHAR(30),
+    ADD COLUMN akte            VARCHAR(30),
+    ADD COLUMN bestandsakt     VARCHAR(30),
+    ADD COLUMN av              VARCHAR(30),
+    ADD COLUMN status          SMALLINT,
+    ADD COLUMN statustext      VARCHAR(50);
 
 CREATE TABLE pscdeakte.logs
 (
