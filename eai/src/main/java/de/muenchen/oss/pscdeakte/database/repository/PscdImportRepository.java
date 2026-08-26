@@ -2,10 +2,9 @@ package de.muenchen.oss.pscdeakte.database.repository;
 
 import de.muenchen.oss.pscdeakte.database.DatensatzStatus;
 import de.muenchen.oss.pscdeakte.database.entity.PscdImport;
+import java.util.List;
 import org.springframework.data.repository.CrudRepository;
 import org.springframework.stereotype.Repository;
-
-import java.util.List;
 
 @Repository
 public interface PscdImportRepository extends CrudRepository<PscdImport, Integer> {

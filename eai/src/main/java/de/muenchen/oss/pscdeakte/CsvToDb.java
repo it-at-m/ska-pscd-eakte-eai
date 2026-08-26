@@ -10,15 +10,14 @@ import de.muenchen.oss.refarch.integration.s3.application.port.out.S3OutPort;
 import de.muenchen.oss.refarch.integration.s3.domain.exception.S3Exception;
 import de.muenchen.oss.refarch.integration.s3.domain.model.FileReference;
 import de.muenchen.oss.refarch.integration.s3.domain.model.ListResult;
+import java.io.IOException;
+import java.io.InputStreamReader;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVRecord;
 import org.springframework.stereotype.Component;
-
-import java.io.IOException;
-import java.io.InputStreamReader;
 
 @Component
 @RequiredArgsConstructor
@@ -32,15 +31,19 @@ public class CsvToDb {
     private final PscdImportRepository pir;
     private final DBLogger logDb;
 
-    enum HEADERS{
-        GP_ID, NAME, VORNAME, GEB_DAT, ZENTRALAKTKENNUNG
+    enum HEADERS {
+        GP_ID,
+        NAME,
+        VORNAME,
+        GEB_DAT,
+        ZENTRALAKTKENNUNG
     }
 
     public void saveFilesToDb(String prefix) throws S3Exception {
         ListResult list = this.getFilesWithPrefix(prefix);
         log.info("{} files found", list.files().size());
         list.files().forEach(file -> saveFileToDb(file.path()));
-//        TODO verarbeitete csv loeschen?
+        //        TODO verarbeitete csv loeschen?
     }
 
     public ListResult getFilesWithPrefix(final String prefix) throws S3Exception {
@@ -58,22 +61,22 @@ public class CsvToDb {
         try {
             records = csvFormat.parse(new InputStreamReader(s3.getFileContent(new FileReference(props.getBucket(), filename))));
             records.forEach(csvRecord -> pir.save(this.mapData(csvRecord)));
-//            TODO Datenbankfehler abfangen
+            //            TODO Datenbankfehler abfangen
         } catch (IOException | S3Exception e) {
             logDb.log("ERROR", "reading file " + filename + "failed", e.getMessage());
         }
 
     }
 
-    private PscdImport mapData(final CSVRecord csvRecord){
-        log.info("mapping GP {}",csvRecord.get(HEADERS.GP_ID));
+    private PscdImport mapData(final CSVRecord csvRecord) {
+        log.info("mapping GP {}", csvRecord.get(HEADERS.GP_ID));
         final PscdImport data = new PscdImport();
         data.setGeschaeftspartnerId(csvRecord.get(HEADERS.GP_ID));
         data.setName(csvRecord.get(HEADERS.NAME));
         data.setVorname(csvRecord.get(HEADERS.VORNAME));
         data.setGeburtsdatum(csvRecord.get(HEADERS.GEB_DAT));
         data.setZentralakt(csvRecord.get(HEADERS.ZENTRALAKTKENNUNG));
-        if (dmsProps.isInitialbefuellung()){
+        if (dmsProps.isInitialbefuellung()) {
             data.setStatus(DatensatzStatus.NEW);
         } else {
             data.setStatus(pir.countByGeschaeftspartnerId(data.getGeschaeftspartnerId()) == 0 ? DatensatzStatus.NEW : DatensatzStatus.DUPLICATE);

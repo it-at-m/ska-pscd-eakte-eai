@@ -21,6 +21,7 @@ public class Application {
     private final CsvToDb csvToDb;
     private final S3Properties props;
     private final DbToEakte dbToEakte;
+
     public static void main(final String[] args) {
         SpringApplication.run(Application.class, args);
     }
@@ -33,9 +34,8 @@ public class Application {
         this.dbToEakte.start();
         log.info("done, waiting for shutdown");
         Thread.sleep(30000);
-//        SpringApplication.exit(context);
+        //        SpringApplication.exit(context);
         log.info("shutdown");
     }
 
 }
-

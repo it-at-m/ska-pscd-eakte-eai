@@ -28,9 +28,9 @@ public class Apentries {
     private final Pattern pattern;
     private final DmsProperties props;
 
-    public String getApentryCoo(final String gpId){
+    public String getApentryCoo(final String gpId) {
         final int lfdNr = this.generateLfdNr(gpId);
-        if (props.isInitialbefuellung()){
+        if (props.isInitialbefuellung()) {
             return getApentryFromMap(lfdNr);
         } else {
             return this.getSingleApentry(lfdNr);
@@ -39,7 +39,7 @@ public class Apentries {
 
     private String getSingleApentry(final int lfdNr) {
         List<Objektreferenz> obj = dmsService.getApentryFor(lfdNr).getGiobjecttype();
-        if (obj == null || obj.isEmpty()){
+        if (obj == null || obj.isEmpty()) {
             return this.getNewApentry(lfdNr);
         } else {
             return obj.getFirst().getObjaddress();
