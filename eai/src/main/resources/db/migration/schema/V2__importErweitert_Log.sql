@@ -3,7 +3,6 @@ CREATE SCHEMA IF NOT EXISTS pscdeakte;
 
 ALTER TABLE pscdeakte.pscd_import
     ALTER COLUMN geburtsdatum TYPE VARCHAR(10),
-    ADD COLUMN updated_at      TIMESTAMPTZ,
     ADD COLUMN betreffseinheit VARCHAR(30),
     ADD COLUMN akte            VARCHAR(30),
     ADD COLUMN bestandsakt     VARCHAR(30),
