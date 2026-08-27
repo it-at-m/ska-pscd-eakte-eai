@@ -32,9 +32,6 @@ public class Application {
         this.csvToDb.saveFilesToDb(props.getPrefix());
         log.info("Reading Database");
         this.dbToEakte.start();
-        log.info("done, waiting for shutdown");
-        Thread.sleep(120000);
-        //        SpringApplication.exit(context);
         log.info("shutdown");
     }
 
