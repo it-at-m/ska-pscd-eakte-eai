@@ -61,8 +61,13 @@ public class CsvToDb {
                 .get();
         final Iterable<CSVRecord> records;
         try {
-            records = csvFormat.parse(new InputStreamReader(s3.getFileContent(new FileReference(props.getBucket(), filename)), StandardCharsets.ISO_8859_1));
+            final FileReference fileReference = new FileReference(props.getBucket(), filename);
+            records = csvFormat.parse(new InputStreamReader(s3.getFileContent(fileReference), StandardCharsets.ISO_8859_1));
             records.forEach(csvRecord -> pir.save(this.mapData(csvRecord)));
+            final String movedFile = "." + filename;
+            s3.copyFile(fileReference, new FileReference(props.getBucket(), movedFile));
+            s3.deleteFile(fileReference);
+            log.info("moved file {} to {}", filename, movedFile);
             //            TODO Datenbankfehler abfangen
         } catch (IOException | S3Exception e) {
             logDb.log("ERROR", "reading file " + filename + "failed", e.getMessage());
