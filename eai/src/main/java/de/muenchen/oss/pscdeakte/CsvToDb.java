@@ -41,11 +41,10 @@ public class CsvToDb {
         ZENTRALAKTKENNUNG
     }
 
-    public void saveFilesToDb(String prefix) throws S3Exception {
-        ListResult list = this.getFilesWithPrefix(prefix);
+    public void saveFilesToDb(final String prefix) throws S3Exception {
+        final ListResult list = this.getFilesWithPrefix(prefix);
         log.info("{} files found", list.files().size());
         list.files().forEach(file -> saveFileToDb(file.path()));
-        //        TODO verarbeitete csv loeschen?
     }
 
     public ListResult getFilesWithPrefix(final String prefix) throws S3Exception {
@@ -68,8 +67,8 @@ public class CsvToDb {
             s3.copyFile(fileReference, new FileReference(props.getBucket(), movedFile));
             s3.deleteFile(fileReference);
             log.info("moved file {} to {}", filename, movedFile);
-            //            TODO Datenbankfehler abfangen
         } catch (IOException | S3Exception e) {
+            //            TODO Datenbankfehler abfangen
             logDb.log("ERROR", "reading file " + filename + "failed", e.getMessage());
         }
 

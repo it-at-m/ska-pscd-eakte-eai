@@ -21,7 +21,7 @@ class ApentriesTest {
 
     @Test
     void objektnameTest() {
-        Map<Integer, String> map = new HashMap<>();
+        final Map<Integer, String> map = new HashMap<>();
         map.put(0, "1000000001-1000005000");
         map.put(1, "1000005001-1000010000");
         map.put(2, "1000010001-1000015000");
@@ -33,7 +33,7 @@ class ApentriesTest {
 
     @Test
     void integerTest() {
-        Map<String, Integer> map = new HashMap<>();
+        final Map<String, Integer> map = new HashMap<>();
         map.put("1000000000", 0);
         map.put("1000000001", 0);
         map.put("1000004999", 0);

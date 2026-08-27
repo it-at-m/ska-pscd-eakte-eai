@@ -38,7 +38,7 @@ public class Apentries {
     }
 
     private String getSingleApentry(final int lfdNr) {
-        List<Objektreferenz> obj = dmsService.getApentryFor(lfdNr).getGiobjecttype();
+        final List<Objektreferenz> obj = dmsService.getApentryFor(lfdNr).getGiobjecttype();
         if (obj == null || obj.isEmpty()) {
             return this.getNewApentry(lfdNr);
         } else {
@@ -51,7 +51,7 @@ public class Apentries {
             synchronized (this) {
                 if (!mapInitialized) {
                     log.info("reading apentries");
-                    ReadApentryAntwortDTO response = dmsService.getApentries();
+                    final ReadApentryAntwortDTO response = dmsService.getApentries();
                     if (response.getGiobjecttype() != null) {
                         log.info("{} apentries found", response.getGiobjecttype().size());
                         response.getGiobjecttype().forEach(this::fillMap);
@@ -63,16 +63,16 @@ public class Apentries {
         return apentryMap.computeIfAbsent(lfdNr, this::getNewApentry);
     }
 
-    private String getNewApentry(Integer lfdNr) {
+    private String getNewApentry(final Integer lfdNr) {
         log.info("creating new apentry");
-        DmsObjektResponse response = dmsService.createSubjectAreaUnit(lfdNr, this.buildObjname(lfdNr));
+        final DmsObjektResponse response = dmsService.createSubjectAreaUnit(lfdNr, this.buildObjname(lfdNr));
         log.info("new apentry name: {} coo: {}", response.getObjname(), response.getObjid());
         return response.getObjid();
     }
 
     private void fillMap(final Objektreferenz ref) {
         final String objname = ref.getObjname();
-        Matcher matcher;
+        final Matcher matcher;
         if (objname != null && !objname.isEmpty() && (matcher = pattern.matcher(objname)).find()) {
             final String objaddress = ref.getObjaddress();
             log.info("saving apentry name: {} coo: {}", ref.getObjname(), objaddress);
