@@ -57,7 +57,7 @@ public class DbToEakte {
         case DatensatzStatus.BESTANDSAKT_CREATED:
             data.setAv(dmsService.createProcedureAV(data.getAkte()).getObjid());
             this.log(data, DatensatzStatus.DONE);
-            //              fallthrough
+            break;
         case DatensatzStatus.DUPLICATE:
             //                TODO Update Funktion fuer Akte
             dbLog.log("info", "Geschaeftspartner " + data.getGeschaeftspartnerId() + " mehrfach vorhanden", null);
