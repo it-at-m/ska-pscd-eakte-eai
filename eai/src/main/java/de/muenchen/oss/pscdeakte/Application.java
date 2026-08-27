@@ -30,10 +30,10 @@ public class Application {
     public void csvToDb() throws S3Exception, InterruptedException {
         log.info("Loading CSV files");
         this.csvToDb.saveFilesToDb(props.getPrefix());
-        log.info("Saving to Database");
+        log.info("Reading Database");
         this.dbToEakte.start();
         log.info("done, waiting for shutdown");
-        Thread.sleep(30000);
+        Thread.sleep(120000);
         //        SpringApplication.exit(context);
         log.info("shutdown");
     }
