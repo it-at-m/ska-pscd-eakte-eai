@@ -13,6 +13,7 @@ import de.muenchen.oss.refarch.integration.dms.model.DmsObjektResponse;
 import de.muenchen.oss.refarch.integration.dms.model.ReadApentryAntwortDTO;
 import de.muenchen.oss.refarch.integration.dms.model.SearchApentryDTO;
 import de.muenchen.oss.refarch.integration.dms.model.SearchApentryResponseDTO;
+import de.muenchen.oss.refarch.integration.dms.model.UpdateFileDTO;
 import de.muenchen.oss.refarch.integration.dms.model.UserFormsReferenz;
 import java.time.Duration;
 import lombok.RequiredArgsConstructor;
@@ -52,7 +53,6 @@ public class DmsService {
 
     public DmsObjektResponse createFile(final PscdImport data) {
         final CreateFileDTO dto = new CreateFileDTO();
-        //        TODO fallback falls data.getBetreffseinheit().isEmpty()?
         dto.shortname(data.getGeschaeftspartnerId()).filesubj(data.getZentralakt()).apentry(data.getBetreffseinheit()).definition(dmsProperties.getCooKmAkte());
         if (data.getVorname() != null && !data.getVorname().isEmpty()) {
             final UserFormsReferenz vornameReferenz = new UserFormsReferenz();
@@ -70,6 +70,13 @@ public class DmsService {
             dto.addUserformsdataItem(gebDatReferenz);
         }
         return filesApi.createFile(dto, dmsProperties.getXAnwendung(), dmsProperties.getUserlogin(), dmsProperties.getJoboe(), dmsProperties.getJobposition())
+                .timeout(Duration.ofSeconds(30)).block();
+    }
+
+    public DmsObjektResponse updateFile(PscdImport data){
+        final UpdateFileDTO dto = new UpdateFileDTO();
+        dto.shortname(data.getGeschaeftspartnerId()).filesubj(data.getZentralakt());
+        return filesApi.updateFile(data.getAkte(), dto, dmsProperties.getXAnwendung(), dmsProperties.getUserlogin(), dmsProperties.getJoboe(), dmsProperties.getJobposition())
                 .timeout(Duration.ofSeconds(30)).block();
     }
 

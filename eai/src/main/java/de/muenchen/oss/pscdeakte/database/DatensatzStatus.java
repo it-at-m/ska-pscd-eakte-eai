@@ -12,7 +12,7 @@ public enum DatensatzStatus {
     FILE_CREATED("Akte angelegt"),
     BESTANDSAKT_CREATED("\"Bestandsakten\" angelegt"),
     DONE("erfolgreich verarbeitet"),
-    DUPLICATE("Duplikat"),
+    UPDATE("Update"),
     ARCHIVE("personenbezogene Daten entfernt"),
     ERROR("Fehler: manuelles Eingreifen erforderlich");
 

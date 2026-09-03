@@ -4,7 +4,6 @@ import de.muenchen.oss.pscdeakte.database.DBLogger;
 import de.muenchen.oss.pscdeakte.database.DatensatzStatus;
 import de.muenchen.oss.pscdeakte.database.entity.PscdImport;
 import de.muenchen.oss.pscdeakte.database.repository.PscdImportRepository;
-import de.muenchen.oss.pscdeakte.dms.DmsProperties;
 import de.muenchen.oss.pscdeakte.s3.S3Properties;
 import de.muenchen.oss.refarch.integration.s3.application.port.out.S3OutPort;
 import de.muenchen.oss.refarch.integration.s3.domain.exception.S3Exception;
@@ -29,7 +28,6 @@ public class CsvToDb {
     @Getter
     private final S3OutPort s3;
     private final S3Properties props;
-    private final DmsProperties dmsProps;
     private final PscdImportRepository pir;
     private final DBLogger logDb;
 
@@ -62,7 +60,7 @@ public class CsvToDb {
         try {
             final FileReference fileReference = new FileReference(props.getBucket(), filename);
             records = csvFormat.parse(new InputStreamReader(s3.getFileContent(fileReference), StandardCharsets.ISO_8859_1));
-            records.forEach(csvRecord -> pir.save(this.mapData(csvRecord)));
+            records.forEach(this::processCSVRecord);
             final String movedFile = "." + filename;
             s3.copyFile(fileReference, new FileReference(props.getBucket(), movedFile));
             s3.deleteFile(fileReference);
@@ -74,6 +72,19 @@ public class CsvToDb {
 
     }
 
+    private void processCSVRecord(CSVRecord csvRecord){
+        final PscdImport fromCsv = this.mapData(csvRecord);
+        final PscdImport fromDb = pir.findByGeschaeftspartnerId(fromCsv.getGeschaeftspartnerId());
+        if (fromDb == null){
+            pir.save(fromCsv);
+            return;
+        }
+        final DuplicateOrUpdate dou = new DuplicateOrUpdate(fromCsv, fromDb);
+        if (dou.isUpdate()){
+            pir.save(dou.createUpdatedPscdImport());
+        }
+    }
+
     private PscdImport mapData(final CSVRecord csvRecord) {
         log.info("mapping GP {}", csvRecord.get(HEADERS.GP_ID));
         final PscdImport data = new PscdImport();
@@ -82,11 +93,7 @@ public class CsvToDb {
         data.setVorname(csvRecord.get(HEADERS.VORNAME));
         data.setGeburtsdatum(csvRecord.get(HEADERS.GEB_DAT));
         data.setZentralakt(csvRecord.get(HEADERS.ZENTRALAKTKENNUNG));
-        if (dmsProps.isInitialbefuellung()) {
-            data.setStatus(DatensatzStatus.NEW);
-        } else {
-            data.setStatus(pir.countByGeschaeftspartnerId(data.getGeschaeftspartnerId()) == 0 ? DatensatzStatus.NEW : DatensatzStatus.DUPLICATE);
-        }
+        data.setStatus(DatensatzStatus.NEW);
         return data;
     }
 

@@ -58,9 +58,10 @@ public class DbToEakte {
             data.setAv(dmsService.createProcedureAV(data.getAkte()).getObjid());
             this.log(data, DatensatzStatus.DONE);
             break;
-        case DatensatzStatus.DUPLICATE:
-            //                TODO Update Funktion fuer Akte
-            dbLog.log("info", "Geschaeftspartner " + data.getGeschaeftspartnerId() + " mehrfach vorhanden", null);
+        case DatensatzStatus.UPDATE:
+            dbLog.log("info", "Gp " + data.getGeschaeftspartnerId() + " mehrfach vorhanden. -> update", null);
+            dmsService.updateFile(data);
+            this.log(data, DatensatzStatus.DONE);
             break;
         case DatensatzStatus.ARCHIVE:
             //               TODO personenbezogene Daten entfernen
