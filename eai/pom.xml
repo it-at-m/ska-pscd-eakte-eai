@@ -45,7 +45,7 @@
         <maven.compiler.release>${java.version}</maven.compiler.release>
 
         <!-- Core Frameworks -->
-        <camel-spring-boot-dependencies.version>4.21.0</camel-spring-boot-dependencies.version>
+        <camel-spring-boot-dependencies.version>4.22.0</camel-spring-boot-dependencies.version>
         <lombok.version>1.18.46</lombok.version>
 
         <!-- Linting & Formatting -->
