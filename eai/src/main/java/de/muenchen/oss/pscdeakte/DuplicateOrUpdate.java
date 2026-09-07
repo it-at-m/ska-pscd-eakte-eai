@@ -2,32 +2,31 @@ package de.muenchen.oss.pscdeakte;
 
 import de.muenchen.oss.pscdeakte.database.DatensatzStatus;
 import de.muenchen.oss.pscdeakte.database.entity.PscdImport;
-import org.apache.commons.codec.binary.StringUtils;
-
 import java.time.Instant;
+import org.apache.commons.codec.binary.StringUtils;
 
 public class DuplicateOrUpdate {
 
     private final PscdImport existingImport;
     private final PscdImport newImport;
 
-    public DuplicateOrUpdate(final PscdImport existingImport, final PscdImport newImport){
+    public DuplicateOrUpdate(final PscdImport existingImport, final PscdImport newImport) {
         this.existingImport = existingImport;
         this.newImport = newImport;
     }
 
-    public boolean isDuplicate(){
+    public boolean isDuplicate() {
         return StringUtils.equals(newImport.getName(), existingImport.getName()) &&
                 StringUtils.equals(newImport.getVorname(), existingImport.getVorname()) &&
                 StringUtils.equals(newImport.getGeburtsdatum(), existingImport.getGeburtsdatum()) &&
                 StringUtils.equals(newImport.getZentralakt(), existingImport.getZentralakt());
     }
 
-    public boolean isUpdate(){
+    public boolean isUpdate() {
         return !isDuplicate();
     }
 
-    public PscdImport createUpdatedPscdImport(){
+    public PscdImport createUpdatedPscdImport() {
         final PscdImport updated = new PscdImport();
         updated.setId(existingImport.getId());
         updated.setGeschaeftspartnerId(existingImport.getGeschaeftspartnerId());

@@ -31,7 +31,7 @@ public class DbToEakte {
             datensatzVerarbeitung(data);
         } catch (WebClientResponseException e) {
             //        TODO Fehlerhandling der eAkte
-            dbLog.log("error", "WebclientResponseException", e.getMessage());
+            dbLog.log("error", "Exception aus der eAkte: WebclientResponseException", e.getMessage());
         } finally {
             repo.save(data);
         }
@@ -59,12 +59,12 @@ public class DbToEakte {
             this.log(data, DatensatzStatus.DONE);
             break;
         case DatensatzStatus.UPDATE:
-            dbLog.log("info", "Gp " + data.getGeschaeftspartnerId() + " mehrfach vorhanden. -> update", null);
+            dbLog.log("info", "Gp " + data.getGeschaeftspartnerId() + " hat neue Daten. -> update", null);
             dmsService.updateFile(data);
             this.log(data, DatensatzStatus.DONE);
             break;
         case DatensatzStatus.ARCHIVE:
-            //               TODO personenbezogene Daten entfernen
+            // personenbezogene Daten entfernen wird vom Projekt nicht erwartet.
             break;
         case DatensatzStatus.ERROR:
             dbLog.log("error", "GpId " + data.getGeschaeftspartnerId() + "steht auf ERROR.", null);

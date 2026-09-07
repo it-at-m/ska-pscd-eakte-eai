@@ -62,25 +62,25 @@ public class CsvToDb {
             records = csvFormat.parse(new InputStreamReader(s3.getFileContent(fileReference), StandardCharsets.ISO_8859_1));
             records.forEach(this::processCSVRecord);
             final String movedFile = "." + filename;
-            s3.copyFile(fileReference, new FileReference(props.getBucket(), movedFile));
+            s3.copyFile(fileReference, new FileReference(props.getBackupBucket(), movedFile));
             s3.deleteFile(fileReference);
-            log.info("moved file {} to {}", filename, movedFile);
+            log.info("moved file {}/{} to {}/{}", props.getBucket(), filename, props.getBackupBucket(), movedFile);
         } catch (IOException | S3Exception e) {
             //            TODO Datenbankfehler abfangen
-            logDb.log("ERROR", "reading file " + filename + "failed", e.getMessage());
+            logDb.log("ERROR", "reading/moving file " + filename + " failed", e.getMessage());
         }
 
     }
 
-    private void processCSVRecord(CSVRecord csvRecord){
+    private void processCSVRecord(CSVRecord csvRecord) {
         final PscdImport fromCsv = this.mapData(csvRecord);
         final PscdImport fromDb = pir.findByGeschaeftspartnerId(fromCsv.getGeschaeftspartnerId());
-        if (fromDb == null){
+        if (fromDb == null) {
             pir.save(fromCsv);
             return;
         }
         final DuplicateOrUpdate dou = new DuplicateOrUpdate(fromCsv, fromDb);
-        if (dou.isUpdate()){
+        if (dou.isUpdate()) {
             pir.save(dou.createUpdatedPscdImport());
         }
     }

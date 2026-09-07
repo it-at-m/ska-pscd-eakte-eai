@@ -10,6 +10,7 @@ import org.springframework.validation.annotation.Validated;
 @Validated
 public class S3Properties {
     @NotBlank private String bucket;
+    @NotBlank private String backupBucket;
     @NotBlank private String prefix;
     private String delimiter = ";";
     private boolean skipHeader = false;

@@ -109,6 +109,7 @@ refarch:
 
 s3csv:
   bucket: "int-eheaik-importrueckstandsakt"
+  backup-bucket: "int-eheaik-backup"
   prefix: "BP_Export_"
   delimiter: ";"
   skip-header: false

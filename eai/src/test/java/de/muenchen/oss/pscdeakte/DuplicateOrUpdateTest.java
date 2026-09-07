@@ -9,7 +9,7 @@ import org.junit.jupiter.api.Test;
 class DuplicateOrUpdateTest {
 
     @Test
-    void testDuplicate(){
+    void testDuplicate() {
         final PscdImport psi = new PscdImport();
         final DuplicateOrUpdate dou = new DuplicateOrUpdate(psi, psi);
         Assertions.assertTrue(dou.isDuplicate());
@@ -17,7 +17,7 @@ class DuplicateOrUpdateTest {
     }
 
     @Test
-    void testUpdate(){
+    void testUpdate() {
         final PscdImport org = getPscdImport();
 
         final PscdImport second = new PscdImport();
