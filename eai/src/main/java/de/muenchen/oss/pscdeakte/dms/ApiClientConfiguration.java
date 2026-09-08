@@ -5,6 +5,7 @@ import de.muenchen.oss.refarch.integration.dms.api.ApentriesApi;
 import de.muenchen.oss.refarch.integration.dms.api.FilesApi;
 import de.muenchen.oss.refarch.integration.dms.api.ProceduresApi;
 import de.muenchen.oss.refarch.integration.dms.api.SubjectAreaUnitsApi;
+import de.muenchen.oss.refarch.integration.dms.api.UserFormsDataApi;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.reactive.function.client.WebClient;
@@ -39,6 +40,11 @@ class ApiClientConfiguration {
     @Bean
     public ProceduresApi proceduresApi(final ApiClient apiClient) {
         return new ProceduresApi(apiClient);
+    }
+
+    @Bean
+    public UserFormsDataApi userFormsDataApi(final ApiClient apiClient) {
+        return new UserFormsDataApi(apiClient);
     }
 
 }

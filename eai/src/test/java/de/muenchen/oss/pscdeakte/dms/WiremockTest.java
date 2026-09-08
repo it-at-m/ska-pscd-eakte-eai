@@ -5,7 +5,7 @@ import com.github.tomakehurst.wiremock.core.WireMockConfiguration;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 
-class WiremockTest {
+public class WiremockTest {
 
     private WireMockServer wireMockServer;
 
