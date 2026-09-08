@@ -79,7 +79,7 @@ public class CsvToDb {
             pir.save(fromCsv);
             return;
         }
-        final DuplicateOrUpdate dou = new DuplicateOrUpdate(fromCsv, fromDb);
+        final DuplicateOrUpdate dou = new DuplicateOrUpdate(fromDb, fromCsv);
         if (dou.isUpdate()) {
             pir.save(dou.createUpdatedPscdImport());
         }
