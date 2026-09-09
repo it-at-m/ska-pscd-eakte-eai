@@ -16,16 +16,15 @@ spring:
     show-sql: false
     properties:
       hibernate:
-        dialect: # Must be configured
+        dialect: org.hibernate.dialect.PostgreSQLDialect
   flyway:
     enabled: true
     baseline-on-migrate: false
-    schemas: # Must be configured
-
-server:
-  error:
-    whitelabel:
-      enabled: false
+    schemas: pscdeakte
+  web:
+    error:
+      whitelabel:
+        enabled: false
 
 management:
   endpoints:
@@ -54,13 +53,11 @@ management:
   info:
     env:
       enabled: true
-    camel:
-      enabled: false
   health:
     livenessstate:
-      enabled: true
+      enabled: false
     readinessstate:
-      enabled: true
+      enabled: false
 
 logging:
   level:
@@ -87,11 +84,6 @@ info:
   build:
     java.version: "@java.version@"
     camel.version: "@camel-spring-boot-dependencies.version@"
-
-camel:
-  servlet:
-    mapping:
-      context-path: /api/*
 
 dms:
   XAnwendung: "PSCD-eAkte-EAI"
