@@ -16,6 +16,8 @@ import org.springframework.data.annotation.LastModifiedDate;
 @Entity
 @Table(name = "pscd_import", schema = "pscdeakte")
 @NoArgsConstructor
+// Review: Ggfs Validierungen auf Pflichtfelder einbauen
+// Review: Laut SysSpec in Confluence soll es zwei Tabellen geben. Eine für die Personenbezogenen Daten und ein für den Rest
 public class PscdImport extends BaseEntity {
 
     //   GP-ID,Name,Vorname,Geb.-Datum,Zentralakt

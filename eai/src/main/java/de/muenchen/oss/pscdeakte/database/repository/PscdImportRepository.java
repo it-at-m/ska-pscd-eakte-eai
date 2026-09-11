@@ -7,6 +7,7 @@ import org.springframework.data.repository.CrudRepository;
 import org.springframework.stereotype.Repository;
 
 @Repository
+// Review: Ggfs umstellen auf Jparepository anstelle von Crud
 public interface PscdImportRepository extends CrudRepository<PscdImport, Integer> {
 
     List<PscdImport> findByGeschaeftspartnerId(String geschaeftspartnerId);

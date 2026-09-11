@@ -112,3 +112,5 @@ s3csv:
   prefix: "BP_Export_"
   delimiter: ";"
   skip-header: false
+
+# Dürfen die URLs einfach so in github stehen? Ist doch eine interna der LHM?
