@@ -15,7 +15,7 @@ import org.springframework.test.context.ActiveProfiles;
 @SpringBootTest
 @ActiveProfiles(TestConstants.SPRING_TEST_PROFILE)
 @Disabled
-class DmsTest extends WiremockTest{
+class DmsTest extends WiremockTest {
 
     @Autowired
     public DmsService dmsService;
