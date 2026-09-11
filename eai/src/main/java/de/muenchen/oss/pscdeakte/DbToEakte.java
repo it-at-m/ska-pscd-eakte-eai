@@ -22,7 +22,7 @@ public class DbToEakte {
     private final Apentries apentries;
 
     public void start() {
-        repo.streamAllByStatusIsNot(DatensatzStatus.DONE).forEach(this::process);
+        repo.streamAllByStatusIsNot(DatensatzStatus.DONE).parallelStream().forEach(this::process);
     }
 
     public void process(final PscdImport data) {
@@ -31,7 +31,7 @@ public class DbToEakte {
             datensatzVerarbeitung(data);
         } catch (WebClientResponseException e) {
             //        TODO Fehlerhandling der eAkte
-            dbLog.log("error", "WebclientResponseException", e.getMessage());
+            dbLog.log("error", "Exception aus der eAkte: WebclientResponseException", e.getMessage());
         } finally {
             repo.save(data);
         }
@@ -58,12 +58,13 @@ public class DbToEakte {
             data.setAv(dmsService.createProcedureAV(data.getAkte()).getObjid());
             this.log(data, DatensatzStatus.DONE);
             break;
-        case DatensatzStatus.DUPLICATE:
-            //                TODO Update Funktion fuer Akte
-            dbLog.log("info", "Geschaeftspartner " + data.getGeschaeftspartnerId() + " mehrfach vorhanden", null);
+        case DatensatzStatus.UPDATE:
+            dbLog.log("info", "Gp " + data.getGeschaeftspartnerId() + " hat neue Daten. -> update", null);
+            dmsService.updateFile(data);
+            this.log(data, DatensatzStatus.DONE);
             break;
         case DatensatzStatus.ARCHIVE:
-            //               TODO personenbezogene Daten entfernen
+            // personenbezogene Daten entfernen wird vom Projekt nicht erwartet.
             break;
         case DatensatzStatus.ERROR:
             dbLog.log("error", "GpId " + data.getGeschaeftspartnerId() + "steht auf ERROR.", null);
@@ -76,7 +77,7 @@ public class DbToEakte {
     private void log(final PscdImport data, final DatensatzStatus status) {
         data.setStatus(status);
         data.setStatustext(status.getValue());
-        log.info(status.getValue());
+        log.debug(status.getValue());
     }
 
 }

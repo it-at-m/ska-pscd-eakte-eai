@@ -16,16 +16,15 @@ spring:
     show-sql: false
     properties:
       hibernate:
-        dialect: # Must be configured
+        dialect: org.hibernate.dialect.PostgreSQLDialect
   flyway:
     enabled: true
     baseline-on-migrate: false
-    schemas: # Must be configured
-
-server:
-  error:
-    whitelabel:
-      enabled: false
+    schemas: pscdeakte
+  web:
+    error:
+      whitelabel:
+        enabled: false
 
 management:
   endpoints:
@@ -54,13 +53,11 @@ management:
   info:
     env:
       enabled: true
-    camel:
-      enabled: false
   health:
     livenessstate:
-      enabled: true
+      enabled: false
     readinessstate:
-      enabled: true
+      enabled: false
 
 logging:
   level:
@@ -88,11 +85,6 @@ info:
     java.version: "@java.version@"
     camel.version: "@camel-spring-boot-dependencies.version@"
 
-camel:
-  servlet:
-    mapping:
-      context-path: /api/*
-
 dms:
   XAnwendung: "PSCD-eAkte-EAI"
   base-url: "https://cap-eakte-resteai-test-bay-eakte-resteai.apps.test.capk.muenchen.de/api"
@@ -109,6 +101,7 @@ refarch:
 
 s3csv:
   bucket: "int-eheaik-importrueckstandsakt"
+  backup-bucket: "int-eheaik-backup"
   prefix: "BP_Export_"
   delimiter: ";"
   skip-header: false

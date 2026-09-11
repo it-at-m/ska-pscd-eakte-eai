@@ -10,9 +10,9 @@ public enum DatensatzStatus {
     STARTED("gestartet"),
     APENTRY_EXISTS("Betreffseinheit angelegt/vorhanden"),
     FILE_CREATED("Akte angelegt"),
-    BESTANDSAKT_CREATED("\"Bestandsakten\" angelegt"),
+    BESTANDSAKT_CREATED("\\\"Bestandsakten\\\" angelegt"),
     DONE("erfolgreich verarbeitet"),
-    DUPLICATE("Duplikat"),
+    UPDATE("Update"),
     ARCHIVE("personenbezogene Daten entfernt"),
     ERROR("Fehler: manuelles Eingreifen erforderlich");
 
