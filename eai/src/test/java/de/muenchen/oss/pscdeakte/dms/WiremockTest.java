@@ -13,7 +13,7 @@ public class WiremockTest {
     void setUp() {
 
         wireMockServer = new WireMockServer(
-                WireMockConfiguration.wireMockConfig().port(8080).withRootDirectory("../stack/wiremock"));
+                WireMockConfiguration.wireMockConfig().port(8181).withRootDirectory("../stack/wiremock"));
         wireMockServer.start();
 
     }

@@ -22,7 +22,7 @@ public class DbToEakte {
     private final Apentries apentries;
 
     public void start() {
-        repo.streamAllByStatusIsNot(DatensatzStatus.DONE).forEach(this::process);
+        repo.streamAllByStatusIsNot(DatensatzStatus.DONE).parallelStream().forEach(this::process);
     }
 
     public void process(final PscdImport data) {
@@ -77,7 +77,7 @@ public class DbToEakte {
     private void log(final PscdImport data, final DatensatzStatus status) {
         data.setStatus(status);
         data.setStatustext(status.getValue());
-        log.info(status.getValue());
+        log.debug(status.getValue());
     }
 
 }

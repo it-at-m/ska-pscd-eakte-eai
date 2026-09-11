@@ -18,7 +18,9 @@ public class DBLogger {
         LogEntry logEntry = new LogEntry();
         logEntry.setLevel(level);
         logEntry.setMessage(message);
-        logEntry.setException(exception.length() > 255 ? exception.substring(0, 255) : exception);
+        if (exception != null) {
+            logEntry.setException(exception.length() > 255 ? exception.substring(0, 255) : exception);
+        }
 
         entityManager.persist(logEntry);
     }
