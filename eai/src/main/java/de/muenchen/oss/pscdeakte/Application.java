@@ -8,7 +8,6 @@ import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.context.event.ApplicationReadyEvent;
 import org.springframework.boot.context.properties.ConfigurationPropertiesScan;
-import org.springframework.context.ApplicationContext;
 import org.springframework.context.event.EventListener;
 
 @ConfigurationPropertiesScan
@@ -17,7 +16,6 @@ import org.springframework.context.event.EventListener;
 @Slf4j
 @SuppressWarnings("PMD.UseUtilityClass")
 public class Application {
-    private final ApplicationContext context;
     private final CsvToDb csvToDb;
     private final S3Properties props;
     private final DbToEakte dbToEakte;
@@ -27,7 +25,10 @@ public class Application {
     }
 
     @EventListener(ApplicationReadyEvent.class)
-    public void csvToDb() throws S3Exception, InterruptedException {
+    // Review Laut SysSpec soll die EAI auf ein neues File lauschen und dann direkt loslegen
+    public void processFiles() throws S3Exception {
+        // REVIEW: Ich hatte für DAVe einen Laufzeitlogger gebaut, der ausgibt wie lange etwas gedauert hat. Evtl ist das was
+        // auch für hier. Das war nur eine Annotation an die Methode und fertig
         log.info("Loading CSV files");
         this.csvToDb.saveFilesToDb(props.getPrefix());
         log.info("Reading Database");

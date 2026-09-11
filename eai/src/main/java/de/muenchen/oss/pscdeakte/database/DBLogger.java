@@ -15,7 +15,7 @@ public class DBLogger {
     @Async
     @Transactional
     public void log(final String level, final String message, final String exception) {
-        LogEntry logEntry = new LogEntry();
+        final LogEntry logEntry = new LogEntry();
         logEntry.setLevel(level);
         logEntry.setMessage(message);
         logEntry.setException(exception);

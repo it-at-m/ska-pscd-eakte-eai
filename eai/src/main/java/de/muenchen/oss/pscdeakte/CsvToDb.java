@@ -47,11 +47,11 @@ public class CsvToDb {
         list.files().forEach(file -> saveFileToDb(file.path()));
     }
 
-    public ListResult getFilesWithPrefix(final String prefix) throws S3Exception {
+    private ListResult getFilesWithPrefix(final String prefix) throws S3Exception {
         return s3.getFilesWithPrefix(props.getBucket(), prefix, true);
     }
 
-    public void saveFileToDb(final String filename) {
+    private void saveFileToDb(final String filename) {
         log.info("reading file {}", filename);
         final CSVFormat csvFormat = CSVFormat.DEFAULT.builder()
                 .setDelimiter(props.getDelimiter())
@@ -75,7 +75,7 @@ public class CsvToDb {
     }
 
     private PscdImport mapData(final CSVRecord csvRecord) {
-        log.info("mapping GP {}", csvRecord.get(HEADERS.GP_ID));
+        log.debug("mapping GP {}", csvRecord.get(HEADERS.GP_ID));
         final PscdImport data = new PscdImport();
         data.setGeschaeftspartnerId(csvRecord.get(HEADERS.GP_ID));
         data.setName(csvRecord.get(HEADERS.NAME));

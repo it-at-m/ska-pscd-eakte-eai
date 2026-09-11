@@ -19,6 +19,7 @@ public class Apentries {
     public Apentries(final DmsService dmsService, final DmsProperties properties) {
         this.dmsService = dmsService;
         this.props = properties;
+        // REVIEW: Kann sich die Regex ändern? Ist fix. Ggfs als constante machen
         pattern = Pattern.compile(Pattern.quote(properties.getAktenplannummer()) + "\\.([0-9]+)/[0-9]{10}-[0-9]{10}");
     }
 
@@ -46,7 +47,7 @@ public class Apentries {
         }
     }
 
-    public String getApentryFromMap(final int lfdNr) {
+    private String getApentryFromMap(final int lfdNr) {
         if (!mapInitialized) {
             synchronized (this) {
                 if (!mapInitialized) {
@@ -83,11 +84,11 @@ public class Apentries {
         }
     }
 
-    public int generateLfdNr(final String gpId) {
+    protected int generateLfdNr(final String gpId) {
         return (Integer.parseInt(gpId) - 1000000001) / 5000;
     }
 
-    public String buildObjname(final int lfdNr) {
+    protected String buildObjname(final int lfdNr) {
         final int mrd = 1000000000;
         final int begin = mrd + 1 + lfdNr * 5000;
         final int end = mrd + (lfdNr + 1) * 5000;
