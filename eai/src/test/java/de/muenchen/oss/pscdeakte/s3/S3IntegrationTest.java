@@ -60,10 +60,10 @@ class S3IntegrationTest extends WiremockTest {
     }
 
     private void saveFile2DB(final String filename) {
-        final FileReference fileReference = new FileReference(props.getBucket(), filename);
-        Assertions.assertDoesNotThrow(() -> csvToDb.getS3().saveFile(fileReference, new File("testdata/s3/" + filename)));
+        final FileReference origin = new FileReference(props.getBucket(), filename);
+        Assertions.assertDoesNotThrow(() -> csvToDb.getS3().saveFile(origin, new File("testdata/s3/" + filename)));
         Assertions.assertDoesNotThrow(() -> csvToDb.saveFilesToDb(props.getPrefix()));
-        Assertions.assertDoesNotThrow(() -> Assertions.assertFalse(csvToDb.getS3().fileExists(fileReference)));
+        Assertions.assertDoesNotThrow(() -> Assertions.assertFalse(csvToDb.getS3().fileExists(origin)));
         final FileReference backup = new FileReference(props.getBackupBucket(), "." + filename);
         Assertions.assertDoesNotThrow(() -> Assertions.assertTrue(csvToDb.getS3().fileExists(backup)));
         Assertions.assertDoesNotThrow(() -> csvToDb.getS3().deleteFile(backup));
