@@ -16,6 +16,7 @@ import org.springframework.web.reactive.function.client.WebClientResponseExcepti
 @Log4j2
 public class DbToEakte {
 
+    public static final String ERROR = "error";
     private final PscdImportRepository repo;
     private final DBLogger dbLog;
     private final DmsService dmsService;
@@ -31,7 +32,9 @@ public class DbToEakte {
             datensatzVerarbeitung(data);
         } catch (WebClientResponseException e) {
             //        TODO Fehlerhandling der eAkte
-            dbLog.log("error", "Exception aus der eAkte: WebclientResponseException", e.getMessage());
+            dbLog.log(ERROR, "Exception aus der eAkte: WebclientResponseException", e.getMessage());
+        } catch (IllegalStateException e) {
+            dbLog.log(ERROR, "Timeout in der eAkte", e.getMessage());
         } finally {
             repo.save(data);
         }
@@ -67,7 +70,7 @@ public class DbToEakte {
             // personenbezogene Daten entfernen wird vom Projekt nicht erwartet.
             break;
         case DatensatzStatus.ERROR:
-            dbLog.log("error", "GpId " + data.getGeschaeftspartnerId() + "steht auf ERROR.", null);
+            dbLog.log(ERROR, "GpId " + data.getGeschaeftspartnerId() + "steht auf ERROR.", null);
             break;
         default:
             log.warn("Status steht auf {}", data.getStatus().getValue());

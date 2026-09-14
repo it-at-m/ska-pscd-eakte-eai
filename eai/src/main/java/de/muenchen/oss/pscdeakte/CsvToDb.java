@@ -72,7 +72,7 @@ public class CsvToDb {
 
     }
 
-    private void processCSVRecord(CSVRecord csvRecord) {
+    private void processCSVRecord(final CSVRecord csvRecord) {
         final PscdImport fromCsv = this.mapData(csvRecord);
         final PscdImport fromDb = pir.findByGeschaeftspartnerId(fromCsv.getGeschaeftspartnerId());
         if (fromDb == null) {

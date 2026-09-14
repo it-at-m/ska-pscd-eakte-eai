@@ -28,7 +28,7 @@ import org.springframework.stereotype.Service;
 @Service
 public class DmsService {
 
-    public static final int TIMEOUT = 5;
+    public static final Duration TIMEOUT = Duration.ofSeconds(5);
     private final de.muenchen.oss.pscdeakte.dms.DmsProperties dmsProperties;
 
     private final ApentriesApi apentriesApi;
@@ -39,14 +39,14 @@ public class DmsService {
 
     public ReadApentryAntwortDTO getApentries() {
         return apentriesApi.readApentry(dmsProperties.getCooEinzelakte(), dmsProperties.getXAnwendung(), dmsProperties.getUserlogin(), dmsProperties.getJoboe(),
-                dmsProperties.getJobposition()).timeout(Duration.ofSeconds(TIMEOUT)).block();
+                dmsProperties.getJobposition()).timeout(TIMEOUT).block();
     }
 
     public SearchApentryResponseDTO getApentryFor(final int lfdnr) {
         final SearchApentryDTO dto = new SearchApentryDTO();
         dto.setBasenr(dmsProperties.getAktenplannummer() + "." + lfdnr);
         return apentriesApi.searchApentry(dto, dmsProperties.getXAnwendung(), dmsProperties.getUserlogin(), dmsProperties.getJoboe(),
-                dmsProperties.getJobposition()).timeout(Duration.ofSeconds(TIMEOUT)).block();
+                dmsProperties.getJobposition()).timeout(TIMEOUT).block();
     }
 
     public DmsObjektResponse createSubjectAreaUnit(final int laufendeNr, final String bereich) {
@@ -55,7 +55,7 @@ public class DmsService {
         dto.setShortterm(bereich);
         dto.setObjaddress(dmsProperties.getCooEinzelakte());
         return subjectAreaUnitsApi.createSubjectAreaUnit(dto, dmsProperties.getXAnwendung(), dmsProperties.getUserlogin(), dmsProperties.getJoboe(),
-                dmsProperties.getJobposition()).timeout(Duration.ofSeconds(TIMEOUT)).block();
+                dmsProperties.getJobposition()).timeout(TIMEOUT).block();
     }
 
     public DmsObjektResponse createFile(final PscdImport data) {
@@ -63,41 +63,41 @@ public class DmsService {
         dto.shortname(data.getGeschaeftspartnerId()).filesubj(data.getZentralakt()).apentry(data.getBetreffseinheit()).definition(dmsProperties.getCooKmAkte());
         dto.userformsdata(getUserFormsData(data));
         return filesApi.createFile(dto, dmsProperties.getXAnwendung(), dmsProperties.getUserlogin(), dmsProperties.getJoboe(), dmsProperties.getJobposition())
-                .timeout(Duration.ofSeconds(TIMEOUT)).block();
+                .timeout(TIMEOUT).block();
     }
 
-    public void updateFile(PscdImport data) {
+    public void updateFile(final PscdImport data) {
         final UpdateUserFormsDataRequestDTO dto = new UpdateUserFormsDataRequestDTO();
         dto.userformsdata(getUserFormsData(data));
         userFormsDataApi
                 .updateUserFormsData(data.getAkte(), dto, dmsProperties.getXAnwendung(), dmsProperties.getUserlogin(), dmsProperties.getJoboe(),
                         dmsProperties.getJobposition())
-                .timeout(Duration.ofSeconds(TIMEOUT)).block();
+                .timeout(TIMEOUT).block();
         final UpdateFileDTO ufdto = new UpdateFileDTO();
         ufdto.shortname(data.getGeschaeftspartnerId()).filesubj(data.getZentralakt());
         filesApi.updateFile(data.getAkte(), ufdto, dmsProperties.getXAnwendung(), dmsProperties.getUserlogin(), dmsProperties.getJoboe(),
                 dmsProperties.getJobposition())
-                .timeout(Duration.ofSeconds(TIMEOUT)).block();
+                .timeout(TIMEOUT).block();
     }
 
-    private static List<UserFormsReferenz> getUserFormsData(PscdImport data) {
-        List<UserFormsReferenz> list = new ArrayList<>();
+    private static List<UserFormsReferenz> getUserFormsData(final PscdImport data) {
+        final List<UserFormsReferenz> userFormsData = new ArrayList<>();
         if (data.getVorname() != null && !data.getVorname().isEmpty()) {
             final UserFormsReferenz vornameReferenz = new UserFormsReferenz();
             vornameReferenz.lhMBAI151700Ufreference("BusinessDataGPFirstname").addLhMBAI151700UfvalueItem(data.getVorname());
-            list.add(vornameReferenz);
+            userFormsData.add(vornameReferenz);
         }
         if (data.getName() != null && !data.getName().isEmpty()) {
             final UserFormsReferenz nameReferenz = new UserFormsReferenz();
             nameReferenz.lhMBAI151700Ufreference("BusinessDataGPSurname").addLhMBAI151700UfvalueItem(data.getName());
-            list.add(nameReferenz);
+            userFormsData.add(nameReferenz);
         }
         if (data.getGeburtsdatum() != null && !data.getGeburtsdatum().isEmpty()) {
             final UserFormsReferenz gebDatReferenz = new UserFormsReferenz();
             gebDatReferenz.lhMBAI151700Ufreference("BusinessDataGPBirthDate").addLhMBAI151700UfvalueItem(DateHelper.format(data.getGeburtsdatum()));
-            list.add(gebDatReferenz);
+            userFormsData.add(gebDatReferenz);
         }
-        return list;
+        return userFormsData;
     }
 
     public DmsObjektResponse createProcedureBestandsakte(final String referrednumber) {
@@ -105,7 +105,7 @@ public class DmsService {
         dto.shortname("Bestandsakten").accdef("Aktengebunden").referrednumber(referrednumber);
         return proceduresApi
                 .createProcedure(dto, dmsProperties.getXAnwendung(), dmsProperties.getUserlogin(), dmsProperties.getJoboe(), dmsProperties.getJobposition())
-                .timeout(Duration.ofSeconds(TIMEOUT)).block();
+                .timeout(TIMEOUT).block();
     }
 
     public DmsObjektResponse createProcedureAV(final String referrednumber) {
@@ -113,6 +113,6 @@ public class DmsService {
         dto.shortname("AVs, Titel, Haftbefehle").accdef("Aktengebunden").referrednumber(referrednumber);
         return proceduresApi
                 .createProcedure(dto, dmsProperties.getXAnwendung(), dmsProperties.getUserlogin(), dmsProperties.getJoboe(), dmsProperties.getJobposition())
-                .timeout(Duration.ofSeconds(TIMEOUT)).block();
+                .timeout(TIMEOUT).block();
     }
 }

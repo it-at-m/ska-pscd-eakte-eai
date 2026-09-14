@@ -52,7 +52,7 @@ public class Apentries {
                 if (!mapInitialized) {
                     log.info("reading apentries");
                     final ReadApentryAntwortDTO response = dmsService.getApentries();
-                    if (response.getGiobjecttype() != null) {
+                    if (response != null && response.getGiobjecttype() != null) {
                         log.info("{} apentries found", response.getGiobjecttype().size());
                         response.getGiobjecttype().forEach(this::fillMap);
                     }
@@ -64,9 +64,9 @@ public class Apentries {
     }
 
     private String getNewApentry(final Integer lfdNr) {
-        log.info("creating new apentry");
+        log.debug("creating new apentry");
         final DmsObjektResponse response = dmsService.createSubjectAreaUnit(lfdNr, this.buildObjname(lfdNr));
-        log.info("new apentry name: {} coo: {}", response.getObjname(), response.getObjid());
+        log.debug("new apentry name: {} coo: {}", response.getObjname(), response.getObjid());
         return response.getObjid();
     }
 
@@ -75,11 +75,11 @@ public class Apentries {
         final Matcher matcher;
         if (objname != null && !objname.isEmpty() && (matcher = pattern.matcher(objname)).find()) {
             final String objaddress = ref.getObjaddress();
-            log.info("saving apentry name: {} coo: {}", ref.getObjname(), objaddress);
+            log.debug("saving apentry name: {} coo: {}", ref.getObjname(), objaddress);
             final int lfdNr = Integer.parseInt(matcher.group(1));
             apentryMap.put(lfdNr, objaddress);
         } else {
-            log.warn("apentry does not match criteria: {}", ref.getObjname());
+            log.info("apentry does not match criteria: {}", ref.getObjname());
         }
     }
 

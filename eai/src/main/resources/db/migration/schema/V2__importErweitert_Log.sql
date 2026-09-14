@@ -1,3 +1,6 @@
+CREATE SCHEMA IF NOT EXISTS pscdeakte;
+
+
 ALTER TABLE pscdeakte.pscd_import
     ALTER COLUMN geburtsdatum TYPE VARCHAR(10),
     ADD COLUMN betreffseinheit VARCHAR(30),
