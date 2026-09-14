@@ -40,16 +40,12 @@ public class CsvToDb {
     }
 
     public void saveFilesToDb(final String prefix) throws S3Exception {
-        final ListResult list = this.getFilesWithPrefix(prefix);
+        final ListResult list = s3.getFilesWithPrefix(props.getBucket(), prefix, true);
         log.info("{} files found", list.files().size());
         list.files().forEach(file -> saveFileToDb(file.path()));
     }
 
-    public ListResult getFilesWithPrefix(final String prefix) throws S3Exception {
-        return s3.getFilesWithPrefix(props.getBucket(), prefix, true);
-    }
-
-    public void saveFileToDb(final String filename) {
+    private void saveFileToDb(final String filename) {
         log.info("reading file {}", filename);
         final CSVFormat csvFormat = CSVFormat.DEFAULT.builder()
                 .setDelimiter(props.getDelimiter())

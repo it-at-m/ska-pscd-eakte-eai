@@ -35,15 +35,10 @@ class S3IntegrationTest extends WiremockTest {
 
     @Test
     void integratedTest() {
-        final String filename = "BP_Export_Test.csv";
-        final String updateFilename = "BP_Export_UpdateTest.csv";
-        final FileReference fileReference = new FileReference(props.getBucket(), filename);
-        Assertions.assertDoesNotThrow(() -> csvToDb.getS3().saveFile(fileReference, new File("testdata/s3/" + filename)));
-        Assertions.assertDoesNotThrow(() -> csvToDb.saveFilesToDb(props.getPrefix()));
-        Assertions.assertDoesNotThrow(() -> csvToDb.getS3().deleteFile(fileReference));
+        saveFile2DB("BP_Export_Test.csv");
 
         final String gpId = "2000000000";
-        PscdImport pi = repo.findByGeschaeftspartnerId(gpId);
+        final PscdImport pi = repo.findByGeschaeftspartnerId(gpId);
         Assertions.assertNotNull(pi);
         Assertions.assertEquals(gpId, pi.getGeschaeftspartnerId());
         Assertions.assertEquals("s3testname", pi.getName());
@@ -51,10 +46,7 @@ class S3IntegrationTest extends WiremockTest {
         Assertions.assertEquals("01.02.2012", pi.getGeburtsdatum());
         Assertions.assertEquals("1234", pi.getZentralakt());
 
-        final FileReference updateFileReference = new FileReference(props.getBucket(), updateFilename);
-        Assertions.assertDoesNotThrow(() -> csvToDb.getS3().saveFile(updateFileReference, new File("testdata/s3/" + updateFilename)));
-        Assertions.assertDoesNotThrow(() -> csvToDb.saveFilesToDb(props.getPrefix()));
-        Assertions.assertDoesNotThrow(() -> csvToDb.getS3().deleteFile(updateFileReference));
+        saveFile2DB("BP_Export_UpdateTest.csv");
 
         final PscdImport updatePi = repo.findByGeschaeftspartnerId(gpId);
         Assertions.assertNotNull(updatePi);
@@ -65,5 +57,15 @@ class S3IntegrationTest extends WiremockTest {
         Assertions.assertEquals("9876", updatePi.getZentralakt());
 
         Assertions.assertDoesNotThrow(() -> repo.delete(updatePi));
+    }
+
+    private void saveFile2DB(final String filename) {
+        final FileReference fileReference = new FileReference(props.getBucket(), filename);
+        Assertions.assertDoesNotThrow(() -> csvToDb.getS3().saveFile(fileReference, new File("testdata/s3/" + filename)));
+        Assertions.assertDoesNotThrow(() -> csvToDb.saveFilesToDb(props.getPrefix()));
+        Assertions.assertDoesNotThrow(() -> Assertions.assertFalse(csvToDb.getS3().fileExists(fileReference)));
+        final FileReference backup = new FileReference(props.getBackupBucket(), "." + filename);
+        Assertions.assertDoesNotThrow(() -> Assertions.assertTrue(csvToDb.getS3().fileExists(backup)));
+        Assertions.assertDoesNotThrow(() -> csvToDb.getS3().deleteFile(backup));
     }
 }
