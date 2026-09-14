@@ -52,9 +52,10 @@ public class Apentries {
                 if (!mapInitialized) {
                     log.info("reading apentries");
                     final ReadApentryAntwortDTO response = dmsService.getApentries();
-                    if (response != null && response.getGiobjecttype() != null) {
-                        log.info("{} apentries found", response.getGiobjecttype().size());
-                        response.getGiobjecttype().forEach(this::fillMap);
+                    final List<Objektreferenz> giObjects;
+                    if (response != null && ((giObjects = response.getGiobjecttype()) != null)) {
+                        log.info("{} apentries found", giObjects.size());
+                        giObjects.forEach(this::fillMap);
                     }
                     mapInitialized = true;
                 }
