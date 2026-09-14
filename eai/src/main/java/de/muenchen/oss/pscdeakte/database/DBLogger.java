@@ -24,7 +24,7 @@ public class DBLogger {
         entityManager.persist(logEntry);
     }
 
-    private String limitLength(final String log){
+    private String limitLength(final String log) {
         if (log == null) {
             return null;
         }
