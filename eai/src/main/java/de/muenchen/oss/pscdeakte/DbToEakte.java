@@ -26,8 +26,8 @@ public class DbToEakte {
         repo.streamAllByStatusIsNot(DatensatzStatus.DONE).parallelStream().forEach(this::process);
     }
 
-    public void process(final PscdImport data) {
-        log.info("Processing {}", data.getGeschaeftspartnerId());
+    private void process(final PscdImport data) {
+        log.debug("Processing {}", data.getGeschaeftspartnerId());
         try {
             datensatzVerarbeitung(data);
         } catch (WebClientResponseException e) {

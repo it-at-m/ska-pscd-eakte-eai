@@ -25,7 +25,10 @@ public class Application {
     }
 
     @EventListener(ApplicationReadyEvent.class)
-    public void csv2db2dms() throws S3Exception {
+    // Review Laut SysSpec soll die EAI auf ein neues File lauschen und dann direkt loslegen
+    public void processFiles() throws S3Exception {
+        // REVIEW: Ich hatte für DAVe einen Laufzeitlogger gebaut, der ausgibt wie lange etwas gedauert hat. Evtl ist das was
+        // auch für hier. Das war nur eine Annotation an die Methode und fertig
         log.info("Loading CSV files");
         this.csvToDb.saveFilesToDb(props.getPrefix());
         log.info("Reading Database");
