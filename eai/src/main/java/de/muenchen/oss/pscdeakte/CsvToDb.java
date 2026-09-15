@@ -1,5 +1,6 @@
 package de.muenchen.oss.pscdeakte;
 
+import de.muenchen.oss.pscdeakte.configuration.LogExecutionTime;
 import de.muenchen.oss.pscdeakte.database.DBLogger;
 import de.muenchen.oss.pscdeakte.database.DatensatzStatus;
 import de.muenchen.oss.pscdeakte.database.entity.PscdImport;
@@ -39,12 +40,14 @@ public class CsvToDb {
         ZENTRALAKTKENNUNG
     }
 
-    public void saveFilesToDb(final String prefix) throws S3Exception {
-        final ListResult list = s3.getFilesWithPrefix(props.getBucket(), prefix, true);
+    public void processFiles() throws S3Exception {
+        log.info("Processing CSV files");
+        final ListResult list = s3.getFilesWithPrefix(props.getBucket(), props.getPrefix(), true);
         log.info("{} files found", list.files().size());
-        list.files().forEach(file -> saveFileToDb(file.path()));
+        list.files().parallelStream().forEach(file -> saveFileToDb(file.path()));
     }
 
+    @LogExecutionTime
     private void saveFileToDb(final String filename) {
         log.info("reading file {}", filename);
         final CSVFormat csvFormat = CSVFormat.DEFAULT.builder()
@@ -68,8 +71,9 @@ public class CsvToDb {
 
     }
 
+    @LogExecutionTime
     private void processCSVRecord(final CSVRecord csvRecord) {
-        final PscdImport fromCsv = this.mapData(csvRecord);
+        final PscdImport fromCsv = mapData(csvRecord);
         final PscdImport fromDb = pir.findByGeschaeftspartnerId(fromCsv.getGeschaeftspartnerId());
         if (fromDb == null) {
             pir.save(fromCsv);
@@ -81,8 +85,9 @@ public class CsvToDb {
         }
     }
 
+    @LogExecutionTime
     private PscdImport mapData(final CSVRecord csvRecord) {
-        log.info("mapping GP {}", csvRecord.get(HEADERS.GP_ID));
+        log.debug("mapping GP {}", csvRecord.get(HEADERS.GP_ID));
         final PscdImport data = new PscdImport();
         data.setGeschaeftspartnerId(csvRecord.get(HEADERS.GP_ID));
         data.setName(csvRecord.get(HEADERS.NAME));

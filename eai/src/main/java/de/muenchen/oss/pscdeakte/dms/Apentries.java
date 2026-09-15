@@ -19,7 +19,6 @@ public class Apentries {
     public Apentries(final DmsService dmsService, final DmsProperties properties) {
         this.dmsService = dmsService;
         this.props = properties;
-        // REVIEW: Kann sich die Regex ändern? Ist fix. Ggfs als constante machen
         pattern = Pattern.compile(Pattern.quote(properties.getAktenplannummer()) + "\\.([0-9]+)/[0-9]{10}-[0-9]{10}");
     }
 
@@ -53,8 +52,8 @@ public class Apentries {
                 if (!mapInitialized) {
                     log.info("reading apentries");
                     final ReadApentryAntwortDTO response = dmsService.getApentries();
-                    final List<Objektreferenz> giObjects;
-                    if (response != null && ((giObjects = response.getGiobjecttype()) != null)) {
+                    final List<Objektreferenz> giObjects = response != null ? response.getGiobjecttype() : null;
+                    if (giObjects != null) {
                         log.info("{} apentries found", giObjects.size());
                         giObjects.forEach(this::fillMap);
                     }
@@ -81,7 +80,7 @@ public class Apentries {
             final int lfdNr = Integer.parseInt(matcher.group(1));
             apentryMap.put(lfdNr, objaddress);
         } else {
-            log.info("apentry does not match criteria: {}", ref.getObjname());
+            log.debug("apentry does not match criteria: {}", ref.getObjname());
         }
     }
 
