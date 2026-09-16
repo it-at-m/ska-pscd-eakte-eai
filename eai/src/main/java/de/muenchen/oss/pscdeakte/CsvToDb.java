@@ -44,7 +44,7 @@ public class CsvToDb {
         log.info("Processing CSV files");
         final ListResult list = s3.getFilesWithPrefix(props.getBucket(), props.getPrefix(), true);
         log.info("{} files found", list.files().size());
-        list.files().parallelStream().forEach(file -> saveFileToDb(file.path()));
+        list.files().forEach(file -> saveFileToDb(file.path()));
     }
 
     @LogExecutionTime
