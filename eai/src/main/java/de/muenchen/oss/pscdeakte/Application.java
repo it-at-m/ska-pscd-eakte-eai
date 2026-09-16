@@ -2,6 +2,7 @@ package de.muenchen.oss.pscdeakte;
 
 import de.muenchen.oss.pscdeakte.configuration.LogExecutionTime;
 import de.muenchen.oss.refarch.integration.s3.domain.exception.S3Exception;
+import java.util.concurrent.atomic.AtomicBoolean;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.SpringApplication;
@@ -20,6 +21,8 @@ public class Application {
     private final CsvToDb csvToDb;
     private final DbToEakte dbToEakte;
 
+    private static final AtomicBoolean stillRunning = new AtomicBoolean(false);
+
     public static void main(final String[] args) {
         SpringApplication.run(Application.class, args);
     }
@@ -27,8 +30,14 @@ public class Application {
     @Scheduled(cron = "${dms.cron}")
     @LogExecutionTime
     public void scheduledTask() throws S3Exception {
-        this.csvToDb.processFiles();
-        this.dbToEakte.start();
+        if (!stillRunning.get()) {
+            stillRunning.set(true);
+            this.csvToDb.processFiles();
+            this.dbToEakte.start();
+            stillRunning.set(false);
+        } else {
+            log.info("Nothing to do, scheduled task still running");
+        }
     }
 
 }
