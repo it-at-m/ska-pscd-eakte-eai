@@ -5,7 +5,7 @@ import com.github.tomakehurst.wiremock.core.WireMockConfiguration;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 
-class WiremockTest {
+public class WiremockTest {
 
     private WireMockServer wireMockServer;
 
@@ -13,7 +13,7 @@ class WiremockTest {
     void setUp() {
 
         wireMockServer = new WireMockServer(
-                WireMockConfiguration.wireMockConfig().port(8080).withRootDirectory("../stack/wiremock"));
+                WireMockConfiguration.wireMockConfig().port(8181).withRootDirectory("../stack/wiremock"));
         wireMockServer.start();
 
     }

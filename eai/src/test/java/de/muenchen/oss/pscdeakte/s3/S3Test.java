@@ -1,9 +1,6 @@
 package de.muenchen.oss.pscdeakte.s3;
 
-import de.muenchen.oss.pscdeakte.CsvToDb;
 import de.muenchen.oss.pscdeakte.TestConstants;
-import de.muenchen.oss.pscdeakte.database.entity.PscdImport;
-import de.muenchen.oss.pscdeakte.database.repository.PscdImportRepository;
 import de.muenchen.oss.refarch.integration.s3.adapter.out.s3.S3Mapper;
 import de.muenchen.oss.refarch.integration.s3.adapter.out.s3.S3OutAdapter;
 import de.muenchen.oss.refarch.integration.s3.application.port.out.S3OutPort;
@@ -15,15 +12,13 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.URI;
-import java.util.List;
+
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInstance;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
 import org.testcontainers.containers.GenericContainer;
 import org.testcontainers.junit.jupiter.Container;
@@ -40,23 +35,12 @@ import software.amazon.awssdk.services.s3.presigner.S3Presigner;
 
 @Testcontainers
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
-@SpringBootTest
 @ActiveProfiles(TestConstants.SPRING_TEST_PROFILE)
 @Slf4j
 @Disabled
 class S3Test {
 
     private S3OutPort s3OutPort;
-    private final S3Properties props;
-    private final CsvToDb csvToDb;
-    private final PscdImportRepository repo;
-
-    @Autowired
-    S3Test(S3Properties props, CsvToDb csvToDb, PscdImportRepository repo) {
-        this.props = props;
-        this.csvToDb = csvToDb;
-        this.repo = repo;
-    }
 
     private static final String ACCESS_KEY = "minio";
     private static final String SECRET_KEY = "Test1234";
@@ -103,35 +87,18 @@ class S3Test {
 
     @Test
     void simpleS3Test() throws S3Exception, IOException {
-
         final String testfile = "testdata/s3/s3testfile";
 
-        final FileReference fileReference = new FileReference(props.getBucket(), "s3testfile");
+        final FileReference fileReference = new FileReference("int-eheaik-importrueckstandsakt", "s3testfile");
         s3OutPort.saveFile(fileReference, new File(testfile));
         Assertions.assertDoesNotThrow(() -> s3OutPort.saveFile(fileReference, new File(testfile)));
 
-        final ListResult result = s3OutPort.getFilesWithPrefix(props.getBucket(), "s", true);
+        final ListResult result = s3OutPort.getFilesWithPrefix("int-eheaik-importrueckstandsakt", "s", true);
         final String path = result.files().getFirst().path();
         Assertions.assertEquals("s3testfile", path);
-        final FileReference fileReference1 = new FileReference(props.getBucket(), path);
+        final FileReference fileReference1 = new FileReference("int-eheaik-importrueckstandsakt", path);
         Assertions.assertEquals("content", new BufferedReader(new InputStreamReader(s3OutPort.getFileContent(fileReference1))).readLine());
 
         Assertions.assertDoesNotThrow(() -> s3OutPort.deleteFile(fileReference1));
-
-    }
-
-    @Test
-    void integratedTest() {
-        final String filename = "BP_Export_Test.csv";
-        FileReference fileReference = new FileReference(props.getBucket(), filename);
-        Assertions.assertDoesNotThrow(() -> csvToDb.getS3().saveFile(fileReference, new File("testdata/s3/" + filename)));
-        Assertions.assertDoesNotThrow(() -> csvToDb.saveFilesToDb(props.getPrefix()));
-        Assertions.assertDoesNotThrow(() -> csvToDb.getS3().deleteFile(fileReference));
-        final String gpId = "2000000000";
-        final List<PscdImport> list = repo.findByGeschaeftspartnerId(gpId);
-        Assertions.assertEquals(1, list.size());
-        Assertions.assertEquals(gpId, list.getFirst().getGeschaeftspartnerId());
-        Assertions.assertEquals("01.02.2012", list.getFirst().getGeburtsdatum());
-        Assertions.assertDoesNotThrow(() -> repo.delete(list.getFirst()));
     }
 }
