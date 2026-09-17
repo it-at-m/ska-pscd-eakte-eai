@@ -48,7 +48,7 @@ public class CsvToDb {
     }
 
     @LogExecutionTime
-    private void saveFileToDb(final String filename) {
+    public void saveFileToDb(final String filename) {
         log.info("reading file {}", filename);
         final CSVFormat csvFormat = CSVFormat.DEFAULT.builder()
                 .setDelimiter(props.getDelimiter())
@@ -72,7 +72,7 @@ public class CsvToDb {
     }
 
     @LogExecutionTime
-    private void processCSVRecord(final CSVRecord csvRecord) {
+    public void processCSVRecord(final CSVRecord csvRecord) {
         final PscdImport fromCsv = mapData(csvRecord);
         final PscdImport fromDb = pir.findByGeschaeftspartnerId(fromCsv.getGeschaeftspartnerId());
         if (fromDb == null) {
@@ -86,7 +86,7 @@ public class CsvToDb {
     }
 
     @LogExecutionTime
-    private PscdImport mapData(final CSVRecord csvRecord) {
+    public PscdImport mapData(final CSVRecord csvRecord) {
         log.debug("mapping GP {}", csvRecord.get(HEADERS.GP_ID));
         final PscdImport data = new PscdImport();
         data.setGeschaeftspartnerId(csvRecord.get(HEADERS.GP_ID));
