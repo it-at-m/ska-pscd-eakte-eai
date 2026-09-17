@@ -49,6 +49,13 @@ public class DmsService {
                 dmsProperties.getJobposition()).timeout(TIMEOUT).block();
     }
 
+    /**
+     * Erzeugt in der Einzelakte eine Betreffseinheit
+     *
+     * @param laufendeNr laufende Nummer für das Geschaeftszeichen des uebergeordneten Aktenplaneintrags
+     * @param bereich Titel der anzulegenden Betreffseinheit
+     * @return Response der eAkte
+     */
     public DmsObjektResponse createSubjectAreaUnit(final int laufendeNr, final String bereich) {
         final CreateSubjectAreaUnitAnfrageDTO dto = new CreateSubjectAreaUnitAnfrageDTO();
         dto.setBasenr(dmsProperties.getAktenplannummer() + "." + laufendeNr);
@@ -58,6 +65,12 @@ public class DmsService {
                 dmsProperties.getJobposition()).timeout(TIMEOUT).block();
     }
 
+    /**
+     * Erzeugt in der Betreffseinheit eine Sachakte (Geschaeftspartner)
+     *
+     * @param data zu speichernde Daten der Sachakte
+     * @return Response der eAkte
+     */
     public DmsObjektResponse createFile(final PscdImport data) {
         final CreateFileDTO dto = new CreateFileDTO();
         dto.shortname(data.getGeschaeftspartnerId()).filesubj(data.getZentralakt()).apentry(data.getBetreffseinheit()).definition(dmsProperties.getCooKmAkte());
@@ -100,17 +113,38 @@ public class DmsService {
         return userFormsData;
     }
 
+    /**
+     * Bei der Erstellung einer Sachakte muss ein darin enthaltener Vorgang des Typs 'Bestandsakte'
+     * erzeugt werden.
+     *
+     * @param referrednumber uebergeordnete Sachakte
+     * @return Response der ProceduresApi
+     */
     public DmsObjektResponse createProcedureBestandsakte(final String referrednumber) {
-        final CreateProcedureDTO dto = new CreateProcedureDTO();
-        dto.shortname("Bestandsakten").accdef("Aktengebunden").referrednumber(referrednumber);
-        return proceduresApi
-                .createProcedure(dto, dmsProperties.getXAnwendung(), dmsProperties.getUserlogin(), dmsProperties.getJoboe(), dmsProperties.getJobposition())
-                .timeout(TIMEOUT).block();
+        return createProcedure(referrednumber, "Bestandsakten");
     }
 
+    /**
+     * Bei der Erstellung einer Sachakte muss ein darin enthaltener Vorgang des Typs 'AVs, Titel,
+     * Haftbefehle' erzeugt werden.
+     *
+     * @param referrednumber uebergeordnete Sachakte
+     * @return Response der ProceduresApi
+     */
     public DmsObjektResponse createProcedureAV(final String referrednumber) {
+        return createProcedure(referrednumber, "AVs, Titel, Haftbefehle");
+    }
+
+    /**
+     * Kapselt den Aufruf der ProceduresApi.
+     *
+     * @param referrednumber uebergeordnete Sachakte
+     * @param shortname Typ des anzulegenden Vorgangs
+     * @return Response der ProceduresApi
+     */
+    private DmsObjektResponse createProcedure(final String referrednumber, final String shortname) {
         final CreateProcedureDTO dto = new CreateProcedureDTO();
-        dto.shortname("AVs, Titel, Haftbefehle").accdef("Aktengebunden").referrednumber(referrednumber);
+        dto.shortname(shortname).accdef("Aktengebunden").referrednumber(referrednumber);
         return proceduresApi
                 .createProcedure(dto, dmsProperties.getXAnwendung(), dmsProperties.getUserlogin(), dmsProperties.getJoboe(), dmsProperties.getJobposition())
                 .timeout(TIMEOUT).block();

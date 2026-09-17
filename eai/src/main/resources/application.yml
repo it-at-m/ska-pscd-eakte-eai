@@ -55,9 +55,9 @@ management:
       enabled: true
   health:
     livenessstate:
-      enabled: false
+      enabled: true
     readinessstate:
-      enabled: false
+      enabled: true
 
 logging:
   level:
@@ -94,6 +94,7 @@ dms:
   jobposition: "DocumentManager"
   joboe: "COO.2150.8800.1.237"
   initialbefuellung: true
+  cron: 0 0 16 1/1 * ?
 
 refarch:
   s3:
@@ -105,3 +106,5 @@ s3csv:
   prefix: "BP_Export_"
   delimiter: ";"
   skip-header: false
+
+# Dürfen die URLs einfach so in github stehen? Ist doch eine interna der LHM?

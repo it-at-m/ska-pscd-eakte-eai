@@ -1,5 +1,6 @@
 package de.muenchen.oss.pscdeakte;
 
+import de.muenchen.oss.pscdeakte.configuration.LogExecutionTime;
 import de.muenchen.oss.pscdeakte.database.DBLogger;
 import de.muenchen.oss.pscdeakte.database.DatensatzStatus;
 import de.muenchen.oss.pscdeakte.database.entity.PscdImport;
@@ -22,12 +23,15 @@ public class DbToEakte {
     private final DmsService dmsService;
     private final Apentries apentries;
 
+    @LogExecutionTime
     public void start() {
+        log.debug("Starting DB To Eakte");
         repo.streamAllByStatusIsNot(DatensatzStatus.DONE).parallelStream().forEach(this::process);
     }
 
-    public void process(final PscdImport data) {
-        log.info("Processing {}", data.getGeschaeftspartnerId());
+    @LogExecutionTime
+    private void process(final PscdImport data) {
+        log.debug("Processing {}", data.getGeschaeftspartnerId());
         try {
             datensatzVerarbeitung(data);
         } catch (WebClientResponseException e) {
