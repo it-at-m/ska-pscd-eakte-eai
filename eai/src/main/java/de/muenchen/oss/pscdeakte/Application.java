@@ -1,43 +1,34 @@
 package de.muenchen.oss.pscdeakte;
 
-import de.muenchen.oss.pscdeakte.configuration.LogExecutionTime;
 import de.muenchen.oss.refarch.integration.s3.domain.exception.S3Exception;
-import java.util.concurrent.atomic.AtomicBoolean;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.boot.context.event.ApplicationReadyEvent;
 import org.springframework.boot.context.properties.ConfigurationPropertiesScan;
-import org.springframework.scheduling.annotation.EnableScheduling;
-import org.springframework.scheduling.annotation.Scheduled;
+import org.springframework.context.event.EventListener;
 
 @ConfigurationPropertiesScan
 @SpringBootApplication
 @RequiredArgsConstructor
 @Slf4j
-@EnableScheduling
 @SuppressWarnings("PMD.UseUtilityClass")
 public class Application {
     private final CsvToDb csvToDb;
     private final DbToEakte dbToEakte;
 
-    private static final AtomicBoolean stillRunning = new AtomicBoolean(false);
-
     public static void main(final String[] args) {
         SpringApplication.run(Application.class, args);
     }
 
-    @Scheduled(cron = "${dms.cron}")
-    @LogExecutionTime
-    public void scheduledTask() throws S3Exception {
-        if (!stillRunning.get()) {
-            stillRunning.set(true);
-            this.csvToDb.processFiles();
-            this.dbToEakte.start();
-            stillRunning.set(false);
-        } else {
-            log.info("Nothing to do, scheduled task still running");
-        }
+    @EventListener(ApplicationReadyEvent.class)
+    public void csv2db2dms() throws S3Exception {
+        log.info("Loading CSV files");
+        this.csvToDb.processFiles();
+        log.info("Reading Database");
+        this.dbToEakte.start();
+        log.info("shutdown");
     }
 
 }
