@@ -55,9 +55,9 @@ management:
       enabled: true
   health:
     livenessstate:
-      enabled: true
+      enabled: false
     readinessstate:
-      enabled: true
+      enabled: false
 
 logging:
   level:
