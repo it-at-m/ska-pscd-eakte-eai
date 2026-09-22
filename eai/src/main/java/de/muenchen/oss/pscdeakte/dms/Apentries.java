@@ -16,17 +16,17 @@ import org.springframework.stereotype.Component;
 @Component
 public class Apentries {
 
-    public Apentries(final DmsService dmsService, final DmsProperties properties) {
-        this.dmsService = dmsService;
-        this.props = properties;
-        pattern = Pattern.compile(Pattern.quote(properties.getAktenplannummer()) + "\\.([0-9]+)/[0-9]{10}-[0-9]{10}");
-    }
-
     private final DmsService dmsService;
     private final Map<Integer, String> apentryMap = new ConcurrentHashMap<>();
     private volatile boolean mapInitialized = false;
     private final Pattern pattern;
     private final DmsProperties props;
+
+    public Apentries(final DmsService dmsService, final DmsProperties properties) {
+        this.dmsService = dmsService;
+        this.props = properties;
+        pattern = Pattern.compile(Pattern.quote(properties.getAktenplannummer()) + "\\.([0-9]+)/[0-9]{10}-[0-9]{10}");
+    }
 
     public String getApentryCoo(final String gpId) {
         final int lfdNr = this.generateLfdNr(gpId);
