@@ -32,9 +32,12 @@ public class Application {
     protected void scheduledTask() throws S3Exception {
         if (!stillRunning.get()) {
             stillRunning.set(true);
-            this.csvToDb.processFiles();
-            this.dbToEakte.start();
-            stillRunning.set(false);
+            try {
+                this.csvToDb.processFiles();
+                this.dbToEakte.start();
+            } finally {
+                stillRunning.set(false);
+            }
         } else {
             log.info("Nothing to do, scheduled task still running");
         }
