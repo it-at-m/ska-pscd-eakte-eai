@@ -16,30 +16,29 @@ import org.springframework.scheduling.annotation.Scheduled;
 @RequiredArgsConstructor
 @Slf4j
 @EnableScheduling
-@SuppressWarnings("PMD.UseUtilityClass")
 public class Application {
     private final CsvToDb csvToDb;
     private final DbToEakte dbToEakte;
 
-    private static final AtomicBoolean stillRunning = new AtomicBoolean(false);
+    private static final AtomicBoolean STILL_RUNNING = new AtomicBoolean(false);
 
-    static void main(final String[] args) {
+    /* package */ static void main(final String... args) {
         SpringApplication.run(Application.class, args);
     }
 
     @Scheduled(cron = "${dms.cron}")
     @LogExecutionTime
     protected void scheduledTask() throws S3Exception {
-        if (!stillRunning.get()) {
-            stillRunning.set(true);
+        if (STILL_RUNNING.get()) {
+            log.info("Nothing to do, scheduled task still running");
+        } else {
+            STILL_RUNNING.set(true);
             try {
                 this.csvToDb.processFiles();
                 this.dbToEakte.start();
             } finally {
-                stillRunning.set(false);
+                STILL_RUNNING.set(false);
             }
-        } else {
-            log.info("Nothing to do, scheduled task still running");
         }
     }
 
