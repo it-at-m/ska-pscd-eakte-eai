@@ -75,7 +75,7 @@ public class CsvToDb {
     @LogExecutionTime
     public void processCSVRecord(final CSVRecord csvRecord) {
         final PscdImport fromCsv = mapData(csvRecord);
-        if (fromCsv.getGeschaeftspartnerId().equals("1000000000")) {
+        if ("1000000000".equals(fromCsv.getGeschaeftspartnerId())) {
             // Test GP-Id ueberspringen
             return;
         }
