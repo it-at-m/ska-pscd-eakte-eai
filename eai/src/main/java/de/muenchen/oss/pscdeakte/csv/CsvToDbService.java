@@ -1,4 +1,4 @@
-package de.muenchen.oss.pscdeakte;
+package de.muenchen.oss.pscdeakte.csv;
 
 import de.muenchen.oss.pscdeakte.configuration.LogExecutionTime;
 import de.muenchen.oss.pscdeakte.database.DBLogger;
@@ -13,18 +13,17 @@ import de.muenchen.oss.refarch.integration.s3.domain.model.ListResult;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
-
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVRecord;
-import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Service;
 
-@Component
+@Service
 @RequiredArgsConstructor
 @Slf4j
-public class CsvToDb {
+public class CsvToDbService {
 
     public static final String TEST_GPID = "1000000000";
     @Getter
@@ -43,13 +42,18 @@ public class CsvToDb {
 
     public void processFiles() throws S3Exception {
         log.info("Processing CSV files");
-        final ListResult list = s3.getFilesWithPrefix(props.getBucket(), props.getPrefix(), true);
-        log.info("{} files found", list.files().size());
-        list.files().forEach(file -> saveFileToDb(file.path()));
+        getFilesWithPrefix().files().forEach(file -> saveFileToDb(file.path()));
+    }
+
+    protected ListResult getFilesWithPrefix() throws S3Exception {
+        log.info("#getFilesWithPrefix()");
+        final ListResult foundFiles = s3.getFilesWithPrefix(props.getBucket(), props.getPrefix(), true);
+        log.info("{} files found", foundFiles.files().size());
+        return foundFiles;
     }
 
     @LogExecutionTime
-    public void saveFileToDb(final String filename) {
+    protected void saveFileToDb(final String filename) {
         log.info("reading file {}", filename);
         final CSVFormat csvFormat = CSVFormat.DEFAULT.builder()
                 .setDelimiter(props.getDelimiter())
@@ -74,7 +78,7 @@ public class CsvToDb {
     }
 
     @LogExecutionTime
-    public void processCSVRecord(final CSVRecord csvRecord) {
+    protected void processCSVRecord(final CSVRecord csvRecord) {
         final PscdImport fromCsv = mapData(csvRecord);
         if (TEST_GPID.equals(fromCsv.getGeschaeftspartnerId())) {
             // Test GP-Id ueberspringen
@@ -92,7 +96,7 @@ public class CsvToDb {
     }
 
     @LogExecutionTime
-    public PscdImport mapData(final CSVRecord csvRecord) {
+    protected PscdImport mapData(final CSVRecord csvRecord) {
         log.debug("mapping GP {}", csvRecord.get(HEADERS.GP_ID));
         final PscdImport data = new PscdImport();
         data.setGeschaeftspartnerId(csvRecord.get(HEADERS.GP_ID));

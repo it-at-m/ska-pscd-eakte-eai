@@ -1,8 +1,8 @@
 package de.muenchen.oss.pscdeakte.scheduler;
 
-import de.muenchen.oss.pscdeakte.CsvToDb;
-import de.muenchen.oss.pscdeakte.DbToEakte;
 import de.muenchen.oss.pscdeakte.configuration.LogExecutionTime;
+import de.muenchen.oss.pscdeakte.csv.CsvToDbService;
+import de.muenchen.oss.pscdeakte.database.DbToEakteService;
 import de.muenchen.oss.refarch.integration.s3.domain.exception.S3Exception;
 import java.util.concurrent.atomic.AtomicBoolean;
 import lombok.RequiredArgsConstructor;
@@ -15,8 +15,8 @@ import org.springframework.stereotype.Service;
 @Slf4j
 public class Scheduler {
 
-    private final CsvToDb csvToDb;
-    private final DbToEakte dbToEakte;
+    private final CsvToDbService csvToDbService;
+    private final DbToEakteService dbToEakteService;
 
     private static final AtomicBoolean STILL_RUNNING = new AtomicBoolean(false);
 
@@ -28,8 +28,8 @@ public class Scheduler {
         } else {
             STILL_RUNNING.set(true);
             try {
-                this.csvToDb.processFiles();
-                this.dbToEakte.start();
+                this.csvToDbService.processFiles();
+                this.dbToEakteService.start();
             } finally {
                 STILL_RUNNING.set(false);
             }
