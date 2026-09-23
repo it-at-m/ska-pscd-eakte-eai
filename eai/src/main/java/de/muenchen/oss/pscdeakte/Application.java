@@ -32,6 +32,7 @@ public class Application {
         if (STILL_RUNNING.get()) {
             log.info("Nothing to do, scheduled task still running");
         } else {
+            log.info("starting");
             STILL_RUNNING.set(true);
             try {
                 this.csvToDb.processFiles();
