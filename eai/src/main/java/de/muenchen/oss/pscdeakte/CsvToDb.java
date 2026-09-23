@@ -52,7 +52,7 @@ public class CsvToDb {
         log.info("reading file {}", filename);
         final CSVFormat csvFormat = CSVFormat.DEFAULT.builder()
                 .setDelimiter(props.getDelimiter())
-                .setQuote('µ')
+                .setEscape(props.getEscape())
                 .setHeader(HEADERS.class)
                 .setSkipHeaderRecord(props.isSkipHeader())
                 .get();
