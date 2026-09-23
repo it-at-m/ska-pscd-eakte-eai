@@ -75,6 +75,10 @@ public class CsvToDb {
     @LogExecutionTime
     public void processCSVRecord(final CSVRecord csvRecord) {
         final PscdImport fromCsv = mapData(csvRecord);
+        if (fromCsv.getGeschaeftspartnerId().equals("1000000000")) {
+            // Test GP-Id ueberspringen
+            return;
+        }
         final PscdImport fromDb = pir.findByGeschaeftspartnerId(fromCsv.getGeschaeftspartnerId());
         if (fromDb == null) {
             pir.save(fromCsv);
