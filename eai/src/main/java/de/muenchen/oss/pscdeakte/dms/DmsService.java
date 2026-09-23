@@ -29,7 +29,7 @@ import org.springframework.stereotype.Service;
 public class DmsService {
 
     public static final Duration TIMEOUT = Duration.ofSeconds(5);
-    private final DmsProperties dmsProperties;
+    private final de.muenchen.oss.pscdeakte.dms.DmsProperties dmsProperties;
 
     private final ApentriesApi apentriesApi;
     private final SubjectAreaUnitsApi subjectAreaUnitsApi;

@@ -1,32 +1,26 @@
 "Type: Feature":
-  - head-branch: ['^feat', '-feature-']
+  - head-branch: [ '^feat', '-feature-' ]
 "Type: Bug":
-  - head-branch: ['^bug', '-bug-']
+  - head-branch: [ '^bug', '-bug-' ]
 "Type: Maintenance":
-  - head-branch: ['^maint', '^refact', '^chore', '-maintenance-']
+  - head-branch: [ '^maint', '-maintenance-' ]
 "Type: Documentation":
-  - head-branch: ['^docs', '-documentation-']
+  - head-branch: [ '^docs', '-documentation-' ]
   - changed-files:
-      - any-glob-to-any-file: ['docs/**']
+    - any-glob-to-any-file: ['docs/**']
 "Type: Dependency":
-  - head-branch: ['^dep', '-dependency-']
+  - head-branch: [ '^dep', '-dependency-' ]
 "Type: Security":
-  - head-branch: ['^sec', '-security-']
-"Component: CI/CD":
+  - head-branch: [ '^sec', '-security-' ]
+"Template: Backend":
   - changed-files:
-      - any-glob-to-any-file: ['.github/**']
-"Component: Stack":
+    - any-glob-to-any-file: ['backend/**']
+"Template: EAI":
   - changed-files:
-      - any-glob-to-any-file: ['stack/**']
-"Component: Backend":
+    - any-glob-to-any-file: ['eai/**']
+"Template: Frontend":
   - changed-files:
-      - any-glob-to-any-file: ['backend/**']
-"Component: EAI":
+    - any-glob-to-any-file: ['frontend/**']
+"Template: Webcomponent":
   - changed-files:
-      - any-glob-to-any-file: ['eai/**']
-"Component: Frontend":
-  - changed-files:
-      - any-glob-to-any-file: ['frontend/**']
-"Component: Web Component":
-  - changed-files:
-      - any-glob-to-any-file: ['webcomponent/**']
+    - any-glob-to-any-file: ['webcomponent/**']
