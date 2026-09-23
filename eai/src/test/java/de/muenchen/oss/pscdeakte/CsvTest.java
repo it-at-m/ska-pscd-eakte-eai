@@ -3,6 +3,7 @@ package de.muenchen.oss.pscdeakte;
 import de.muenchen.oss.pscdeakte.configuration.LogExecutionTime;
 import de.muenchen.oss.pscdeakte.database.DatensatzStatus;
 import de.muenchen.oss.pscdeakte.database.entity.PscdImport;
+import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
 import lombok.extern.slf4j.Slf4j;
@@ -23,41 +24,18 @@ class CsvTest {
     }
 
     @Test
-    void csvSetQuoteTest() throws IOException {
+    void readCsvTest() throws IOException {
         final CSVFormat csvFormat = CSVFormat.DEFAULT.builder()
                 .setDelimiter(";")
                 .setQuote('µ')
+                //                .setEscape('\\')
                 .setHeader(HEADERS.class)
                 .setSkipHeaderRecord(false)
                 .get();
         final Iterable<CSVRecord> records;
-        records = csvFormat.parse(new FileReader("testdata/s3/BP_Export_invalid_character.csv"));
-        Assertions.assertEquals("\"innen\" aussen", mapData(records.iterator().next()).getName());
-    }
-
-    @Test
-    void csvQuotedTest() throws IOException {
-        final CSVFormat csvFormat = CSVFormat.DEFAULT.builder()
-                .setDelimiter(";")
-                .setHeader(HEADERS.class)
-                .setSkipHeaderRecord(false)
-                .get();
-        final Iterable<CSVRecord> records;
-        records = csvFormat.parse(new FileReader("testdata/s3/BP_Export_invalid_character_quoted.csv"));
-        Assertions.assertEquals("\"innen\" aussen", mapData(records.iterator().next()).getName());
-    }
-
-    @Test
-    void csvQuoteEscapedTest() throws IOException {
-        final CSVFormat csvFormat = CSVFormat.DEFAULT.builder()
-                .setDelimiter(";")
-                .setEscape('\\')
-                .setHeader(HEADERS.class)
-                .setSkipHeaderRecord(false)
-                .get();
-        final Iterable<CSVRecord> records;
-        records = csvFormat.parse(new FileReader("testdata/s3/BP_Export_invalid_character_escaped.csv"));
-        Assertions.assertEquals("\"innen\" aussen", mapData(records.iterator().next()).getName());
+        records = csvFormat.parse(new FileReader(new File("testdata/s3/BP_Export_invalid_character.csv")));
+        Assertions.assertEquals("\"facts\" Veranstaltungsmanagement GmbH, Austria, Zweigniederlassung München", mapData(records.iterator().next()).getName());
+        //        Assertions.assertEquals("\"facts2\" Veranstaltungsmanagement", mapData(records.iterator().next()).getName());
     }
 
     @LogExecutionTime

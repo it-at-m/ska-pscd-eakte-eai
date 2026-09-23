@@ -12,7 +12,7 @@
 <!-- Project specific links -->
 [refarch-documentation]: https://refarch.oss.muenchen.de/
 [refarch-code]: https://github.com/it-at-m/refarch
-[spring-documentation]: https://spring.io/
+[spring-documentation]: https://spring.io/ 
 [vuejs-documentation]:  https://vuejs.org/
 [getting-started-documentation]: https://refarch.oss.muenchen.de/templates/getting-started
 [develop-documentation]: https://refarch.oss.muenchen.de/templates/develop
