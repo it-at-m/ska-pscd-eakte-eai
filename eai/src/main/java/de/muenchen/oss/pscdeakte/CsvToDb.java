@@ -32,7 +32,7 @@ public class CsvToDb {
     private final PscdImportRepository pir;
     private final DBLogger logDb;
 
-    enum HEADERS {
+    /* package */ enum HEADERS {
         GP_ID,
         NAME,
         VORNAME,
