@@ -42,6 +42,8 @@ management:
   endpoint:
     health:
       access: read_only
+      probes:
+        enabled: true
     info:
       access: read_only
     prometheus:
@@ -51,15 +53,15 @@ management:
   info:
     env:
       enabled: true
-  otlp:
-    metrics:
-      export:
-        enabled: false
+  health:
+    livenessstate:
+      enabled: false
+    readinessstate:
+      enabled: false
 
 logging:
   level:
     root: info
-    de.muenchen.oss.pscdeakte.configuration.AspectConfiguration: DEBUG
   structured:
     format:
       console: logstash
@@ -81,6 +83,7 @@ info:
     description: "@project.description@"
   build:
     java.version: "@java.version@"
+    camel.version: "@camel-spring-boot-dependencies.version@"
 
 dms:
   XAnwendung: "PSCD-eAkte-EAI"

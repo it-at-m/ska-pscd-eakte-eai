@@ -13,18 +13,16 @@ body:
     attributes:
       value: "## General"
   - type: dropdown
-    id: component
+    id: template
     attributes:
-      label: Relevant component
+      label: Relevant template
       multiple: true
-      description: Name(s) of the affected component(s) (if applicable)
+      description: Name(s) of the affected template(s) (if applicable)
       options:
         - frontend
         - backend
         - eai
         - webcomponent
-        - stack
-        - cicd
     validations:
       required: false
   - type: textarea

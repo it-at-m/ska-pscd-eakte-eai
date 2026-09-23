@@ -50,18 +50,16 @@ body:
     validations:
       required: true
   - type: dropdown
-    id: component
+    id: template
     attributes:
-      label: Affected component
+      label: Affected template
       multiple: true
-      description: Name(s) of the affected component(s) (if applicable)
+      description: Name(s) of the affected template(s) (if applicable)
       options:
         - frontend
         - backend
         - eai
         - webcomponent
-        - stack
-        - cicd
     validations:
       required: false
   - type: input
