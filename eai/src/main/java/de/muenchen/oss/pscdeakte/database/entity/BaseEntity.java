@@ -30,13 +30,9 @@ public abstract class BaseEntity implements Serializable {
     private Integer id;
 
     @Override
-    public boolean equals(final Object o) {
-        if (this == o) {
-            return true;
-        }
-        if (!(o instanceof BaseEntity that)) {
-            return false;
-        }
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof BaseEntity that)) return false;
         return id != null && id.equals(that.id);
     }
 
