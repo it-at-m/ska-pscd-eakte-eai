@@ -23,10 +23,6 @@ logging:
     format:
       console: # set to empty to disable structured logging for testing
 
-camel:
-  main:
-    tracing: false
-
 dms:
   userlogin: "admin"
   username: "admin"
