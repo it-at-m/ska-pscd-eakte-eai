@@ -26,6 +26,7 @@ import org.springframework.stereotype.Component;
 @Slf4j
 public class CsvToDb {
 
+    public static final String TEST_GPID = "1000000000";
     @Getter
     private final S3OutPort s3;
     private final S3Properties props;
@@ -75,7 +76,7 @@ public class CsvToDb {
     @LogExecutionTime
     public void processCSVRecord(final CSVRecord csvRecord) {
         final PscdImport fromCsv = mapData(csvRecord);
-        if ("1000000000".equals(fromCsv.getGeschaeftspartnerId())) {
+        if (TEST_GPID.equals(fromCsv.getGeschaeftspartnerId())) {
             // Test GP-Id ueberspringen
             return;
         }
