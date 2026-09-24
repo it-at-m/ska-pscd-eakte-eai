@@ -9,8 +9,8 @@ import org.springframework.stereotype.Repository;
 @Repository
 public interface PscdImportRepository extends CrudRepository<PscdImport, Integer> {
 
-    PscdImport findByGeschaeftspartnerId(final String geschaeftspartnerId);
+    PscdImport findByGeschaeftspartnerId(String geschaeftspartnerId);
 
-    List<PscdImport> streamAllByStatusIsNot(final DatensatzStatus datensatzStatus);
+    List<PscdImport> streamAllByStatusIsNot(DatensatzStatus datensatzStatus);
 
 }

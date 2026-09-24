@@ -5,6 +5,8 @@ import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.PrePersist;
 import jakarta.persistence.Table;
+
+import java.io.Serial;
 import java.time.Instant;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
@@ -20,6 +22,8 @@ import org.springframework.data.annotation.LastModifiedDate;
 // Review: Laut SysSpec in Confluence soll es zwei Tabellen geben. Eine für die Personenbezogenen Daten und ein für den Rest
 public class PscdImport extends BaseEntity {
 
+    @Serial
+    private static final long serialVersionUID = 1L;
     //   GP-ID,Name,Vorname,Geb.-Datum,Zentralakt
 
     @Column(name = "geschaeftspartner_id")

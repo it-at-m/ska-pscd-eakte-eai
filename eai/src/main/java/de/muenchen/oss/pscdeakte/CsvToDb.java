@@ -26,13 +26,14 @@ import org.springframework.stereotype.Component;
 @Slf4j
 public class CsvToDb {
 
+    public static final String TEST_GPID = "1000000000";
     @Getter
     private final S3OutPort s3;
     private final S3Properties props;
     private final PscdImportRepository pir;
     private final DBLogger logDb;
 
-    enum HEADERS {
+    /* package */ enum HEADERS {
         GP_ID,
         NAME,
         VORNAME,
@@ -52,7 +53,7 @@ public class CsvToDb {
         log.info("reading file {}", filename);
         final CSVFormat csvFormat = CSVFormat.DEFAULT.builder()
                 .setDelimiter(props.getDelimiter())
-                .setQuote('µ')
+                .setEscape(props.getEscape())
                 .setHeader(HEADERS.class)
                 .setSkipHeaderRecord(props.isSkipHeader())
                 .get();
@@ -75,6 +76,10 @@ public class CsvToDb {
     @LogExecutionTime
     public void processCSVRecord(final CSVRecord csvRecord) {
         final PscdImport fromCsv = mapData(csvRecord);
+        if (TEST_GPID.equals(fromCsv.getGeschaeftspartnerId())) {
+            // Test GP-Id ueberspringen
+            return;
+        }
         final PscdImport fromDb = pir.findByGeschaeftspartnerId(fromCsv.getGeschaeftspartnerId());
         if (fromDb == null) {
             pir.save(fromCsv);
