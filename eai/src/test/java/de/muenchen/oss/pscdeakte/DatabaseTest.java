@@ -15,7 +15,6 @@ import de.muenchen.oss.refarch.integration.s3.application.port.out.S3OutPort;
 import java.net.URI;
 import java.time.Instant;
 import java.util.Optional;
-import org.apache.camel.test.spring.junit5.CamelSpringBootTest;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
@@ -36,7 +35,6 @@ import software.amazon.awssdk.services.s3.model.CreateBucketRequest;
 import software.amazon.awssdk.services.s3.presigner.S3Presigner;
 
 @SpringBootTest(classes = { Application.class })
-@CamelSpringBootTest
 @ActiveProfiles(TestConstants.SPRING_TEST_PROFILE)
 @Testcontainers
 //@TestInstance(TestInstance.Lifecycle.PER_CLASS)
@@ -87,6 +85,7 @@ class DatabaseTest {
         try {
             s3Client.createBucket(CreateBucketRequest.builder().bucket(BUCKET).build());
         } catch (BucketAlreadyExistsException | BucketAlreadyOwnedByYouException ignored) {
+            // ignored
         }
 
         final S3Mapper mapper = new S3Mapper();

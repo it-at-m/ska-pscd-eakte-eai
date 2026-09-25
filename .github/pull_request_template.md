@@ -44,7 +44,6 @@ Issue: #XXX
 - [ ] Added integration tests
 - [ ] Updated database migration scripts (if changes to model were made)
 - [ ] Added Swagger API annotations (if changes to API was made)
-- [ ] Checked Spring Boot version matching Camel version in `pom.xml` (if Camel version was bumped)
 
 ### Development Stack
 
