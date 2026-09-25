@@ -1,4 +1,4 @@
-package de.muenchen.oss.pscdeakte;
+package de.muenchen.oss.pscdeakte.csv;
 
 import de.muenchen.oss.pscdeakte.database.DatensatzStatus;
 import de.muenchen.oss.pscdeakte.database.entity.PscdImport;

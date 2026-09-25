@@ -1,21 +1,19 @@
-package de.muenchen.oss.pscdeakte;
+package de.muenchen.oss.pscdeakte.database;
 
 import de.muenchen.oss.pscdeakte.configuration.LogExecutionTime;
-import de.muenchen.oss.pscdeakte.database.DBLogger;
-import de.muenchen.oss.pscdeakte.database.DatensatzStatus;
 import de.muenchen.oss.pscdeakte.database.entity.PscdImport;
 import de.muenchen.oss.pscdeakte.database.repository.PscdImportRepository;
 import de.muenchen.oss.pscdeakte.dms.Apentries;
 import de.muenchen.oss.pscdeakte.dms.DmsService;
 import lombok.RequiredArgsConstructor;
-import lombok.extern.log4j.Log4j2;
-import org.springframework.stereotype.Component;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.client.WebClientResponseException;
 
 @RequiredArgsConstructor
-@Component
-@Log4j2
-public class DbToEakte {
+@Service
+@Slf4j
+public class DbToEakteService {
 
     public static final String ERROR = "error";
     private final PscdImportRepository repo;
@@ -30,7 +28,7 @@ public class DbToEakte {
     }
 
     @LogExecutionTime
-    private void process(final PscdImport data) {
+    protected void process(final PscdImport data) {
         log.debug("Processing {}", data.getGeschaeftspartnerId());
         try {
             datensatzVerarbeitung(data);
