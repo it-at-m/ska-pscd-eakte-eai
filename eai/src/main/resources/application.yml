@@ -60,7 +60,10 @@ management:
       enabled: true
     readinessstate:
       enabled: true
-
+  otlp:
+    metrics:
+      export:
+        enabled: false
 
 logging:
   level:
