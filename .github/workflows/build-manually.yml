@@ -1,0 +1,50 @@
+# Workflow for building NPM/Maven projects and Docker images
+name: build-manually
+
+on:
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: 'What should the image be tagged as?'
+        required: false
+        default: 'dev'
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+    env:
+      TZ: Europe/Berlin
+    strategy:
+      fail-fast: false
+      matrix:
+        include: # Add or modify paths according to your project structure
+          - app-path: eai
+
+    steps:
+      - uses: it-at-m/lhm_actions/action-templates/actions/action-checkout@54b32c7d11363cad45838c9a3d8a8560b93f0e8c # v1.5.4
+      - id: node # required for steps.* syntax
+        if: ${{ hashFiles(format('./{0}/package.json', matrix.app-path)) != '' }}
+        uses: it-at-m/lhm_actions/action-templates/actions/action-npm-build@54b32c7d11363cad45838c9a3d8a8560b93f0e8c # v1.5.4
+        with:
+          app-path: ${{ matrix.app-path }}
+          node-version: "24"
+      - id: maven # required for steps.* syntax
+        if: ${{ hashFiles(format('./{0}/pom.xml', matrix.app-path)) != '' }}
+        uses: it-at-m/lhm_actions/action-templates/actions/action-maven-build@54b32c7d11363cad45838c9a3d8a8560b93f0e8c # v1.5.4
+        with:
+          app-path: ${{ matrix.app-path }}
+          java-version: "25"
+      - id: image
+        uses: it-at-m/lhm_actions/action-templates/actions/action-build-image@54b32c7d11363cad45838c9a3d8a8560b93f0e8c # v1.5.4
+        with:
+          path: ${{ matrix.app-path }}
+          image-name: ${{ matrix.app-path }}
+          artifact-name: ${{ join(steps.*.outputs.artifact-name) }}
+          registry-password: ${{ secrets.GITHUB_TOKEN }}
+          registry-username: ${{ github.actor }}
+          image-tags: |
+            # use tag from input only if triggered by workflow_dispatch
+            type=raw,value=${{ github.event.inputs.tag }},enable=${{ github.event_name == 'workflow_dispatch' }}
