@@ -42,6 +42,8 @@ management:
   endpoint:
     health:
       access: read_only
+      probes:
+        enabled: true
     info:
       access: read_only
     prometheus:
@@ -51,10 +53,14 @@ management:
   info:
     env:
       enabled: true
-  otlp:
-    metrics:
-      export:
-        enabled: false
+    camel:
+      enabled: false
+  health:
+    livenessstate:
+      enabled: true
+    readinessstate:
+      enabled: true
+
 
 logging:
   level:
