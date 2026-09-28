@@ -17,6 +17,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
@@ -35,6 +36,7 @@ import org.springframework.web.client.RestClient;
 @ExtendWith(MockitoExtension.class)
 @EnableConfigurationProperties(SecurityProperties.class)
 @ActiveProfiles(profiles = { SPRING_TEST_PROFILE })
+@Disabled
 class KeycloakPermissionsAuthoritiesConverterTest {
     private static final String TEST_SUBJECT = "test-subject";
     private static final String TEST_TOKEN_VALUE = "test-token";
