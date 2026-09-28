@@ -1,3 +1,0 @@
-ALTER TABLE pscdeakte.logs
-    ALTER COLUMN message TYPE VARCHAR(255),
-    ALTER COLUMN exception TYPE VARCHAR(255);

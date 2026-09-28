@@ -1,31 +1,37 @@
+server:
+  forward-headers-strategy: framework
+
 spring:
   main:
     banner-mode: console
-    web-application-type: none
   application:
-    name: @project.artifactId@
-    group: @project.groupId@
-    version: @project.version@
-  datasource:
-    url:     # Must be configured
-    username: # Must be configured
-    password:  # Must be configured
+    name: "@project.artifactId@"
+    group: "@project.groupId@"
+    version: "@project.version@"
+  data:
+    web:
+      pageable:
+        serialization-mode: via_dto
   jpa:
     hibernate:
+      # schema is managed by Flyway, only validate
       ddl-auto: validate
-    show-sql: false
-    properties:
-      hibernate:
-        dialect: org.hibernate.dialect.PostgreSQLDialect
+    open-in-view: false # Disable OSIV
   flyway:
-    enabled: true
-    baseline-on-migrate: false
-    schemas: pscdeakte
+    locations:
+      - classpath:db/migration/schema
   web:
     error:
       whitelabel:
         enabled: false
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          authority-prefix: "ROLE_"
+          authorities-claim-expressions: "['resource_access']['${refarch.security.client-id}']['roles']"
 
+# Config for spring actuator endpoints
 management:
   endpoints:
     access:
@@ -42,8 +48,6 @@ management:
   endpoint:
     health:
       access: read_only
-      probes:
-        enabled: true
     info:
       access: read_only
     prometheus:
@@ -53,22 +57,25 @@ management:
   info:
     env:
       enabled: true
-    camel:
-      enabled: false
-  health:
-    livenessstate:
-      enabled: true
-    readinessstate:
-      enabled: true
   otlp:
     metrics:
       export:
         enabled: false
 
+springdoc:
+  show-actuator: true
+  # Disable swagger-ui as default
+  swagger-ui:
+    enabled: false
+    csrf:
+      enabled: true
+  api-docs:
+    version: openapi_3_0
+    enabled: false
+
 logging:
   level:
     root: info
-    de.muenchen.oss.pscdeakte.configuration.AspectConfiguration: DEBUG
   structured:
     format:
       console: logstash
@@ -90,27 +97,3 @@ info:
     description: "@project.description@"
   build:
     java.version: "@java.version@"
-
-dms:
-  XAnwendung: "PSCD-eAkte-EAI"
-  base-url: "https://cap-eakte-resteai-test-bay-eakte-resteai.apps.test.capk.muenchen.de/api"
-  aktenplannummer: "9512"
-  coo-einzelakte: "COO.2150.8819.2.1652"
-  coo-km-akte: "COO.2150.8801.2.1055475"
-  jobposition: "DocumentManager"
-  joboe: "COO.2150.8800.1.237"
-  initialbefuellung: true
-  cron: 0 0 16 1/1 * ?
-
-refarch:
-  s3:
-    url: https://s3k.muenchen.de:443
-
-s3csv:
-  bucket: "int-eheaik-importrueckstandsakt"
-  backup-bucket: "int-eheaik-backup"
-  prefix: "BP_Export_"
-  delimiter: ";"
-  skip-header: false
-
-# Dürfen die URLs einfach so in github stehen? Ist doch eine interna der LHM?
