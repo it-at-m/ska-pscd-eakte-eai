@@ -90,7 +90,7 @@
         <dependency>
             <groupId>de.muenchen.oss.refarch</groupId>
             <artifactId>refarch-s3-integration-starter</artifactId>
-            <version>4.0.0</version>
+            <version>4.0.1</version>
         </dependency>
         <dependency>
             <groupId>org.apache.commons</groupId>
