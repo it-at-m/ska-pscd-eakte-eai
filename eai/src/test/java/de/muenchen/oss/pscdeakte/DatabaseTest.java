@@ -9,6 +9,7 @@ import static org.junit.jupiter.api.Assertions.fail;
 
 import de.muenchen.oss.pscdeakte.database.entity.PscdImport;
 import de.muenchen.oss.pscdeakte.database.repository.PscdImportRepository;
+import de.muenchen.oss.refarch.integration.s3.adapter.out.s3.S3ListHelper;
 import de.muenchen.oss.refarch.integration.s3.adapter.out.s3.S3Mapper;
 import de.muenchen.oss.refarch.integration.s3.adapter.out.s3.S3OutAdapter;
 import de.muenchen.oss.refarch.integration.s3.application.port.out.S3OutPort;
@@ -84,12 +85,12 @@ class DatabaseTest {
 
         try {
             s3Client.createBucket(CreateBucketRequest.builder().bucket(BUCKET).build());
-        } catch (BucketAlreadyExistsException | BucketAlreadyOwnedByYouException ignored) {
+        } catch (BucketAlreadyExistsException | BucketAlreadyOwnedByYouException _) {
             // ignored
         }
 
         final S3Mapper mapper = new S3Mapper();
-        DatabaseTest.s3OutPort = new S3OutAdapter(mapper, s3Client, s3Presigner);
+        DatabaseTest.s3OutPort = new S3OutAdapter(mapper, s3Client, s3Presigner, new S3ListHelper(s3Client, mapper));
     }
 
     @Test
