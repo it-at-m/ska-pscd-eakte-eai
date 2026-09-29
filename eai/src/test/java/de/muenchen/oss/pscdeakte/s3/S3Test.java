@@ -1,6 +1,7 @@
 package de.muenchen.oss.pscdeakte.s3;
 
 import de.muenchen.oss.pscdeakte.TestConstants;
+import de.muenchen.oss.refarch.integration.s3.adapter.out.s3.S3ListHelper;
 import de.muenchen.oss.refarch.integration.s3.adapter.out.s3.S3Mapper;
 import de.muenchen.oss.refarch.integration.s3.adapter.out.s3.S3OutAdapter;
 import de.muenchen.oss.refarch.integration.s3.application.port.out.S3OutPort;
@@ -77,12 +78,12 @@ class S3Test {
 
         try {
             s3Client.createBucket(CreateBucketRequest.builder().bucket(BUCKET).build());
-        } catch (BucketAlreadyExistsException | BucketAlreadyOwnedByYouException ignored) {
+        } catch (BucketAlreadyExistsException | BucketAlreadyOwnedByYouException _) {
             //            ignored
         }
 
         final S3Mapper mapper = new S3Mapper();
-        this.s3OutPort = new S3OutAdapter(mapper, s3Client, s3Presigner);
+        this.s3OutPort = new S3OutAdapter(mapper, s3Client, s3Presigner, new S3ListHelper(s3Client, mapper));
     }
 
     @Test
@@ -93,7 +94,7 @@ class S3Test {
         s3OutPort.saveFile(fileReference, new File(testfile));
         Assertions.assertDoesNotThrow(() -> s3OutPort.saveFile(fileReference, new File(testfile)));
 
-        final ListResult result = s3OutPort.getFilesWithPrefix("int-eheaik-importrueckstandsakt", "s", true);
+        final ListResult result = s3OutPort.getFilesAsListResult("int-eheaik-importrueckstandsakt", "s", true);
         final String path = result.files().getFirst().path();
         Assertions.assertEquals("s3testfile", path);
         final FileReference fileReference1 = new FileReference("int-eheaik-importrueckstandsakt", path);

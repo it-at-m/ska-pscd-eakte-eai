@@ -43,7 +43,7 @@ public class CsvToDb {
 
     public void processFiles() throws S3Exception {
         log.info("Processing CSV files");
-        final ListResult list = s3.getFilesWithPrefix(props.getBucket(), props.getPrefix(), true);
+        final ListResult list = s3.getFilesAsListResult(props.getBucket(), props.getPrefix(), true);
         log.info("{} files found", list.files().size());
         list.files().forEach(file -> saveFileToDb(file.path()));
     }
