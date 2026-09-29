@@ -47,7 +47,7 @@ public class CsvToDbService {
 
     protected ListResult getFilesWithPrefix() throws S3Exception {
         log.info("#getFilesWithPrefix()");
-        final ListResult foundFiles = s3.getFilesWithPrefix(props.getBucket(), props.getPrefix(), true);
+        final ListResult foundFiles = s3.getFilesAsListResult(props.getBucket(), props.getPrefix(), true);
         log.info("{} files found", foundFiles.files().size());
         return foundFiles;
     }
