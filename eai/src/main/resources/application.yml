@@ -17,9 +17,6 @@ spring:
       # schema is managed by Flyway, only validate
       ddl-auto: validate
     show-sql: false
-    properties:
-      hibernate:
-        dialect: org.hibernate.dialect.PostgreSQLDialect
     open-in-view: false # Disable OSIV
   flyway:
     enabled: true
@@ -110,7 +107,8 @@ dms:
   jobposition: "DocumentManager"
   joboe: "COO.2150.8800.1.237"
   initialbefuellung: true
-  cron: 0 0 16 1/1 * ?
+#  cron: 0 0 16 1/1 * ?
+  cron: 0 1/1 * * * ?
 
 refarch:
   s3:
