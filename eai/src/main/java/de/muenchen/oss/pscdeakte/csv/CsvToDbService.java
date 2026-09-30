@@ -42,11 +42,11 @@ public class CsvToDbService {
 
     public void processFiles() throws S3Exception {
         log.info("Processing CSV files");
-        getFilesWithPrefix().files().forEach(file -> saveFileToDb(file.path()));
+        getFilesAsListResult().files().forEach(file -> saveFileToDb(file.path()));
     }
 
     protected ListResult getFilesAsListResult() throws S3Exception {
-        log.info("#getFilesWithPrefix()");
+        log.info("#getFilesAsListResult()");
         final ListResult foundFiles = s3.getFilesAsListResult(props.getBucket(), props.getPrefix(), true);
         log.info("{} files found", foundFiles.files().size());
         return foundFiles;
