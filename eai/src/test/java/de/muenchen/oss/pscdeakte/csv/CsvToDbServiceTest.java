@@ -63,7 +63,7 @@ public class CsvToDbServiceTest {
 
         Mockito
                 .verify(s3OutPort, Mockito.times(1))
-                .getFilesWithPrefix(s3Properties.getBucket(), s3Properties.getPrefix(), true);
+                .getFilesAsListResult(s3Properties.getBucket(), s3Properties.getPrefix(), true);
     }
 
     @Test

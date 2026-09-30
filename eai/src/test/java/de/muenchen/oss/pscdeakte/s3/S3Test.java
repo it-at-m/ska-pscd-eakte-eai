@@ -94,7 +94,7 @@ class S3Test {
         s3OutPort.saveFile(fileReference, new File(testfile));
         Assertions.assertDoesNotThrow(() -> s3OutPort.saveFile(fileReference, new File(testfile)));
 
-        final ListResult result = s3OutPort.getFilesWithPrefix("int-eheaik-importrueckstandsakt", "s", true);
+        final ListResult result = s3OutPort.getFilesAsListResult("int-eheaik-importrueckstandsakt", "s", true);
         final String path = result.files().getFirst().path();
         Assertions.assertEquals("s3testfile", path);
         final FileReference fileReference1 = new FileReference("int-eheaik-importrueckstandsakt", path);
