@@ -1,5 +1,15 @@
 name: pscdeakte-stack
 
+x-healthcheck: &healthcheck
+  interval: 30s
+  timeout: 60s
+  retries: 3
+  start_period: 60s
+
+x-security-settings: &security_settings
+  security_opt:
+    - no-new-privileges:true
+
 services:
   postgres:
     image: postgres:17.7-alpine3.21@sha256:5bcb5623bb6999b2f7fbd2109f0bfc1f144d138b52ca35ede95d644d93585c2f
@@ -60,38 +70,37 @@ services:
       - "--global-response-templating"
       - "--verbose"
 
-  minio:
-    image: minio/minio:RELEASE.2025-09-07T16-13-09Z-cpuv1@sha256:13582eff79c6605a2d315bdd0e70164142ea7e98fc8411e9e10d089502a6d883
-    command: server /data --console-address ":9001"
+  # === S3 ===
+  rustfs:
+    image: rustfs/rustfs:1.0.0
     environment:
-      MINIO_ROOT_USER: minio
-      MINIO_ROOT_PASSWORD: Test1234
+      RUSTFS_ACCESS_KEY: admin
+      RUSTFS_SECRET_KEY: admin
     ports:
-      - '9000:9000'
-      - '9001:9001'
+      - "9000:9000" # API
+      - "9001:9001" # UI
     volumes:
-      - ./minio:/data
-    networks:
-      - internal
+      - rustfs-data:/data
     healthcheck:
       <<: *healthcheck
-      test: ["CMD-SHELL",  "curl http://localhost:9000/minio/health/live"]
-    security_opt: *security_settings
+      test: ["CMD", "curl", "-fsS", "http://localhost:9000/health/ready"]
+    <<: *security_settings
 
-  init-minio:
-    image: minio/mc:RELEASE.2025-08-13T08-35-41Z-cpuv1@sha256:95b5f3f7969a5c5a9f3a700ba72d5c84172819e13385aaf916e237cf111ab868
+  init-rustfs:
+    image: rustfs/rc:v0.1.36
     depends_on:
-      - minio
+      rustfs:
+        condition: service_healthy
     entrypoint: >
       /bin/sh -c "
-        until curl -fsS http://minio:9000/minio/health/ready; do sleep 2; done;
-        mc config host add minio http://minio:9000 minio Test1234;
-        mc mb minio/test-bucket || true;
-        exit 0;
+        set -e;
+        rc alias set local http://rustfs:9000 admin admin;
+        rc mb local/test-bucket;
       "
-    networks:
-      - internal
-    security_opt: *security_settings
+    <<: *security_settings
+
+volumes:
+  rustfs-data:
 
 networks:
   keycloak:
