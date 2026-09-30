@@ -8,28 +8,23 @@ spring:
     name: "@project.artifactId@"
     group: "@project.groupId@"
     version: "@project.version@"
-  data:
-    web:
-      pageable:
-        serialization-mode: via_dto
-  jpa:
-    hibernate:
-      # schema is managed by Flyway, only validate
-      ddl-auto: validate
-    open-in-view: false # Disable OSIV
-  flyway:
-    locations:
-      - classpath:db/migration/schema
-  web:
-    error:
-      whitelabel:
-        enabled: false
-  security:
-    oauth2:
-      resourceserver:
-        jwt:
-          authority-prefix: "ROLE_"
-          authorities-claim-expressions: "['resource_access']['${refarch.security.client-id}']['roles']"
+#  data:
+#    web:
+#      pageable:
+#        serialization-mode: via_dto
+#  jpa:
+#    hibernate:
+#      # schema is managed by Flyway, only validate
+#      ddl-auto: validate
+#    open-in-view: false # Disable OSIV
+#  flyway:
+#    locations:
+#      - classpath:db/migration/schema
+#  web:
+#    error:
+#      whitelabel:
+#        enabled: false
+
 
 # Config for spring actuator endpoints
 management:
@@ -97,3 +92,7 @@ info:
     description: "@project.description@"
   build:
     java.version: "@java.version@"
+
+
+dms:
+  cron: 0 1/1 * * * ?
