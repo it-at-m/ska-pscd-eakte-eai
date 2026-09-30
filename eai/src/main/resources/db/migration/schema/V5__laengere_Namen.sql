@@ -1,0 +1,3 @@
+ALTER TABLE pscdeakte.pscd_import
+    ALTER COLUMN name TYPE VARCHAR(255),
+    ALTER COLUMN vorname TYPE VARCHAR(255);
