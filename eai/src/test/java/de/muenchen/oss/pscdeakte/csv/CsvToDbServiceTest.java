@@ -49,7 +49,7 @@ public class CsvToDbServiceTest {
     }
 
     @Test
-    void getFilesWithPrefix() throws S3Exception {
+    void getFilesAsListResult() throws S3Exception {
         final var fileMetadata1 = new FileMetadata(
                 "dummy.csv",
                 999L,
@@ -57,9 +57,9 @@ public class CsvToDbServiceTest {
                 Instant.now());
 
         final ListResult foundFiles = new ListResult(List.of(fileMetadata1), List.of("prefix"), false, "startAfter");
-        Mockito.when(s3OutPort.getFilesWithPrefix(s3Properties.getBucket(), s3Properties.getPrefix(), true)).thenReturn(foundFiles);
+        Mockito.when(s3OutPort.getFilesAsListResult(s3Properties.getBucket(), s3Properties.getPrefix(), true)).thenReturn(foundFiles);
 
-        csvToDbService.getFilesWithPrefix();
+        csvToDbService.getFilesAsListResult();
 
         Mockito
                 .verify(s3OutPort, Mockito.times(1))
