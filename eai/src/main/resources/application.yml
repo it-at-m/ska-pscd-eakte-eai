@@ -76,7 +76,7 @@ logging:
     de.muenchen.oss.pscdeakte.configuration.AspectConfiguration: DEBUG
   structured:
     format:
-      console: logstash
+      console:
     json:
       stacktrace:
         root: first
