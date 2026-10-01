@@ -105,7 +105,8 @@ dms:
   jobposition: "DocumentManager"
   joboe: "COO.2150.8800.1.237"
   initialbefuellung: true
-  cron: 0 0 16 1/1 * ?
+#  cron: 0 0 16 1/1 * ?
+  cron: 0 1/1 * * * ?
 
 refarch:
   s3:
