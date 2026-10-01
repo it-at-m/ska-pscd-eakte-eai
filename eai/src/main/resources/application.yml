@@ -8,10 +8,10 @@ spring:
     name: "@project.artifactId@"
     group: "@project.groupId@"
     version: "@project.version@"
-#  data:
-#    web:
-#      pageable:
-#        serialization-mode: via_dto
+  datasource:
+    url:     # Must be configured
+    username: # Must be configured
+    password:  # Must be configured
   jpa:
     hibernate:
       # schema is managed by Flyway, only validate
@@ -22,9 +22,6 @@ spring:
     enabled: true
     baseline-on-migrate: false
     schemas: pscdeakte
-#  flyway:
-#    locations:
-#      - classpath:db/migration/schema
   web:
     error:
       whitelabel:
@@ -76,6 +73,7 @@ springdoc:
 logging:
   level:
     root: info
+    de.muenchen.oss.pscdeakte.configuration.AspectConfiguration: DEBUG
   structured:
     format:
       console: logstash

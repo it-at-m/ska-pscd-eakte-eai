@@ -1,5 +1,4 @@
-package de.muenchen.oss.pscdeakte.dms;//package de.muenchen.oss.pscdeakte.dms;
-
+//package de.muenchen.oss.pscdeakte.dms;
 //
 //import com.github.tomakehurst.wiremock.WireMockServer;
 //import com.github.tomakehurst.wiremock.core.WireMockConfiguration;

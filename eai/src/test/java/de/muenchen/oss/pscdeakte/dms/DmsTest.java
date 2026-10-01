@@ -1,5 +1,4 @@
-package de.muenchen.oss.pscdeakte.dms;//package de.muenchen.oss.pscdeakte.dms;
-
+//package de.muenchen.oss.pscdeakte.dms;
 //
 //import static org.junit.jupiter.api.Assertions.assertEquals;
 //
