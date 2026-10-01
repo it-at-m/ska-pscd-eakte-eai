@@ -28,9 +28,8 @@ public class Scheduler {
         } else {
             STILL_RUNNING.set(true);
             try {
-                log.warn("Scheduling task still running");
-                //                this.csvToDbService.processFiles();
-                //                this.dbToEakteService.start();
+                this.csvToDbService.processFiles();
+                this.dbToEakteService.start();
             } finally {
                 STILL_RUNNING.set(false);
             }
