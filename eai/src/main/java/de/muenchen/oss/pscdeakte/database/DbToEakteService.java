@@ -33,7 +33,6 @@ public class DbToEakteService {
         try {
             datensatzVerarbeitung(data);
         } catch (WebClientResponseException e) {
-            //        TODO Fehlerhandling der eAkte
             dbLog.log(ERROR, "Exception aus der eAkte: WebclientResponseException", e.getMessage());
         } catch (IllegalStateException e) {
             dbLog.log(ERROR, "Timeout in der eAkte", e.getMessage());

@@ -71,7 +71,6 @@ public class CsvToDbService {
             s3.deleteFile(fileReference);
             log.info("moved file {}/{} to {}/{}", props.getBucket(), filename, props.getBackupBucket(), movedFile);
         } catch (IOException | S3Exception e) {
-            //            TODO Datenbankfehler abfangen
             logDb.log("ERROR", "reading/moving file " + filename + " failed", e.getMessage());
         }
 
