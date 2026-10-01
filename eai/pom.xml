@@ -9,13 +9,13 @@
         <relativePath />
     </parent>
 
-    <groupId>de.muenchen.oss.refarch</groupId>
-    <artifactId>refarch-backend</artifactId>
+    <groupId>de.muenchen.oss.ska</groupId>
+    <artifactId>pscd-eakte-eai</artifactId>
     <version>0.0.1-SNAPSHOT</version>
 
-    <name>refarch-backend</name>
-    <description>This is the default starting project for a backend project based on the reference architecture of it@M</description>
-    <url>https://github.com/it-at-m/refarch-templates</url>
+    <name>pscd-eakte-eai</name>
+    <description>EAI for transferring Data from SAP PSCD to Fabasoft eAkte</description>
+    <url>https://github.com/it-at-m/ska-pscd-eakte-eai</url>
     <licenses>
         <license>
             <name>MIT</name>
