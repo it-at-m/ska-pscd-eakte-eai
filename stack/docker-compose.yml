@@ -19,12 +19,9 @@ services:
       - POSTGRES_PASSWORD=admin
     ports:
       - "5432:5432"
-    healthcheck: &healthcheck
+    healthcheck:
+      <<: *healthcheck
       test: ["CMD-SHELL", "pg_isready -d postgres -U admin"]
-      interval: 30s
-      timeout: 60s
-      retries: 3
-      start_period: 60s
     <<: *security_settings
 
   pg-admin:
@@ -45,7 +42,7 @@ services:
     healthcheck:
       <<: *healthcheck
       test: ["CMD", "wget", "-O", "-", "http://localhost:5050/misc/ping"]
-    security_opt: *security_settings
+    <<: *security_settings
     volumes:
       - './pgadmin/servers.json:/pgadmin4/servers.json:ro'
       - './pgadmin/preferences.json:/pgadmin4/preferences.json:ro'
