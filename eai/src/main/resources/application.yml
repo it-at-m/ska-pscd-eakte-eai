@@ -1,22 +1,23 @@
+server:
+  forward-headers-strategy: framework
+
 spring:
   main:
     banner-mode: console
-    web-application-type: none
   application:
-    name: @project.artifactId@
-    group: @project.groupId@
-    version: @project.version@
+    name: "@project.artifactId@"
+    group: "@project.groupId@"
+    version: "@project.version@"
   datasource:
     url:     # Must be configured
     username: # Must be configured
     password:  # Must be configured
   jpa:
     hibernate:
+      # schema is managed by Flyway, only validate
       ddl-auto: validate
     show-sql: false
-    properties:
-      hibernate:
-        dialect: org.hibernate.dialect.PostgreSQLDialect
+    open-in-view: false # Disable OSIV
   flyway:
     enabled: true
     baseline-on-migrate: false
@@ -26,6 +27,8 @@ spring:
       whitelabel:
         enabled: false
 
+
+# Config for spring actuator endpoints
 management:
   endpoints:
     access:
@@ -42,8 +45,6 @@ management:
   endpoint:
     health:
       access: read_only
-      probes:
-        enabled: true
     info:
       access: read_only
     prometheus:
@@ -53,17 +54,21 @@ management:
   info:
     env:
       enabled: true
-    camel:
-      enabled: false
-  health:
-    livenessstate:
-      enabled: true
-    readinessstate:
-      enabled: true
   otlp:
     metrics:
       export:
         enabled: false
+
+springdoc:
+  show-actuator: true
+  # Disable swagger-ui as default
+  swagger-ui:
+    enabled: false
+    csrf:
+      enabled: true
+  api-docs:
+    version: openapi_3_0
+    enabled: false
 
 logging:
   level:
@@ -100,7 +105,8 @@ dms:
   jobposition: "DocumentManager"
   joboe: "COO.2150.8800.1.237"
   initialbefuellung: true
-  cron: 0 0 16 1/1 * ?
+#  cron: 0 0 16 1/1 * ?
+  cron: 0 1/1 * * * ?
 
 refarch:
   s3:
@@ -112,5 +118,3 @@ s3csv:
   prefix: "BP_Export_"
   delimiter: ";"
   skip-header: false
-
-# Dürfen die URLs einfach so in github stehen? Ist doch eine interna der LHM?

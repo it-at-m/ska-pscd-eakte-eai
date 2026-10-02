@@ -35,7 +35,7 @@ import software.amazon.awssdk.services.s3.model.BucketAlreadyOwnedByYouException
 import software.amazon.awssdk.services.s3.model.CreateBucketRequest;
 import software.amazon.awssdk.services.s3.presigner.S3Presigner;
 
-@SpringBootTest(classes = { Application.class })
+@SpringBootTest(classes = { MicroServiceApplication.class })
 @ActiveProfiles(TestConstants.SPRING_TEST_PROFILE)
 @Testcontainers
 //@TestInstance(TestInstance.Lifecycle.PER_CLASS)
