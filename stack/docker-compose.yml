@@ -25,8 +25,7 @@ services:
       timeout: 60s
       retries: 3
       start_period: 60s
-    security_opt: &security_settings
-      - no-new-privileges:true
+    security_opt: *security_settings
 
   pg-admin:
     image: dpage/pgadmin4:9.18.0@sha256:c332c5f6dfba995d9ebc4af261d93506d6876085d712eaaa3defc8dd1a3f26de
