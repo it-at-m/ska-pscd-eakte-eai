@@ -24,7 +24,7 @@ public class DbToEakteService {
     @LogExecutionTime
     public void start() {
         log.debug("Starting DB To Eakte");
-        repo.streamAllByStatusIsNot(DatensatzStatus.DONE).parallelStream().forEach(this::process);
+        repo.streamAllByStatusIsNot(DatensatzStatus.DONE).forEach(this::process);
     }
 
     @LogExecutionTime
