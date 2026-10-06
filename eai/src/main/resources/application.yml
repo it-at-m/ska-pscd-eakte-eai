@@ -93,22 +93,21 @@ info:
 
 dms:
   XAnwendung: "PSCD-eAkte-EAI"
-  base-url: "https://cap-eakte-resteai-test-bay-eakte-resteai.apps.test.capk.muenchen.de/api"
+  base-url: # Must be configured
   aktenplannummer: "9512"
-  coo-einzelakte: "COO.2150.8819.2.1652"
-  coo-km-akte: "COO.2150.8801.2.1055475"
+  coo-einzelakte: # Must be configured
+  coo-km-akte: # Must be configured
   jobposition: "DocumentManager"
-  joboe: "COO.2150.8800.1.237"
-  initialbefuellung: true
-  cron: 0 0 16 1/1 * ?
+  joboe: # Must be configured
+  cron: # Must be configured
 
 refarch:
   s3:
     url: https://s3k.muenchen.de:443
 
 s3csv:
-  bucket: "int-eheaik-importrueckstandsakt"
-  backup-bucket: "int-eheaik-backup"
+  bucket: # Must be configured
+  backup-bucket: # Must be configured
   prefix: "BP_Export_"
   delimiter: ";"
   skip-header: false
