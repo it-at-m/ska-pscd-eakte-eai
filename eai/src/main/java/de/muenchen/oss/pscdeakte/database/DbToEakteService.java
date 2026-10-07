@@ -36,6 +36,8 @@ public class DbToEakteService {
             dbLog.log(ERROR, "Exception aus der eAkte: WebclientResponseException", e.getMessage());
         } catch (IllegalStateException e) {
             dbLog.log(ERROR, "Timeout in der eAkte", e.getMessage());
+        } catch (Exception e){
+            dbLog.log(ERROR, "Exception beim Schreiben in eAkte", e.getMessage());
         } finally {
             repo.save(data);
         }
