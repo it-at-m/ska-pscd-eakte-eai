@@ -5,12 +5,11 @@ import de.muenchen.oss.pscdeakte.database.entity.PscdImport;
 import de.muenchen.oss.pscdeakte.database.repository.PscdImportRepository;
 import de.muenchen.oss.pscdeakte.dms.Apentries;
 import de.muenchen.oss.pscdeakte.dms.DmsService;
+import java.util.List;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.client.WebClientResponseException;
-
-import java.util.List;
 
 @RequiredArgsConstructor
 @Service
@@ -41,7 +40,7 @@ public class DbToEakteService {
             dbLog.log(ERROR, "Exception aus der eAkte: WebclientResponseException", e.getMessage());
         } catch (IllegalStateException e) {
             dbLog.log(ERROR, "Timeout in der eAkte", e.getMessage());
-        } catch (Exception e){
+        } catch (Exception e) {
             dbLog.log(ERROR, "Exception beim Schreiben in eAkte", e.getMessage());
         } finally {
             repo.save(data);
