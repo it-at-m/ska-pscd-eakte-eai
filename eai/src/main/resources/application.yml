@@ -73,7 +73,6 @@ springdoc:
 logging:
   level:
     root: info
-    de.muenchen.oss.pscdeakte.configuration.AspectConfiguration: DEBUG
   structured:
     format:
       console: logstash
@@ -96,6 +95,7 @@ info:
   build:
     java.version: "@java.version@"
 
+# Must be configured and empty
 dms:
   XAnwendung: "PSCD-eAkte-EAI"
   base-url: "https://cap-eakte-resteai-test-bay-eakte-resteai.apps.test.capk.muenchen.de/api"

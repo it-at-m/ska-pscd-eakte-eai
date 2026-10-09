@@ -36,7 +36,7 @@ public class DbToEakteService {
             dbLog.log(ERROR, "Exception aus der eAkte: WebclientResponseException", e.getMessage());
         } catch (IllegalStateException e) {
             dbLog.log(ERROR, "Timeout in der eAkte", e.getMessage());
-        } catch (Exception e){
+        } catch (Exception e) {
             dbLog.log(ERROR, "Exception beim Schreiben in eAkte", e.getMessage());
         } finally {
             repo.save(data);
@@ -82,7 +82,6 @@ public class DbToEakteService {
 
     private void log(final PscdImport data, final DatensatzStatus status) {
         data.setStatus(status);
-        data.setStatustext(status.getValue());
         log.debug(status.getValue());
     }
 
