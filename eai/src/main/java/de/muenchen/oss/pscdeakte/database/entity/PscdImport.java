@@ -55,7 +55,7 @@ public class PscdImport extends BaseEntity {
     @Column(name = "av")
     private String av;
 
-    @Column(name = "datensatzstatus")
+    @Column(name = "status")
     @Enumerated(EnumType.STRING)
     private DatensatzStatus status;
 
