@@ -5,6 +5,7 @@ import de.muenchen.oss.pscdeakte.database.entity.PscdImport;
 import de.muenchen.oss.pscdeakte.database.repository.PscdImportRepository;
 import de.muenchen.oss.pscdeakte.dms.Apentries;
 import de.muenchen.oss.pscdeakte.dms.DmsService;
+import java.util.List;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -23,8 +24,11 @@ public class DbToEakteService {
 
     @LogExecutionTime
     public void start() {
-        log.debug("Starting DB To Eakte");
-        repo.streamAllByStatusIsNot(DatensatzStatus.DONE).forEach(this::process);
+        log.info("Starting DB To Eakte");
+        final List<PscdImport> pscdImports = repo.streamAllByStatusIsNot(DatensatzStatus.DONE);
+        log.info("{} Datensätze zur Verarbeitung vorhanden. ", pscdImports.size());
+        pscdImports.forEach(this::process);
+        log.info("Finished DB To Eakte");
     }
 
     @LogExecutionTime
