@@ -16,11 +16,11 @@ spring:
     show-sql: false
     properties:
       hibernate:
-        dialect: org.hibernate.dialect.PostgreSQLDialect
+        dialect:
   flyway:
     enabled: true
     baseline-on-migrate: false
-    schemas: pscdeakte
+    schemas: # Must be configured
   web:
     error:
       whitelabel:
@@ -92,24 +92,26 @@ info:
     java.version: "@java.version@"
 
 dms:
-  XAnwendung: "PSCD-eAkte-EAI"
+  XAnwendung: # Must be configured
   base-url: # Must be configured
-  aktenplannummer: "9512"
+  aktenplannummer: # Must be configured
   coo-einzelakte: # Must be configured
   coo-km-akte: # Must be configured
-  jobposition: "DocumentManager"
+  jobposition: # Must be configured
   joboe: # Must be configured
+  initialbefuellung: #optional; defaults to false
   cron: # Must be configured
 
 refarch:
   s3:
-    url: https://s3k.muenchen.de:443
+    url: # Must be configured
+    secret-key: # Must be configured
+    access-key: # Must be configured
 
 s3csv:
   bucket: # Must be configured
   backup-bucket: # Must be configured
-  prefix: "BP_Export_"
-  delimiter: ";"
-  skip-header: false
-
-# Dürfen die URLs einfach so in github stehen? Ist doch eine interna der LHM?
+  prefix: # Must be configured
+  delimiter: #optional; defaults to ";"
+  escape: #optional; defaults to '\\'
+  skip-header: #optional; defaults to false
