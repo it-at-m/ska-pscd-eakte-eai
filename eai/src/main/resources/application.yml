@@ -1,22 +1,20 @@
 spring:
   main:
     banner-mode: console
-    web-application-type: none
   application:
-    name: @project.artifactId@
-    group: @project.groupId@
-    version: @project.version@
+    name: "@project.artifactId@"
+    group: "@project.groupId@"
+    version: "@project.version@"
   datasource:
     url:     # Must be configured
     username: # Must be configured
     password:  # Must be configured
   jpa:
     hibernate:
+      # schema is managed by Flyway, only validate
       ddl-auto: validate
     show-sql: false
-    properties:
-      hibernate:
-        dialect:
+    open-in-view: false # Disable OSIV
   flyway:
     enabled: true
     baseline-on-migrate: false
@@ -26,6 +24,7 @@ spring:
       whitelabel:
         enabled: false
 
+# Config for spring actuator endpoints
 management:
   endpoints:
     access:
@@ -42,8 +41,6 @@ management:
   endpoint:
     health:
       access: read_only
-      probes:
-        enabled: true
     info:
       access: read_only
     prometheus:
@@ -53,17 +50,21 @@ management:
   info:
     env:
       enabled: true
-    camel:
-      enabled: false
-  health:
-    livenessstate:
-      enabled: true
-    readinessstate:
-      enabled: true
   otlp:
     metrics:
       export:
         enabled: false
+
+springdoc:
+  show-actuator: true
+  # Disable swagger-ui as default
+  swagger-ui:
+    enabled: false
+    csrf:
+      enabled: true
+  api-docs:
+    version: openapi_3_0
+    enabled: false
 
 logging:
   level:
