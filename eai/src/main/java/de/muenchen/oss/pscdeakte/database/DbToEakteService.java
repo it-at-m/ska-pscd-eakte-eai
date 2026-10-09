@@ -10,6 +10,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.client.WebClientResponseException;
 
+import java.util.List;
+
 @RequiredArgsConstructor
 @Service
 @Slf4j
@@ -23,8 +25,11 @@ public class DbToEakteService {
 
     @LogExecutionTime
     public void start() {
-        log.debug("Starting DB To Eakte");
-        repo.streamAllByStatusIsNot(DatensatzStatus.DONE).forEach(this::process);
+        log.info("Starting DB To Eakte");
+        final List<PscdImport> pscdImports = repo.streamAllByStatusIsNot(DatensatzStatus.DONE);
+        log.info("{} Datensätze zur Verarbeitung vorhanden. ", pscdImports.size());
+        pscdImports.forEach(this::process);
+        log.info("Finished DB To Eakte");
     }
 
     @LogExecutionTime
