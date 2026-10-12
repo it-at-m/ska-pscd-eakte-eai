@@ -89,7 +89,6 @@ public class DbToEakteService {
 
     private void log(final PscdImport data, final DatensatzStatus status) {
         data.setStatus(status);
-        data.setStatustext(status.getValue());
         log.debug(status.getValue());
     }
 

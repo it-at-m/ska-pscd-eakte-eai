@@ -41,7 +41,6 @@ public class DuplicateOrUpdate {
         updated.setGeburtsdatum(newImport.getGeburtsdatum());
         updated.setZentralakt(newImport.getZentralakt());
         updated.setStatus(DatensatzStatus.UPDATE);
-        updated.setStatustext(DatensatzStatus.UPDATE.getValue());
         return updated;
     }
 

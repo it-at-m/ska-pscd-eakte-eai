@@ -45,7 +45,6 @@ class DuplicateOrUpdateTest {
         org.setId(1234);
         org.setName("name");
         org.setStatus(DatensatzStatus.DONE);
-        org.setStatustext(DatensatzStatus.DONE.getValue());
         org.setVorname("vorname");
         org.setZentralakt("zentralakt");
         return org;
