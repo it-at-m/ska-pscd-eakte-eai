@@ -11,7 +11,7 @@
 
     <groupId>de.muenchen.oss.ska</groupId>
     <artifactId>pscd-eakte-eai</artifactId>
-    <version>1.0.0</version>
+    <version>2.0.0-SNAPSHOT</version>
 
     <name>pscd-eakte-eai</name>
     <description>EAI for transferring Data from SAP PSCD to Fabasoft eAkte</description>
@@ -33,7 +33,7 @@
     <scm>
         <connection>scm:git:https://github.com/it-at-m/ska-pscd-eakte-eai.git</connection>
         <developerConnection>scm:git:https://github.com/it-at-m/ska-pscd-eakte-eai.git</developerConnection>
-        <tag>pscd-eakte-eai-1.0.0</tag>
+        <tag>HEAD</tag>
         <url>https://github.com/it-at-m/ska-pscd-eakte-eai.git</url>
     </scm>
 
