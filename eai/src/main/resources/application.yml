@@ -1,6 +1,3 @@
-server:
-  forward-headers-strategy: framework
-
 spring:
   main:
     banner-mode: console
@@ -21,12 +18,11 @@ spring:
   flyway:
     enabled: true
     baseline-on-migrate: false
-    schemas: pscdeakte
+    schemas: # Must be configured
   web:
     error:
       whitelabel:
         enabled: false
-
 
 # Config for spring actuator endpoints
 management:
@@ -97,24 +93,26 @@ info:
 
 # Must be configured and empty
 dms:
-  XAnwendung: "PSCD-eAkte-EAI"
-  base-url: "https://cap-eakte-resteai-test-bay-eakte-resteai.apps.test.capk.muenchen.de/api"
-  aktenplannummer: "9512"
-  coo-einzelakte: "COO.2150.8819.2.1652"
-  coo-km-akte: "COO.2150.8801.2.1055475"
-  jobposition: "DocumentManager"
-  joboe: "COO.2150.8800.1.237"
-  initialbefuellung: true
-#  cron: 0 0 16 1/1 * ?
-  cron: 0 1/1 * * * ?
+  XAnwendung: # Must be configured
+  base-url: # Must be configured
+  aktenplannummer: # Must be configured
+  coo-einzelakte: # Must be configured
+  coo-km-akte: # Must be configured
+  jobposition: # Must be configured
+  joboe: # Must be configured
+  initialbefuellung: #optional; defaults to false
+  cron: # Must be configured
 
 refarch:
   s3:
-    url: https://s3k.muenchen.de:443
+    url: # Must be configured
+    secret-key: # Must be configured
+    access-key: # Must be configured
 
 s3csv:
-  bucket: "int-eheaik-importrueckstandsakt"
-  backup-bucket: "int-eheaik-backup"
-  prefix: "BP_Export_"
-  delimiter: ";"
-  skip-header: false
+  bucket: # Must be configured
+  backup-bucket: # Must be configured
+  prefix: # Must be configured
+  delimiter: #optional; defaults to ";"
+  escape: #optional; defaults to '\\'
+  skip-header: #optional; defaults to false
