@@ -22,6 +22,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInstance;
 import org.springframework.test.context.ActiveProfiles;
 import org.testcontainers.containers.GenericContainer;
+import org.testcontainers.containers.wait.strategy.Wait;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
 import software.amazon.awssdk.auth.credentials.AwsBasicCredentials;
@@ -43,21 +44,21 @@ class S3Test {
 
     private S3OutPort s3OutPort;
 
-    private static final String ACCESS_KEY = "minio";
-    private static final String SECRET_KEY = "Test1234";
+    private static final String ACCESS_KEY = "admin";
+    private static final String SECRET_KEY = "admin";
     private static final String BUCKET = "int-eheaik-importrueckstandsakt";
 
     @Container
-    private static final GenericContainer<?> MINIO = new GenericContainer<>("quay.io/minio/minio:RELEASE.2025-09-07T16-13-09Z")
-            .withEnv("MINIO_ROOT_USER", ACCESS_KEY)
-            .withEnv("MINIO_ROOT_PASSWORD", SECRET_KEY)
-            .withCommand("server", "/data", "--console-address", ":9001")
-            .withExposedPorts(9000, 9001);
+    private static final GenericContainer<?> S3 = new GenericContainer<>("rustfs/rustfs:1.0.0")
+            .withEnv("RUSTFS_ACCESS_KEY", ACCESS_KEY)
+            .withEnv("RUSTFS_SECRET_KEY", SECRET_KEY)
+            .withExposedPorts(9000)
+            .waitingFor(Wait.forHttp("/health/ready").forPort(9000).forStatusCode(200));
 
     @BeforeAll
     @SuppressWarnings("PMD.CloseResource")
     void setUp() {
-        final String endpoint = "http://" + MINIO.getHost() + ":" + MINIO.getMappedPort(9000);
+        final String endpoint = "http://" + S3.getHost() + ":" + S3.getMappedPort(9000);
         final Region region = Region.US_EAST_1;
 
         final S3Configuration s3cfg = S3Configuration.builder().pathStyleAccessEnabled(true).build();

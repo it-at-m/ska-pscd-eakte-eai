@@ -69,7 +69,6 @@ springdoc:
 logging:
   level:
     root: info
-    de.muenchen.oss.pscdeakte.configuration.AspectConfiguration: DEBUG
   structured:
     format:
       console: logstash
@@ -92,6 +91,7 @@ info:
   build:
     java.version: "@java.version@"
 
+# Must be configured and empty
 dms:
   XAnwendung: # Must be configured
   base-url: # Must be configured

@@ -3,17 +3,21 @@ package de.muenchen.oss.pscdeakte.database.entity;
 import de.muenchen.oss.pscdeakte.database.DatensatzStatus;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.persistence.PrePersist;
 import jakarta.persistence.Table;
 
 import java.io.Serial;
 import java.time.Instant;
-import lombok.Data;
 import lombok.EqualsAndHashCode;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 import org.springframework.data.annotation.LastModifiedDate;
 
-@Data
+@Getter
+@Setter
 @EqualsAndHashCode(callSuper = true)
 @Entity
 @Table(name = "pscd_import", schema = "pscdeakte")
@@ -52,10 +56,8 @@ public class PscdImport extends BaseEntity {
     private String av;
 
     @Column(name = "status")
+    @Enumerated(EnumType.STRING)
     private DatensatzStatus status;
-
-    @Column(name = "statustext")
-    private String statustext;
 
     @LastModifiedDate
     @Column(name = "updated_at", nullable = false)
