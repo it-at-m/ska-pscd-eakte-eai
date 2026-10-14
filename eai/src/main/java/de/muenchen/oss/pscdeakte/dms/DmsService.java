@@ -28,7 +28,7 @@ import org.springframework.stereotype.Service;
 @Service
 public class DmsService {
 
-    public static final Duration TIMEOUT = Duration.ofSeconds(5);
+    public static final Duration TIMEOUT = Duration.ofSeconds(60);
     private final DmsProperties dmsProperties;
 
     private final ApentriesApi apentriesApi;
