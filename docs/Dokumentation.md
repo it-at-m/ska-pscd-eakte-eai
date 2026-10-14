@@ -2,7 +2,8 @@
 ## Konfiguration
 ### configMaps
 
-'dms.timeout': Timeout zur REST-API an die eAkte in Sekunden
+'dms.cron':     Cronjob, aufgrund dessen die Verarbeitung gestartet wird. 
+'dms.timeout':  Timeout zur REST-API an die eAkte in Sekunden.
 
 ### Datenbank
 
