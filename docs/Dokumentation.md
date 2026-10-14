@@ -1,0 +1,2 @@
+Konfiguraation
+configMaps:
