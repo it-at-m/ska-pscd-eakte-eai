@@ -44,11 +44,11 @@ Folgende Werte können im Feld 'status' auftreten:
 'UPDATE'
 
 Bedeutung von 'NEW':
-Der Datensatz wurde aus der CSV-Datei in die Datenbank eingelesen, aber noch nicht von dem Service erfasst, der die Daten in die eAkte schreibt (DmsService).
+Der Datensatz wurde aus der CSV-Datei in die Datenbank eingelesen aber noch nicht vom DmsService erfasst.
 Die Datenbankfelder für die coo-Adressen sind alle 'NULL'
 
 Bedeutung von 'STARTED':
-Der Datensatz wurde vom DmsService erfasst. Es wurde noch keine dazugehörige Betreffseinheit gespeichert.
+Der Datensatz wurde vom DmsService erfasst. Es wurde noch kein Arbeitsschritt abgeschlossen.
 Die Datenbankfelder für die coo-Adressen sind alle 'NULL'.
 
 Bedeutung von 'APENTRY_EXISTS':
