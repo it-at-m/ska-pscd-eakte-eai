@@ -28,9 +28,7 @@ import org.springframework.stereotype.Service;
 @Service
 public class DmsService {
 
-    public static final Duration TIMEOUT = Duration.ofSeconds(60);
     private final DmsProperties dmsProperties;
-
     private final ApentriesApi apentriesApi;
     private final SubjectAreaUnitsApi subjectAreaUnitsApi;
     private final FilesApi filesApi;
@@ -39,14 +37,14 @@ public class DmsService {
 
     public ReadApentryAntwortDTO getApentries() {
         return apentriesApi.readApentry(dmsProperties.getCooEinzelakte(), dmsProperties.getXAnwendung(), dmsProperties.getUserlogin(), dmsProperties.getJoboe(),
-                dmsProperties.getJobposition()).timeout(TIMEOUT).block();
+                dmsProperties.getJobposition()).timeout(Duration.ofSeconds(dmsProperties.getTimeout())).block();
     }
 
     public SearchApentryResponseDTO getApentryFor(final int lfdnr) {
         final SearchApentryDTO dto = new SearchApentryDTO();
         dto.setBasenr(dmsProperties.getAktenplannummer() + "." + lfdnr);
         return apentriesApi.searchApentry(dto, dmsProperties.getXAnwendung(), dmsProperties.getUserlogin(), dmsProperties.getJoboe(),
-                dmsProperties.getJobposition()).timeout(TIMEOUT).block();
+                dmsProperties.getJobposition()).timeout(Duration.ofSeconds(dmsProperties.getTimeout())).block();
     }
 
     /**
@@ -62,7 +60,7 @@ public class DmsService {
         dto.setShortterm(bereich);
         dto.setObjaddress(dmsProperties.getCooEinzelakte());
         return subjectAreaUnitsApi.createSubjectAreaUnit(dto, dmsProperties.getXAnwendung(), dmsProperties.getUserlogin(), dmsProperties.getJoboe(),
-                dmsProperties.getJobposition()).timeout(TIMEOUT).block();
+                dmsProperties.getJobposition()).timeout(Duration.ofSeconds(dmsProperties.getTimeout())).block();
     }
 
     /**
@@ -76,7 +74,7 @@ public class DmsService {
         dto.shortname(data.getGeschaeftspartnerId()).filesubj(data.getZentralakt()).apentry(data.getBetreffseinheit()).definition(dmsProperties.getCooKmAkte());
         dto.userformsdata(getUserFormsData(data));
         return filesApi.createFile(dto, dmsProperties.getXAnwendung(), dmsProperties.getUserlogin(), dmsProperties.getJoboe(), dmsProperties.getJobposition())
-                .timeout(TIMEOUT).block();
+                .timeout(Duration.ofSeconds(dmsProperties.getTimeout())).block();
     }
 
     public void updateFile(final PscdImport data) {
@@ -85,12 +83,12 @@ public class DmsService {
         userFormsDataApi
                 .updateUserFormsData(data.getAkte(), dto, dmsProperties.getXAnwendung(), dmsProperties.getUserlogin(), dmsProperties.getJoboe(),
                         dmsProperties.getJobposition())
-                .timeout(TIMEOUT).block();
+                .timeout(Duration.ofSeconds(dmsProperties.getTimeout())).block();
         final UpdateFileDTO ufdto = new UpdateFileDTO();
         ufdto.shortname(data.getGeschaeftspartnerId()).filesubj(data.getZentralakt());
         filesApi.updateFile(data.getAkte(), ufdto, dmsProperties.getXAnwendung(), dmsProperties.getUserlogin(), dmsProperties.getJoboe(),
                 dmsProperties.getJobposition())
-                .timeout(TIMEOUT).block();
+                .timeout(Duration.ofSeconds(dmsProperties.getTimeout())).block();
     }
 
     private static List<UserFormsReferenz> getUserFormsData(final PscdImport data) {
@@ -147,6 +145,6 @@ public class DmsService {
         dto.shortname(shortname).accdef("Aktengebunden").referrednumber(referrednumber);
         return proceduresApi
                 .createProcedure(dto, dmsProperties.getXAnwendung(), dmsProperties.getUserlogin(), dmsProperties.getJoboe(), dmsProperties.getJobposition())
-                .timeout(TIMEOUT).block();
+                .timeout(Duration.ofSeconds(dmsProperties.getTimeout())).block();
     }
 }

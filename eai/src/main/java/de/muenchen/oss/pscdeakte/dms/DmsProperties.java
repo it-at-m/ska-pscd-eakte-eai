@@ -22,4 +22,5 @@ public class DmsProperties {
     @NotBlank private String userlogin;
     @NotBlank private String aktenplannummer;
     private boolean initialbefuellung = false;
+    private int timeout = 30;
 }

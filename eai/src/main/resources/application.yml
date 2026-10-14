@@ -101,6 +101,7 @@ dms:
   jobposition: # Must be configured
   joboe: # Must be configured
   initialbefuellung: #optional; defaults to false
+  timeout: #optional; defaults to 30sec
   cron: # Must be configured
 
 refarch:
