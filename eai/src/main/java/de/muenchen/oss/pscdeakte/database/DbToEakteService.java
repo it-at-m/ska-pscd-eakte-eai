@@ -27,7 +27,7 @@ public class DbToEakteService {
         log.info("Starting DB To Eakte");
         final List<PscdImport> pscdImports = repo.streamAllByStatusIsNot(DatensatzStatus.DONE);
         log.info("{} Datensätze zur Verarbeitung vorhanden. ", pscdImports.size());
-//        pscdImports.parallelStream().forEach(this::process);
+        //        pscdImports.parallelStream().forEach(this::process);
         pscdImports.forEach(this::process);
         log.info("Finished DB To Eakte");
     }
