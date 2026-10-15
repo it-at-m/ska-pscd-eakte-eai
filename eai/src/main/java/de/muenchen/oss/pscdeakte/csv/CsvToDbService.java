@@ -1,6 +1,6 @@
 package de.muenchen.oss.pscdeakte.csv;
 
-import de.muenchen.oss.pscdeakte.configuration.LogExecutionTime;
+import de.muenchen.oss.pscdeakte.configuration.annotation.LogExecutionTime;
 import de.muenchen.oss.pscdeakte.database.DBLogger;
 import de.muenchen.oss.pscdeakte.database.DatensatzStatus;
 import de.muenchen.oss.pscdeakte.database.entity.PscdImport;
@@ -76,7 +76,6 @@ public class CsvToDbService {
 
     }
 
-    @LogExecutionTime
     protected void processCSVRecord(final CSVRecord csvRecord) {
         final PscdImport fromCsv = mapData(csvRecord);
         if (TEST_GPID.equals(fromCsv.getGeschaeftspartnerId())) {
@@ -94,7 +93,6 @@ public class CsvToDbService {
         }
     }
 
-    @LogExecutionTime
     protected PscdImport mapData(final CSVRecord csvRecord) {
         log.debug("mapping GP {}", csvRecord.get(HEADERS.GP_ID));
         final PscdImport data = new PscdImport();

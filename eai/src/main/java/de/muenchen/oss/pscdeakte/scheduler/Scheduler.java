@@ -1,6 +1,6 @@
 package de.muenchen.oss.pscdeakte.scheduler;
 
-import de.muenchen.oss.pscdeakte.configuration.LogExecutionTime;
+import de.muenchen.oss.pscdeakte.configuration.annotation.LogExecutionTime;
 import de.muenchen.oss.pscdeakte.csv.CsvToDbService;
 import de.muenchen.oss.pscdeakte.database.DbToEakteService;
 import de.muenchen.oss.refarch.integration.s3.domain.exception.S3Exception;
