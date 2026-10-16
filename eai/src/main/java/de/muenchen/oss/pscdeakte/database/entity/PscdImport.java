@@ -20,7 +20,7 @@ import org.springframework.data.annotation.LastModifiedDate;
 @Setter
 @EqualsAndHashCode(callSuper = true)
 @Entity
-@Table(name = "pscd_import", schema = "pscdeakte")
+@Table(name = "pscd_import")
 @NoArgsConstructor
 public class PscdImport extends BaseEntity {
 
