@@ -1,6 +1,6 @@
 package de.muenchen.oss.pscdeakte.database;
 
-import de.muenchen.oss.pscdeakte.configuration.LogExecutionTime;
+import de.muenchen.oss.pscdeakte.configuration.annotation.LogExecutionTime;
 import de.muenchen.oss.pscdeakte.database.entity.PscdImport;
 import de.muenchen.oss.pscdeakte.database.repository.PscdImportRepository;
 import de.muenchen.oss.pscdeakte.dms.Apentries;

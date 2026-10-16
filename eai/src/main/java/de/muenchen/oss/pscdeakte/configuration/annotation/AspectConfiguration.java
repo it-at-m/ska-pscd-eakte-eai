@@ -1,4 +1,4 @@
-package de.muenchen.oss.pscdeakte.configuration;
+package de.muenchen.oss.pscdeakte.configuration.annotation;
 
 import lombok.extern.slf4j.Slf4j;
 import org.aspectj.lang.ProceedingJoinPoint;
@@ -11,7 +11,7 @@ import org.springframework.stereotype.Component;
 @Slf4j
 public class AspectConfiguration {
 
-    @Around("@annotation(de.muenchen.oss.pscdeakte.configuration.LogExecutionTime)")
+    @Around("@annotation(de.muenchen.oss.pscdeakte.configuration.annotation.LogExecutionTime)")
     public Object logExecutionTime(final ProceedingJoinPoint joinPoint) throws Throwable {
         final long start = System.currentTimeMillis();
         final Object proceed = joinPoint.proceed();

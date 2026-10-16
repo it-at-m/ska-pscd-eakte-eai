@@ -1,4 +1,4 @@
-package de.muenchen.oss.pscdeakte.configuration;
+package de.muenchen.oss.pscdeakte.configuration.annotation;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
