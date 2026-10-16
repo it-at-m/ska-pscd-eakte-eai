@@ -10,7 +10,7 @@ import lombok.NoArgsConstructor;
 @Data
 @EqualsAndHashCode(callSuper = true)
 @Entity
-@Table(name = "logs", schema = "pscdeakte")
+@Table(name = "logs")
 @NoArgsConstructor
 public class LogEntry extends BaseEntity {
 
