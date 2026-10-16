@@ -29,8 +29,8 @@ public class DbToEakteService {
         log.info("{} Datensätze zur Verarbeitung vorhanden. ", pscdImports.size());
         if (CollectionUtils.isNotEmpty(pscdImports)) {
             apentries.initMap();
-            //        pscdImports.parallelStream().forEach(this::process);
-            pscdImports.forEach(this::process);
+            pscdImports.parallelStream().forEach(this::process);
+            //            pscdImports.forEach(this::process);
         }
         log.info("Finished DB To Eakte");
     }
