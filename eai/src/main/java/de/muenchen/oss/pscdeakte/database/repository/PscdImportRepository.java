@@ -11,6 +11,6 @@ public interface PscdImportRepository extends CrudRepository<PscdImport, Integer
 
     PscdImport findByGeschaeftspartnerId(String geschaeftspartnerId);
 
-    List<PscdImport> streamAllByStatusIsNot(DatensatzStatus datensatzStatus);
+    List<PscdImport> streamAllByStatusIsNotOrderByLastUpdateAsc(DatensatzStatus datensatzStatus);
 
 }

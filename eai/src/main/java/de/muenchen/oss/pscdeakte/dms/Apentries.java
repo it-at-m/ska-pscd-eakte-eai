@@ -1,5 +1,6 @@
 package de.muenchen.oss.pscdeakte.dms;
 
+import de.muenchen.oss.pscdeakte.configuration.annotation.LogExecutionTime;
 import de.muenchen.oss.refarch.integration.dms.model.DmsObjektResponse;
 import de.muenchen.oss.refarch.integration.dms.model.Objektreferenz;
 import de.muenchen.oss.refarch.integration.dms.model.ReadApentryAntwortDTO;
@@ -32,6 +33,25 @@ public class Apentries {
         pattern = Pattern.compile(Pattern.quote(properties.getAktenplannummer()) + "\\.([0-9]+)/[0-9]{10}-[0-9]{10}");
     }
 
+    @LogExecutionTime
+    public void initMap() {
+        LOCK.lock();
+        try {
+            if (!mapInitialized.get()) {
+                log.info("reading apentries");
+                final ReadApentryAntwortDTO response = dmsService.getApentries();
+                final List<Objektreferenz> giObjects = response != null ? response.getGiobjecttype() : null;
+                if (giObjects != null) {
+                    log.info("{} apentries found", giObjects.size());
+                    giObjects.forEach(this::fillMap);
+                }
+                mapInitialized.set(true);
+            }
+        } finally {
+            LOCK.unlock();
+        }
+    }
+
     public String getApentryCoo(final String gpId) {
         final int lfdNr = this.generateLfdNr(gpId);
         if (props.isInitialbefuellung()) {
@@ -51,21 +71,6 @@ public class Apentries {
     }
 
     private String getApentryFromMap(final int lfdNr) {
-        LOCK.lock();
-        try {
-            if (!mapInitialized.get()) {
-                log.info("reading apentries");
-                final ReadApentryAntwortDTO response = dmsService.getApentries();
-                final List<Objektreferenz> giObjects = response != null ? response.getGiobjecttype() : null;
-                if (giObjects != null) {
-                    log.info("{} apentries found", giObjects.size());
-                    giObjects.forEach(this::fillMap);
-                }
-                mapInitialized.set(true);
-            }
-        } finally {
-            LOCK.unlock();
-        }
         return apentryMap.computeIfAbsent(lfdNr, this::getNewApentry);
     }
 
