@@ -1,12 +1,7 @@
 package de.muenchen.oss.pscdeakte.database.entity;
 
 import de.muenchen.oss.pscdeakte.database.DatensatzStatus;
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.EnumType;
-import jakarta.persistence.Enumerated;
-import jakarta.persistence.PrePersist;
-import jakarta.persistence.Table;
+import jakarta.persistence.*;
 
 import java.io.Serial;
 import java.time.Instant;
@@ -28,6 +23,7 @@ public class PscdImport extends BaseEntity {
     private static final long serialVersionUID = 1L;
     //   GP-ID,Name,Vorname,Geb.-Datum,Zentralakt
 
+    @Id
     @Column(name = "geschaeftspartner_id")
     private String geschaeftspartnerId;
 

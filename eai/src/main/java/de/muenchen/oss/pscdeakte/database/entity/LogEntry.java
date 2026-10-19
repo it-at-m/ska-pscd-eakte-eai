@@ -1,7 +1,7 @@
 package de.muenchen.oss.pscdeakte.database.entity;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.Table;
+import jakarta.persistence.*;
+
 import java.io.Serial;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
@@ -16,6 +16,10 @@ public class LogEntry extends BaseEntity {
 
     @Serial
     private static final long serialVersionUID = 1L;
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Integer id;
 
     private String level;
     private String message;
