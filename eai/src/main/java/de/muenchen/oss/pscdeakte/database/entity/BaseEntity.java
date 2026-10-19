@@ -5,13 +5,12 @@
 package de.muenchen.oss.pscdeakte.database.entity;
 
 import jakarta.persistence.MappedSuperclass;
+import java.io.Serial;
+import java.io.Serializable;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.ToString;
-
-import java.io.Serial;
-import java.io.Serializable;
 
 @MappedSuperclass
 @NoArgsConstructor
