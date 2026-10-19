@@ -26,7 +26,7 @@ public class DbToEakteService {
     @LogExecutionTime
     public void start() {
         log.info("Starting DB To Eakte");
-        final List<PscdImport> pscdImports = repo.streamAllByStatusIsNotOrderByLastUpdateAsc(DatensatzStatus.DONE);
+        final List<PscdImport> pscdImports = repo.streamAllByStatusIsNotOrderByCreatedTimeAsc(DatensatzStatus.DONE);
         log.info("{} Datensätze zur Verarbeitung vorhanden. ", pscdImports.size());
         if (CollectionUtils.isNotEmpty(pscdImports)) {
             apentries.initMap();

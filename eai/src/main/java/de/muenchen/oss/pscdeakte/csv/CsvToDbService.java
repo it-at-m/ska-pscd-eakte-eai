@@ -13,6 +13,8 @@ import de.muenchen.oss.refarch.integration.s3.domain.model.ListResult;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
+import java.util.Optional;
+
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -82,12 +84,12 @@ public class CsvToDbService {
             // Test GP-Id ueberspringen
             return;
         }
-        final PscdImport fromDb = pir.findByGeschaeftspartnerId(fromCsv.getGeschaeftspartnerId());
-        if (fromDb == null) {
+        final Optional<PscdImport> fromDb = pir.findByGeschaeftspartnerId(fromCsv.getGeschaeftspartnerId());
+        if (fromDb.isEmpty()) {
             pir.save(fromCsv);
             return;
         }
-        final DuplicateOrUpdate dou = new DuplicateOrUpdate(fromDb, fromCsv);
+        final DuplicateOrUpdate dou = new DuplicateOrUpdate(fromDb.get(), fromCsv);
         if (dou.isUpdate()) {
             pir.save(dou.createUpdatedPscdImport());
         }

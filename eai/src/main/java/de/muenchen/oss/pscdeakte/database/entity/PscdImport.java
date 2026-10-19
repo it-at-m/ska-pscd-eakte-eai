@@ -6,16 +6,12 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
 import jakarta.persistence.Id;
-import jakarta.persistence.PrePersist;
 import jakarta.persistence.Table;
-
 import java.io.Serial;
-import java.time.Instant;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-import org.springframework.data.annotation.LastModifiedDate;
 
 @Getter
 @Setter
@@ -60,14 +56,5 @@ public class PscdImport extends BaseEntity {
     @Column(name = "status")
     @Enumerated(EnumType.STRING)
     private DatensatzStatus status;
-
-    @LastModifiedDate
-    @Column(name = "updated_at", nullable = false)
-    private Instant lastUpdate;
-
-    @PrePersist
-    protected void onCreate() {
-        lastUpdate = Instant.now();
-    }
 
 }

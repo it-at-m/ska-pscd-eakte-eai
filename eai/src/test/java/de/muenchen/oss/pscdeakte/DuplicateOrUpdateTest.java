@@ -31,7 +31,7 @@ class DuplicateOrUpdateTest {
         Assertions.assertTrue(dou.isUpdate());
         final PscdImport updated = dou.createUpdatedPscdImport();
         Assertions.assertEquals(second.getVorname(), updated.getVorname());
-        Assertions.assertEquals(org.getId(), updated.getId());
+        Assertions.assertEquals(org.getGeschaeftspartnerId(), updated.getGeschaeftspartnerId());
     }
 
     private static @NonNull PscdImport getPscdImport() {
@@ -42,7 +42,6 @@ class DuplicateOrUpdateTest {
         org.setBetreffseinheit("bestreffseinheit");
         org.setGeburtsdatum("geburtsdatum");
         org.setGeschaeftspartnerId("geschaeftspartnerId");
-        org.setId(1234);
         org.setName("name");
         org.setStatus(DatensatzStatus.DONE);
         org.setVorname("vorname");

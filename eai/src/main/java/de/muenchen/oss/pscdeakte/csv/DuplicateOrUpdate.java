@@ -2,7 +2,6 @@ package de.muenchen.oss.pscdeakte.csv;
 
 import de.muenchen.oss.pscdeakte.database.DatensatzStatus;
 import de.muenchen.oss.pscdeakte.database.entity.PscdImport;
-import java.time.Instant;
 import org.apache.commons.codec.binary.StringUtils;
 
 public class DuplicateOrUpdate {
@@ -28,13 +27,11 @@ public class DuplicateOrUpdate {
 
     public PscdImport createUpdatedPscdImport() {
         final PscdImport updated = new PscdImport();
-        updated.setId(existingImport.getId());
         updated.setGeschaeftspartnerId(existingImport.getGeschaeftspartnerId());
         updated.setBetreffseinheit(existingImport.getBetreffseinheit());
         updated.setAkte(existingImport.getAkte());
         updated.setBestandsakt(existingImport.getBestandsakt());
         updated.setAv(existingImport.getAv());
-        updated.setLastUpdate(Instant.now());
 
         updated.setVorname(newImport.getVorname());
         updated.setName(newImport.getName());
