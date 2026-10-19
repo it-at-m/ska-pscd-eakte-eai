@@ -23,6 +23,7 @@ public class DbToEakteService {
     private final DmsService dmsService;
     private final Apentries apentries;
 
+    @LogExecutionTime
     public void start() {
         log.info("Starting DB To Eakte");
         final List<PscdImport> pscdImports = repo.streamAllByStatusIsNotOrderByLastUpdateAsc(DatensatzStatus.DONE);
@@ -34,7 +35,6 @@ public class DbToEakteService {
         log.info("Finished DB To Eakte");
     }
 
-    @LogExecutionTime
     protected void process(final PscdImport data) {
         log.debug("Processing {}", data.getGeschaeftspartnerId());
         try {

@@ -1,6 +1,5 @@
 package de.muenchen.oss.pscdeakte.dms;
 
-import de.muenchen.oss.pscdeakte.configuration.annotation.LogExecutionTime;
 import de.muenchen.oss.pscdeakte.database.entity.PscdImport;
 import de.muenchen.oss.pscdeakte.helper.DateHelper;
 import de.muenchen.oss.refarch.integration.dms.api.ApentriesApi;
@@ -21,7 +20,6 @@ import de.muenchen.oss.refarch.integration.dms.model.UserFormsReferenz;
 import java.time.Duration;
 import java.util.ArrayList;
 import java.util.List;
-
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -36,13 +34,11 @@ public class DmsService {
     private final ProceduresApi proceduresApi;
     private final UserFormsDataApi userFormsDataApi;
 
-    @LogExecutionTime
     public ReadApentryAntwortDTO getApentries() {
         return apentriesApi.readApentry(dmsProperties.getCooEinzelakte(), dmsProperties.getXAnwendung(), dmsProperties.getUserlogin(), dmsProperties.getJoboe(),
                 dmsProperties.getJobposition()).timeout(Duration.ofSeconds(dmsProperties.getTimeout())).block();
     }
 
-    @LogExecutionTime
     public SearchApentryResponseDTO getApentryFor(final int lfdnr) {
         final SearchApentryDTO dto = new SearchApentryDTO();
         dto.setBasenr(dmsProperties.getAktenplannummer() + "." + lfdnr);
@@ -57,7 +53,6 @@ public class DmsService {
      * @param bereich Titel der anzulegenden Betreffseinheit
      * @return Response der eAkte
      */
-    @LogExecutionTime
     public DmsObjektResponse createSubjectAreaUnit(final int laufendeNr, final String bereich) {
         final CreateSubjectAreaUnitAnfrageDTO dto = new CreateSubjectAreaUnitAnfrageDTO();
         dto.setBasenr(dmsProperties.getAktenplannummer() + "." + laufendeNr);
@@ -73,7 +68,6 @@ public class DmsService {
      * @param data zu speichernde Daten der Sachakte
      * @return Response der eAkte
      */
-    @LogExecutionTime
     public DmsObjektResponse createFile(final PscdImport data) {
         final CreateFileDTO dto = new CreateFileDTO();
         dto.shortname(data.getGeschaeftspartnerId()).filesubj(data.getZentralakt()).apentry(data.getBetreffseinheit()).definition(dmsProperties.getCooKmAkte());
@@ -82,7 +76,6 @@ public class DmsService {
                 .timeout(Duration.ofSeconds(dmsProperties.getTimeout())).block();
     }
 
-    @LogExecutionTime
     public void updateFile(final PscdImport data) {
         final UpdateUserFormsDataRequestDTO dto = new UpdateUserFormsDataRequestDTO();
         dto.userformsdata(getUserFormsData(data));
@@ -124,7 +117,6 @@ public class DmsService {
      * @param referrednumber uebergeordnete Sachakte
      * @return Response der ProceduresApi
      */
-    @LogExecutionTime
     public DmsObjektResponse createProcedureBestandsakte(final String referrednumber) {
         return createProcedure(referrednumber, "Bestandsakten");
     }
@@ -136,7 +128,6 @@ public class DmsService {
      * @param referrednumber uebergeordnete Sachakte
      * @return Response der ProceduresApi
      */
-    @LogExecutionTime
     public DmsObjektResponse createProcedureAV(final String referrednumber) {
         return createProcedure(referrednumber, "AVs, Titel, Haftbefehle");
     }
