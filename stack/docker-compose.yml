@@ -68,7 +68,7 @@ services:
 
   # === S3 ===
   rustfs:
-    image: rustfs/rustfs:1.0.1@sha256:1803faef57627e2d9c2e7d89d655d712ddded5389040054987163043fecb6a3c
+    image: rustfs/rustfs:1.0.3@sha256:9ca9559533b537d10482fe923288b676ad08f92a7069d9a17327fbae3cab688b
     environment:
       RUSTFS_ACCESS_KEY: admin
       RUSTFS_SECRET_KEY: admin
@@ -83,7 +83,7 @@ services:
     <<: *security_settings
 
   init-rustfs:
-    image: rustfs/rc:v0.1.36
+    image: rustfs/rc:v0.1.36@sha256:ab024bfebee49a750ce886b4c70963ccd9ddaa03f491704a90710641d7a26699
     depends_on:
       rustfs:
         condition: service_healthy
