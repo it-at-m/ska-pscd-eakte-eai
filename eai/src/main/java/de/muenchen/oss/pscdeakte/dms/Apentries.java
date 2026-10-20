@@ -37,7 +37,7 @@ public class Apentries {
     public void initMap() {
         LOCK.lock();
         try {
-            if (!mapInitialized.get()) {
+            if (props.isInitialbefuellung() && !mapInitialized.get()) {
                 log.info("reading apentries");
                 final ReadApentryAntwortDTO response = dmsService.getApentries();
                 final List<Objektreferenz> giObjects = response != null ? response.getGiobjecttype() : null;
