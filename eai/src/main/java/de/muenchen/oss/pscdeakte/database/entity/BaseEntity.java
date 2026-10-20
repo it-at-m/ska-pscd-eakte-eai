@@ -1,7 +1,3 @@
-/*
- * Copyright (c): it@M - Dienstleister für Informations- und Telekommunikationstechnik
- * der Landeshauptstadt München, 2022
- */
 package de.muenchen.oss.pscdeakte.database.entity;
 
 import jakarta.persistence.Column;
@@ -35,6 +31,6 @@ public abstract class BaseEntity implements Serializable {
     private LocalDateTime createdTime;
 
     @LastModifiedDate
-    @Column(name = "updated_time", nullable = false, columnDefinition = "TIMESTAMP", updatable = false)
+    @Column(name = "updated_time", nullable = false, columnDefinition = "TIMESTAMP")
     private LocalDateTime updatedTime;
 }
