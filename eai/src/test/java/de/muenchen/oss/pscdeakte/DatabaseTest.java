@@ -97,6 +97,7 @@ class DatabaseTest {
     void test_pscdimport_crud() {
 
         PscdImport pscdImport = new PscdImport();
+        pscdImport.setGeschaeftspartnerId("123");
         pscdImport.setName("name");
         pscdImport.setVorname("vorname");
         PscdImport saved = pir.save(pscdImport);
