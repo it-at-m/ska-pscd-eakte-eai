@@ -12,6 +12,8 @@ import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import org.jspecify.annotations.Nullable;
+import org.springframework.data.domain.Persistable;
 
 @Getter
 @Setter
@@ -19,14 +21,14 @@ import lombok.Setter;
 @Entity
 @Table(name = "pscd_import", schema = "pscdeakte")
 @NoArgsConstructor
-public class PscdImport extends BaseEntity {
+public class PscdImport extends BaseEntity implements Persistable<String> {
 
     @Serial
     private static final long serialVersionUID = 1L;
     //   GP-ID,Name,Vorname,Geb.-Datum,Zentralakt
 
     @Id
-    @Column(name = "geschaeftspartner_id")
+    @Column(name = "geschaeftspartner_id", nullable = false)
     private String geschaeftspartnerId;
 
     @Column(name = "name")
@@ -57,4 +59,13 @@ public class PscdImport extends BaseEntity {
     @Enumerated(EnumType.STRING)
     private DatensatzStatus status;
 
+    @Override
+    public @Nullable String getId() {
+        return geschaeftspartnerId;
+    }
+
+    @Override
+    public boolean isNew() {
+        return getCreatedTime() == null;
+    }
 }
