@@ -9,7 +9,7 @@ import org.springframework.data.repository.CrudRepository;
 import org.springframework.stereotype.Repository;
 
 @Repository
-public interface PscdImportRepository extends CrudRepository<PscdImport, Integer> {
+public interface PscdImportRepository extends CrudRepository<PscdImport, String> {
 
     Optional<PscdImport> findByGeschaeftspartnerId(String geschaeftspartnerId);
 
