@@ -10,6 +10,7 @@ import java.util.List;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
+import org.springframework.core.codec.DecodingException;
 import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.client.WebClientResponseException;
 
@@ -49,8 +50,8 @@ public class DbToEakteService {
                     log.error(errorResponse.toString());
                     dbLog.log(ERROR, "DmsErrorResponse der WebclientResponseException", errorResponse.toString());
                 }
-            } catch (Exception innerEx) {
-                // Nothing to do
+            } catch (IllegalStateException | DecodingException innerEx) {
+                log.debug("Could not decode DmsErrorResponse from WebClientResponseException", innerEx);
             }
         } catch (IllegalStateException e) {
             log.error("Timeout in der eAkte", e);
