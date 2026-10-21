@@ -44,7 +44,7 @@ public class DbToEakteService {
             log.error("Exception aus der eAkte: WebclientResponseException", e);
             dbLog.log(ERROR, "Exception aus der eAkte: WebclientResponseException", e.getMessage());
             try {
-                DmsErrorResponse errorResponse = e.getResponseBodyAs(DmsErrorResponse.class);
+                final DmsErrorResponse errorResponse = e.getResponseBodyAs(DmsErrorResponse.class);
                 if (errorResponse != null) {
                     log.error(errorResponse.toString());
                     dbLog.log(ERROR, "Exception aus der eAkte: WebclientResponseException", errorResponse.toString());
