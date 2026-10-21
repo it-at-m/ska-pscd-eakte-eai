@@ -61,7 +61,7 @@ public class CsvToDbService {
                 .setDelimiter(props.getDelimiter())
                 .setEscape(props.getEscape())
                 .setHeader(HEADERS.class)
-                .setSkipHeaderRecord(props.isSkipHeader())
+                .setSkipHeaderRecord(props.getSkipHeader())
                 .get();
         final Iterable<CSVRecord> records;
         try {

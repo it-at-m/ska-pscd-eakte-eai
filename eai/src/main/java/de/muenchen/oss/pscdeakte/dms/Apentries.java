@@ -37,7 +37,7 @@ public class Apentries {
     public void initMap() {
         LOCK.lock();
         try {
-            if (props.isInitialbefuellung() && !mapInitialized.get()) {
+            if (props.getInitialbefuellung() && !mapInitialized.get()) {
                 log.info("reading apentries");
                 final ReadApentryAntwortDTO response = dmsService.getApentries();
                 final List<Objektreferenz> giObjects = response != null ? response.getGiobjecttype() : null;
@@ -54,7 +54,7 @@ public class Apentries {
 
     public String getApentryCoo(final String gpId) {
         final int lfdNr = this.generateLfdNr(gpId);
-        if (props.isInitialbefuellung()) {
+        if (props.getInitialbefuellung()) {
             return getApentryFromMap(lfdNr);
         } else {
             return this.getSingleApentry(lfdNr);

@@ -80,7 +80,7 @@ public class CsvToDbServiceTest {
         final CSVFormat csvFormat = CSVFormat.DEFAULT.builder()
                 .setDelimiter(s3Properties.getDelimiter())
                 .setHeader(CsvToDbService.HEADERS.class)
-                .setSkipHeaderRecord(s3Properties.isSkipHeader())
+                .setSkipHeaderRecord(s3Properties.getSkipHeader())
                 .get();
 
         final CSVParser csvRecords = csvFormat.parse(new InputStreamReader(fileInputStream, StandardCharsets.ISO_8859_1));
