@@ -5,10 +5,12 @@ import de.muenchen.oss.pscdeakte.database.entity.PscdImport;
 import de.muenchen.oss.pscdeakte.database.repository.PscdImportRepository;
 import de.muenchen.oss.pscdeakte.dms.Apentries;
 import de.muenchen.oss.pscdeakte.dms.DmsService;
+import de.muenchen.oss.refarch.integration.dms.model.DmsErrorResponse;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
+import org.springframework.core.codec.DecodingException;
 import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.client.WebClientResponseException;
 
@@ -42,6 +44,15 @@ public class DbToEakteService {
         } catch (WebClientResponseException e) {
             log.error("Exception aus der eAkte: WebclientResponseException", e);
             dbLog.log(ERROR, "Exception aus der eAkte: WebclientResponseException", e.getMessage());
+            try {
+                final DmsErrorResponse errorResponse = e.getResponseBodyAs(DmsErrorResponse.class);
+                if (errorResponse != null) {
+                    log.error(errorResponse.toString());
+                    dbLog.log(ERROR, "DmsErrorResponse der WebclientResponseException", errorResponse.toString());
+                }
+            } catch (IllegalStateException | DecodingException innerEx) {
+                log.warn("Could not decode DmsErrorResponse from WebClientResponseException", innerEx);
+            }
         } catch (IllegalStateException e) {
             log.error("Timeout in der eAkte", e);
             dbLog.log(ERROR, "Timeout in der eAkte", e.getMessage());
