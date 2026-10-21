@@ -5,6 +5,7 @@ import de.muenchen.oss.pscdeakte.database.entity.PscdImport;
 import de.muenchen.oss.pscdeakte.database.repository.PscdImportRepository;
 import de.muenchen.oss.pscdeakte.dms.Apentries;
 import de.muenchen.oss.pscdeakte.dms.DmsService;
+import de.muenchen.oss.refarch.integration.dms.model.DmsErrorResponse;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -42,6 +43,15 @@ public class DbToEakteService {
         } catch (WebClientResponseException e) {
             log.error("Exception aus der eAkte: WebclientResponseException", e);
             dbLog.log(ERROR, "Exception aus der eAkte: WebclientResponseException", e.getMessage());
+            try {
+                DmsErrorResponse errorResponse = e.getResponseBodyAs(DmsErrorResponse.class);
+                if (errorResponse != null) {
+                    log.error(errorResponse.toString());
+                    dbLog.log(ERROR, "Exception aus der eAkte: WebclientResponseException", errorResponse.toString());
+                }
+            } catch (Exception innerEx) {
+                // Nothing to do
+            }
         } catch (IllegalStateException e) {
             log.error("Timeout in der eAkte", e);
             dbLog.log(ERROR, "Timeout in der eAkte", e.getMessage());
