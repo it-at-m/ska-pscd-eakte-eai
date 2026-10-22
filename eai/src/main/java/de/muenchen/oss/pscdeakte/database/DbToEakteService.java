@@ -49,9 +49,12 @@ public class DbToEakteService {
                 if (errorResponse != null) {
                     log.error(errorResponse.toString());
                     dbLog.log(ERROR, "DmsErrorResponse der WebclientResponseException", errorResponse.toString());
+                } else {
+                    log.error("ResponseBody der WebclientResponseException: {}", e.getResponseBodyAsString());
+                    dbLog.log(ERROR, "ResponseBody der WebclientResponseException", e.getResponseBodyAsString());
                 }
             } catch (IllegalStateException | DecodingException innerEx) {
-                log.warn("Could not decode DmsErrorResponse from WebClientResponseException", innerEx);
+                log.warn("ResponseBody der WebClientResponseException konnte nicht dekodiert werden: {}", e.getResponseBodyAsString());
             }
         } catch (IllegalStateException e) {
             log.error("Timeout in der eAkte", e);
