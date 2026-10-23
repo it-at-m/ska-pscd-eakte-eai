@@ -1,12 +1,17 @@
 package de.muenchen.oss.pscdeakte.database;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
+import ch.qos.logback.classic.Level;
+import ch.qos.logback.classic.Logger;
+import ch.qos.logback.classic.spi.ILoggingEvent;
+import ch.qos.logback.core.read.ListAppender;
 import de.muenchen.oss.pscdeakte.database.entity.PscdImport;
 import de.muenchen.oss.pscdeakte.database.repository.PscdImportRepository;
 import de.muenchen.oss.pscdeakte.dms.Apentries;
@@ -18,6 +23,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.slf4j.LoggerFactory;
 import org.springframework.web.reactive.function.client.WebClientResponseException;
 
 @ExtendWith(MockitoExtension.class)
@@ -196,12 +202,23 @@ class DbToEakteServiceTest {
     void processHandlesUndecodableWebClientErrorResponse() {
         final PscdImport data = data(DatensatzStatus.UPDATE);
         final WebClientResponseException exception = mock(WebClientResponseException.class);
+        final String rawResponseBody = "undecodable raw response";
         when(exception.getResponseBodyAs(DmsErrorResponse.class)).thenThrow(new IllegalStateException("undecodable"));
+        when(exception.getResponseBodyAsString()).thenReturn(rawResponseBody);
         doThrow(exception).when(dmsService).updateFile(data);
+        final Logger logger = (Logger) LoggerFactory.getLogger(DbToEakteService.class);
+        final ListAppender<ILoggingEvent> appender = new ListAppender<>();
+        appender.start();
+        logger.addAppender(appender);
 
-        service().process(data);
+        try {
+            service().process(data);
 
-        verify(repository).save(data);
+            assertTrue(appender.list.stream().anyMatch(event -> event.getLevel() == Level.WARN && event.getFormattedMessage().contains(rawResponseBody)));
+            verify(repository).save(data);
+        } finally {
+            logger.detachAppender(appender);
+        }
     }
 
     @Test

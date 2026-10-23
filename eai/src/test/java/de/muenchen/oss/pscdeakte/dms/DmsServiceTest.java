@@ -22,6 +22,9 @@ import de.muenchen.oss.refarch.integration.dms.model.SearchApentryDTO;
 import de.muenchen.oss.refarch.integration.dms.model.SearchApentryResponseDTO;
 import de.muenchen.oss.refarch.integration.dms.model.UpdateFileDTO;
 import de.muenchen.oss.refarch.integration.dms.model.UpdateUserFormsDataRequestDTO;
+import de.muenchen.oss.refarch.integration.dms.model.UserFormsReferenz;
+import java.util.List;
+import java.util.Objects;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -35,6 +38,7 @@ class DmsServiceTest {
 
     private static final String AKTENPLANNUMMER = "9512";
     private static final String COO_EINZELAKTE = "coo-einzelakte";
+    private static final String COO_KM_AKTE = "coo-km-akte";
     private static final String X_ANWENDUNG = "x-anwendung";
     private static final String USERLOGIN = "userlogin";
     private static final String JOBOE = "joboe";
@@ -101,7 +105,14 @@ class DmsServiceTest {
         assertSame(response, dmsService.createFile(fileData("", "", "")));
         assertSame(response, dmsService.createFile(fileData("Vorname", "Name", "01.02.2020")));
 
-        verify(filesApi, times(3)).createFile(any(CreateFileDTO.class), eq(X_ANWENDUNG), eq(USERLOGIN), eq(JOBOE), eq(JOBPOSITION));
+        final ArgumentCaptor<CreateFileDTO> requestCaptor = ArgumentCaptor.forClass(CreateFileDTO.class);
+        verify(filesApi, times(3)).createFile(requestCaptor.capture(), eq(X_ANWENDUNG), eq(USERLOGIN), eq(JOBOE), eq(JOBPOSITION));
+        assertFileRequest(requestCaptor.getAllValues().get(0));
+        Assertions.assertEquals(List.of(), requestCaptor.getAllValues().get(0).getUserformsdata());
+        assertFileRequest(requestCaptor.getAllValues().get(1));
+        Assertions.assertEquals(List.of(), requestCaptor.getAllValues().get(1).getUserformsdata());
+        assertFileRequest(requestCaptor.getAllValues().get(2));
+        assertUserForms(Objects.requireNonNull(requestCaptor.getAllValues().get(2).getUserformsdata()));
     }
 
     @Test
@@ -112,9 +123,14 @@ class DmsServiceTest {
 
         dmsService().updateFile(fileData("Vorname", "Name", "01.02.2020"));
 
-        verify(userFormsDataApi).updateUserFormsData(eq("akte"), any(UpdateUserFormsDataRequestDTO.class), eq(X_ANWENDUNG), eq(USERLOGIN), eq(JOBOE),
+        final ArgumentCaptor<UpdateUserFormsDataRequestDTO> userFormsCaptor = ArgumentCaptor.forClass(UpdateUserFormsDataRequestDTO.class);
+        verify(userFormsDataApi).updateUserFormsData(eq("akte"), userFormsCaptor.capture(), eq(X_ANWENDUNG), eq(USERLOGIN), eq(JOBOE),
                 eq(JOBPOSITION));
-        verify(filesApi).updateFile(eq("akte"), any(UpdateFileDTO.class), eq(X_ANWENDUNG), eq(USERLOGIN), eq(JOBOE), eq(JOBPOSITION));
+        assertUserForms(Objects.requireNonNull(userFormsCaptor.getValue().getUserformsdata()));
+        final ArgumentCaptor<UpdateFileDTO> fileCaptor = ArgumentCaptor.forClass(UpdateFileDTO.class);
+        verify(filesApi).updateFile(eq("akte"), fileCaptor.capture(), eq(X_ANWENDUNG), eq(USERLOGIN), eq(JOBOE), eq(JOBPOSITION));
+        Assertions.assertEquals("gp-id", fileCaptor.getValue().getShortname());
+        Assertions.assertEquals("zentralakt", fileCaptor.getValue().getFilesubj());
     }
 
     @Test
@@ -127,7 +143,14 @@ class DmsServiceTest {
         assertSame(response, dmsService.createProcedureBestandsakte("coo-akte"));
         assertSame(response, dmsService.createProcedureAV("coo-akte"));
 
-        verify(proceduresApi, times(2)).createProcedure(any(CreateProcedureDTO.class), eq(X_ANWENDUNG), eq(USERLOGIN), eq(JOBOE), eq(JOBPOSITION));
+        final ArgumentCaptor<CreateProcedureDTO> requestCaptor = ArgumentCaptor.forClass(CreateProcedureDTO.class);
+        verify(proceduresApi, times(2)).createProcedure(requestCaptor.capture(), eq(X_ANWENDUNG), eq(USERLOGIN), eq(JOBOE), eq(JOBPOSITION));
+        Assertions.assertEquals("Bestandsakten", requestCaptor.getAllValues().get(0).getShortname());
+        Assertions.assertEquals("AVs, Titel, Haftbefehle", requestCaptor.getAllValues().get(1).getShortname());
+        for (CreateProcedureDTO request : requestCaptor.getAllValues()) {
+            Assertions.assertEquals("Aktengebunden", request.getAccdef());
+            Assertions.assertEquals("coo-akte", request.getReferrednumber());
+        }
     }
 
     private DmsService dmsService() {
@@ -138,6 +161,7 @@ class DmsServiceTest {
         final DmsProperties properties = new DmsProperties();
         properties.setAktenplannummer(AKTENPLANNUMMER);
         properties.setCooEinzelakte(COO_EINZELAKTE);
+        properties.setCooKmAkte(COO_KM_AKTE);
         properties.setXAnwendung(X_ANWENDUNG);
         properties.setUserlogin(USERLOGIN);
         properties.setJoboe(JOBOE);
@@ -155,6 +179,23 @@ class DmsServiceTest {
         data.setBetreffseinheit("betreffseinheit");
         data.setAkte("akte");
         return data;
+    }
+
+    private static void assertFileRequest(final CreateFileDTO request) {
+        Assertions.assertEquals("gp-id", request.getShortname());
+        Assertions.assertEquals("zentralakt", request.getFilesubj());
+        Assertions.assertEquals("betreffseinheit", request.getApentry());
+        Assertions.assertEquals(COO_KM_AKTE, request.getDefinition());
+    }
+
+    private static void assertUserForms(final List<UserFormsReferenz> userForms) {
+        Assertions.assertEquals(3, userForms.size());
+        Assertions.assertEquals("BusinessDataGPFirstname", userForms.get(0).getLhMBAI151700Ufreference());
+        Assertions.assertEquals(List.of("Vorname"), userForms.get(0).getLhMBAI151700Ufvalue());
+        Assertions.assertEquals("BusinessDataGPSurname", userForms.get(1).getLhMBAI151700Ufreference());
+        Assertions.assertEquals(List.of("Name"), userForms.get(1).getLhMBAI151700Ufvalue());
+        Assertions.assertEquals("BusinessDataGPBirthDate", userForms.get(2).getLhMBAI151700Ufreference());
+        Assertions.assertEquals(List.of("2020-02-01"), userForms.get(2).getLhMBAI151700Ufvalue());
     }
 
 }
