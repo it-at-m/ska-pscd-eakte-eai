@@ -54,7 +54,7 @@ public class DbToEakteService {
                     dbLog.log(ERROR, "ResponseBody der WebclientResponseException", e.getResponseBodyAsString());
                 }
             } catch (IllegalStateException | DecodingException innerEx) {
-                log.warn("ResponseBody der WebClientResponseException konnte nicht dekodiert werden: {}", e.getResponseBodyAsString(), innerEx);
+                log.warn("ResponseBody der WebClientResponseException konnte nicht dekodiert werden: {}", e.getResponseBodyAsString());
             }
         } catch (IllegalStateException e) {
             log.error("Timeout in der eAkte", e);
