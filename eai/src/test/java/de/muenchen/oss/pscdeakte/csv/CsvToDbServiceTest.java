@@ -19,11 +19,18 @@ import de.muenchen.oss.refarch.integration.s3.domain.model.FileMetadata;
 import de.muenchen.oss.refarch.integration.s3.domain.model.FileReference;
 import de.muenchen.oss.refarch.integration.s3.domain.model.ListResult;
 import java.io.ByteArrayInputStream;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
 import java.time.Instant;
 import java.util.List;
 import java.util.Optional;
+
+import org.apache.commons.csv.CSVFormat;
+import org.apache.commons.csv.CSVParser;
 import org.apache.commons.csv.CSVRecord;
+import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -150,6 +157,36 @@ class CsvToDbServiceTest {
         assertEquals("01.02.2020", result.getGeburtsdatum());
         assertEquals("zentralakt", result.getZentralakt());
         assertEquals(DatensatzStatus.NEW, result.getStatus());
+    }
+
+    @Test
+    void mapDataFromFile() throws IOException {
+        final PscdImport expected = new PscdImport();
+        expected.setGeschaeftspartnerId("2000000000");
+        expected.setName("s3testname");
+        expected.setVorname("s3testvorname");
+        expected.setGeburtsdatum("01.02.2012");
+        expected.setZentralakt("1234");
+        expected.setStatus(DatensatzStatus.NEW);
+
+        FileInputStream fileInputStream = new FileInputStream("src/test/resources/BP_Export_Test.csv");
+        final CSVFormat csvFormat = CSVFormat.DEFAULT.builder()
+                .setDelimiter(s3Properties.getDelimiter())
+                .setHeader(CsvToDbService.HEADERS.class)
+                .setSkipHeaderRecord(s3Properties.getSkipHeader())
+                .get();
+
+        final CSVParser csvRecords = csvFormat.parse(new InputStreamReader(fileInputStream, StandardCharsets.ISO_8859_1));
+
+        final List<CSVRecord> records = csvRecords.getRecords();
+        Assertions.assertThat(records).isNotNull();
+        Assertions.assertThat(records.size()).isEqualTo(1);
+
+        final CSVRecord csvRecord = records.getFirst();
+        final PscdImport result = csvToDbService.mapData(csvRecord);
+
+        Assertions.assertThat(result).usingRecursiveComparison().isEqualTo(expected);
+
     }
 
     private static FileMetadata fileMetadata(final String path) {

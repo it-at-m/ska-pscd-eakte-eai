@@ -14,5 +14,5 @@ public class S3Properties {
     @NotBlank private String prefix;
     private String delimiter = ";";
     private Character escape = '\\';
-    private boolean skipHeader = false;
+    private Boolean skipHeader = false;
 }
