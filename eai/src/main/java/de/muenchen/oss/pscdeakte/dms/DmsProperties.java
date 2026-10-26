@@ -22,6 +22,6 @@ public class DmsProperties {
     @NotBlank private String joboe;
     @NotBlank private String userlogin;
     @NotBlank private String aktenplannummer;
-    private boolean initialbefuellung = false;
-    @Positive private int timeout = 30;
+    private Boolean initialbefuellung = false;
+    @Positive private Integer timeout = 30;
 }
