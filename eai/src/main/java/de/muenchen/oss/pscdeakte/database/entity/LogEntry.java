@@ -1,5 +1,6 @@
 package de.muenchen.oss.pscdeakte.database.entity;
 
+import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -25,6 +26,10 @@ public class LogEntry extends BaseEntity {
     private Integer id;
 
     private String level;
+
+    @Column(columnDefinition = "TEXT")
     private String message;
+
+    @Column(columnDefinition = "TEXT")
     private String exception;
 }
