@@ -14,10 +14,8 @@ Unter dem Schema 'pscdeakte' sind drei Tabellen angelegt:
 
 #### Felder in pscd_import
 
-##### id
-eindeutige ID der Datenbank
 ##### geschaeftspartner_id
-wird aus csv-Datei gefüllt
+eindeutige ID der Datenbank, wird aus csv-Datei gefüllt
 ##### name
 wird aus csv-Datei gefüllt
 ##### vorname
