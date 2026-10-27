@@ -2,22 +2,31 @@
 ## Konfiguration
 ### Allgemeine Properties
 
+| Property | Erklärung | Default |
+| -------- | ------- | ------- |
+|  |  |  |
+|  |  |  |
+|  |  |  |
+|  |  |  |
+|  |  |  |
+
+
 ### Umgebungsspezifische ConfigMaps
 
-| Property              | Erklärung                                                                         |
-|-----------------------|-----------------------------------------------------------------------------------|
-| SPRING_DATASOURCE_URL | URl zum Datenbankserver                                                           |
-| DMS_BASEURL           | URL zur DMS-EAI                                                                   |
-| DMS_COOEINZELAKTE     | COO-Adresse der Einzelakten                                                       |
-| DMS_COOKMAKTE         | COO-Adresse der Vorlage Definition für Verfahren "KM Akte"                        |
-| DMS_JOBOE             | COO-Adresse der Orgeinheit des Organisationsuser                                  |
-| DMS_INITIALBEFUELLUNG | Schalter, um festzulegen, ob es sich um die Erstbefüllung handelt. Default: false |
-| DMS_CRON              | Cronjob, aufgrund dessen die Verarbeitung gestartet wird                          |
-| DMS_TIMEOUT           | Timeout zur REST-API an die eAkte in Sekunden. Default: 30sec                     |
-| REFARCH_S3_URL        | URL zum S3-Server                                                                 |
-| S3CSV_BUCKET          | Name des Buckets, indem die einzulesenden Dateien liegen                          |
-| S3CSV_BACKUPBUCKET    | Name des Buckets, indem die eingelesenen Dateien abgelegt werden                  |
-| S3CSV_PREFIX          | Prefix der einzulesenden Dateien                                                  |
+| Property              | Erklärung                                                         | Default |
+|-----------------------|-------------------------------------------------------------------|---------|
+| SPRING_DATASOURCE_URL | URl zum Datenbankserver                                           | -       |
+| DMS_BASEURL           | URL zur DMS-EAI                                                   | -       |
+| DMS_COOEINZELAKTE     | COO-Adresse der Einzelakten                                       | -       |
+| DMS_COOKMAKTE         | COO-Adresse der Vorlage Definition für Verfahren "KM Akte"        | -       |
+| DMS_JOBOE             | COO-Adresse der Orgeinheit des Organisationsuser                  | -       |
+| DMS_INITIALBEFUELLUNG | Schalter, um festzulegen, ob es sich um die Erstbefüllung handelt | false   |
+| DMS_CRON              | Cronjob, aufgrund dessen die Verarbeitung gestartet wird          | -       |
+| DMS_TIMEOUT           | Timeout zur REST-API an die eAkte in Sekunden                     | 30      |
+| REFARCH_S3_URL        | URL zum S3-Server                                                 | -       |
+| S3CSV_BUCKET          | Name des Buckets, indem die einzulesenden Dateien liegen          | -       |
+| S3CSV_BACKUPBUCKET    | Name des Buckets, indem die eingelesenen Dateien abgelegt werden  | -       |
+| S3CSV_PREFIX          | Prefix der einzulesenden Dateien                                  | -       |
 
 ### Datenbank
 
