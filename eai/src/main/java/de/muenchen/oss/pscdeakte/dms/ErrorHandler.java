@@ -20,9 +20,9 @@ public class ErrorHandler {
 
         final StringBuilder builder = new StringBuilder();
         if (gpId != null && !gpId.isEmpty()){
-            builder.append("GpId").append(gpId).append(": ");
+            builder.append("GpId ").append(gpId).append(": ");
         }
-        builder.append(exceptionToCatch.getClass().getName()).append(" aus der eAkte: ");
+        builder.append(exceptionToCatch.getClass().getSimpleName()).append(" aus der eAkte");
         final String logPrefix = builder.toString();
 
         switch(exceptionToCatch){
@@ -30,17 +30,18 @@ public class ErrorHandler {
                 this.handleWebClientResponseException(wcre, logPrefix);
                 break;
             case final IllegalStateException ise:
-                log.error("{} Timeout", logPrefix);
-                dbLog.log(ERROR, logPrefix + "Timeout", ise.getMessage());
+                log.error("{}: Timeout", logPrefix);
+                dbLog.log(ERROR, logPrefix + ": Timeout", ise.getMessage());
                 break;
             default:
-                log.error("{}{}", logPrefix, exceptionToCatch.getStackTrace());
+                log.error("{}: {}", logPrefix, exceptionToCatch.getStackTrace());
                 dbLog.log(ERROR, logPrefix, exceptionToCatch.getMessage());
         }
 
     }
 
     private void handleWebClientResponseException(WebClientResponseException e, String prefix){
+        final StringBuilder sb = new StringBuilder(e.getMessage()).append(" | ");
         DmsErrorResponse errorResponse = null;
         try {
             errorResponse = e.getResponseBodyAs(DmsErrorResponse.class);
@@ -48,11 +49,13 @@ public class ErrorHandler {
 //            wird unter finally bearbeitet
         } finally {
             if (errorResponse != null) {
-                log.error(prefix, errorResponse);
-                dbLog.log(ERROR, prefix, errorResponse.toString());
+                log.error("{}: {} | {}", prefix, e.getMessage(), errorResponse);
+                sb.append(errorResponse);
+                dbLog.log(ERROR, prefix, sb.toString());
             } else {
-                log.error(prefix, e.getResponseBodyAsString());
-                dbLog.log(ERROR, prefix, e.getResponseBodyAsString());
+                log.error("{}: {} | {}", prefix, e.getMessage(), e.getResponseBodyAsString());
+                sb.append(e.getResponseBodyAsString());
+                dbLog.log(ERROR, prefix, sb.toString());
             }
         }
     }

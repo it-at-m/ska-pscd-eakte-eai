@@ -77,7 +77,7 @@ public class DbToEakteService {
             // personenbezogene Daten entfernen wird vom Projekt nicht erwartet.
             break;
         case DatensatzStatus.ERROR:
-            dbLog.log(ERROR, "GpId " + data.getGeschaeftspartnerId() + "steht auf ERROR.", null);
+            dbLog.log(ERROR, "GpId " + data.getGeschaeftspartnerId() + " steht auf ERROR.", null);
             break;
         default:
             log.warn("Status steht auf {}", data.getStatus().getValue());
