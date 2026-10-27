@@ -18,20 +18,62 @@ class DuplicateOrUpdateTest {
     }
 
     @Test
-    void testUpdate() {
-        final PscdImport org = getPscdImport();
+    void testUpdateWhenNameDiffers() {
+        final PscdImport existingImport = getPscdImport();
 
-        final PscdImport second = new PscdImport();
-        second.setName("nameNeu");
-        second.setVorname("vornameNeu");
-        second.setGeburtsdatum("geburtsdatumNeu");
-        second.setZentralakt("zentralaktNeu");
+        final PscdImport newImport = getPscdImport();
+        newImport.setName("nameNeu");
 
-        final DuplicateOrUpdate dou = new DuplicateOrUpdate(org, second);
+        final DuplicateOrUpdate dou = new DuplicateOrUpdate(existingImport, newImport);
+        Assertions.assertFalse(dou.isDuplicate());
         Assertions.assertTrue(dou.isUpdate());
         final PscdImport updated = dou.createUpdatedPscdImport();
-        Assertions.assertEquals(second.getVorname(), updated.getVorname());
-        Assertions.assertEquals(org.getId(), updated.getId());
+        Assertions.assertEquals(existingImport.getGeschaeftspartnerId(), updated.getGeschaeftspartnerId());
+        Assertions.assertEquals(existingImport.getBetreffseinheit(), updated.getBetreffseinheit());
+        Assertions.assertEquals(existingImport.getAkte(), updated.getAkte());
+        Assertions.assertEquals(existingImport.getBestandsakt(), updated.getBestandsakt());
+        Assertions.assertEquals(existingImport.getAv(), updated.getAv());
+        Assertions.assertEquals(newImport.getVorname(), updated.getVorname());
+        Assertions.assertEquals(newImport.getName(), updated.getName());
+        Assertions.assertEquals(newImport.getGeburtsdatum(), updated.getGeburtsdatum());
+        Assertions.assertEquals(newImport.getZentralakt(), updated.getZentralakt());
+        Assertions.assertEquals(DatensatzStatus.UPDATE, updated.getStatus());
+    }
+
+    @Test
+    void testUpdateWhenVornameDiffers() {
+        final PscdImport existingImport = getPscdImport();
+        final PscdImport newImport = getPscdImport();
+        newImport.setVorname("vornameNeu");
+
+        final DuplicateOrUpdate dou = new DuplicateOrUpdate(existingImport, newImport);
+
+        Assertions.assertFalse(dou.isDuplicate());
+        Assertions.assertTrue(dou.isUpdate());
+    }
+
+    @Test
+    void testUpdateWhenGeburtsdatumDiffers() {
+        final PscdImport existingImport = getPscdImport();
+        final PscdImport newImport = getPscdImport();
+        newImport.setGeburtsdatum("geburtsdatumNeu");
+
+        final DuplicateOrUpdate dou = new DuplicateOrUpdate(existingImport, newImport);
+
+        Assertions.assertFalse(dou.isDuplicate());
+        Assertions.assertTrue(dou.isUpdate());
+    }
+
+    @Test
+    void testUpdateWhenZentralaktDiffers() {
+        final PscdImport existingImport = getPscdImport();
+        final PscdImport newImport = getPscdImport();
+        newImport.setZentralakt("zentralaktNeu");
+
+        final DuplicateOrUpdate dou = new DuplicateOrUpdate(existingImport, newImport);
+
+        Assertions.assertFalse(dou.isDuplicate());
+        Assertions.assertTrue(dou.isUpdate());
     }
 
     private static @NonNull PscdImport getPscdImport() {
@@ -42,7 +84,6 @@ class DuplicateOrUpdateTest {
         org.setBetreffseinheit("bestreffseinheit");
         org.setGeburtsdatum("geburtsdatum");
         org.setGeschaeftspartnerId("geschaeftspartnerId");
-        org.setId(1234);
         org.setName("name");
         org.setStatus(DatensatzStatus.DONE);
         org.setVorname("vorname");

@@ -1,6 +1,6 @@
 package de.muenchen.oss.pscdeakte;
 
-import de.muenchen.oss.pscdeakte.configuration.LogExecutionTime;
+import de.muenchen.oss.pscdeakte.configuration.annotation.LogExecutionTime;
 import de.muenchen.oss.pscdeakte.database.DatensatzStatus;
 import de.muenchen.oss.pscdeakte.database.entity.PscdImport;
 import java.io.FileReader;

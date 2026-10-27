@@ -1,6 +1,7 @@
 package de.muenchen.oss.pscdeakte.dms;
 
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Positive;
 import lombok.Data;
 import lombok.ToString;
 import org.springframework.boot.context.properties.ConfigurationProperties;
@@ -21,5 +22,6 @@ public class DmsProperties {
     @NotBlank private String joboe;
     @NotBlank private String userlogin;
     @NotBlank private String aktenplannummer;
-    private boolean initialbefuellung = false;
+    private Boolean initialbefuellung = false;
+    @Positive private Integer timeout = 30;
 }

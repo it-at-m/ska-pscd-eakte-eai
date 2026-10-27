@@ -1,6 +1,6 @@
 package de.muenchen.oss.pscdeakte.csv;
 
-import de.muenchen.oss.pscdeakte.configuration.LogExecutionTime;
+import de.muenchen.oss.pscdeakte.configuration.annotation.LogExecutionTime;
 import de.muenchen.oss.pscdeakte.database.DBLogger;
 import de.muenchen.oss.pscdeakte.database.DatensatzStatus;
 import de.muenchen.oss.pscdeakte.database.entity.PscdImport;
@@ -13,6 +13,8 @@ import de.muenchen.oss.refarch.integration.s3.domain.model.ListResult;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
+import java.util.Optional;
+
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -59,7 +61,7 @@ public class CsvToDbService {
                 .setDelimiter(props.getDelimiter())
                 .setEscape(props.getEscape())
                 .setHeader(HEADERS.class)
-                .setSkipHeaderRecord(props.isSkipHeader())
+                .setSkipHeaderRecord(props.getSkipHeader())
                 .get();
         final Iterable<CSVRecord> records;
         try {
@@ -76,25 +78,23 @@ public class CsvToDbService {
 
     }
 
-    @LogExecutionTime
     protected void processCSVRecord(final CSVRecord csvRecord) {
         final PscdImport fromCsv = mapData(csvRecord);
         if (TEST_GPID.equals(fromCsv.getGeschaeftspartnerId())) {
             // Test GP-Id ueberspringen
             return;
         }
-        final PscdImport fromDb = pir.findByGeschaeftspartnerId(fromCsv.getGeschaeftspartnerId());
-        if (fromDb == null) {
+        final Optional<PscdImport> fromDb = pir.findByGeschaeftspartnerId(fromCsv.getGeschaeftspartnerId());
+        if (fromDb.isEmpty()) {
             pir.save(fromCsv);
             return;
         }
-        final DuplicateOrUpdate dou = new DuplicateOrUpdate(fromDb, fromCsv);
+        final DuplicateOrUpdate dou = new DuplicateOrUpdate(fromDb.get(), fromCsv);
         if (dou.isUpdate()) {
             pir.save(dou.createUpdatedPscdImport());
         }
     }
 
-    @LogExecutionTime
     protected PscdImport mapData(final CSVRecord csvRecord) {
         log.debug("mapping GP {}", csvRecord.get(HEADERS.GP_ID));
         final PscdImport data = new PscdImport();

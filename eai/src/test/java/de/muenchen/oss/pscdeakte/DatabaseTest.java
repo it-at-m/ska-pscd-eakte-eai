@@ -14,7 +14,7 @@ import de.muenchen.oss.refarch.integration.s3.adapter.out.s3.S3Mapper;
 import de.muenchen.oss.refarch.integration.s3.adapter.out.s3.S3OutAdapter;
 import de.muenchen.oss.refarch.integration.s3.application.port.out.S3OutPort;
 import java.net.URI;
-import java.time.Instant;
+import java.time.LocalDateTime;
 import java.util.Optional;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Disabled;
@@ -97,12 +97,13 @@ class DatabaseTest {
     void test_pscdimport_crud() {
 
         PscdImport pscdImport = new PscdImport();
+        pscdImport.setGeschaeftspartnerId("123");
         pscdImport.setName("name");
         pscdImport.setVorname("vorname");
         PscdImport saved = pir.save(pscdImport);
-        assertNotNull(saved.getLastUpdate());
+        assertNotNull(saved.getCreatedTime());
 
-        Instant insertInstant = saved.getLastUpdate();
+        LocalDateTime createdTime = saved.getCreatedTime();
 
         Iterable<PscdImport> imports = pir.findAll();
         assertTrue(imports.iterator().hasNext(), "Insert and find should work");
@@ -111,11 +112,11 @@ class DatabaseTest {
         selected.setName("updateName");
 
         pir.save(selected);
-        Integer id = selected.getId();
-        Optional<PscdImport> updated = pir.findById(id);
+        String id = selected.getGeschaeftspartnerId();
+        Optional<PscdImport> updated = pir.findByGeschaeftspartnerId(id);
 
         updated.ifPresentOrElse(u -> assertEquals("updateName", u.getName()), () -> fail("Update failed"));
-        updated.ifPresentOrElse(u -> assertNotEquals(0, u.getLastUpdate().compareTo(insertInstant)), () -> fail("Lastupdate is not updated"));
+        updated.ifPresentOrElse(u -> assertNotEquals(0, u.getUpdatedTime().compareTo(createdTime)), () -> fail("Lastupdate is not updated"));
 
         pir.delete(updated.get());
 

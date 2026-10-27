@@ -1,13 +1,16 @@
 package de.muenchen.oss.pscdeakte.database;
 
-import de.muenchen.oss.pscdeakte.configuration.LogExecutionTime;
+import de.muenchen.oss.pscdeakte.configuration.annotation.LogExecutionTime;
 import de.muenchen.oss.pscdeakte.database.entity.PscdImport;
 import de.muenchen.oss.pscdeakte.database.repository.PscdImportRepository;
 import de.muenchen.oss.pscdeakte.dms.Apentries;
 import de.muenchen.oss.pscdeakte.dms.DmsService;
+import de.muenchen.oss.refarch.integration.dms.model.DmsErrorResponse;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.collections4.CollectionUtils;
+import org.springframework.core.codec.DecodingException;
 import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.client.WebClientResponseException;
 
@@ -25,13 +28,15 @@ public class DbToEakteService {
     @LogExecutionTime
     public void start() {
         log.info("Starting DB To Eakte");
-        final List<PscdImport> pscdImports = repo.streamAllByStatusIsNot(DatensatzStatus.DONE);
+        final List<PscdImport> pscdImports = repo.streamAllByStatusIsNotOrderByCreatedTimeAsc(DatensatzStatus.DONE);
         log.info("{} Datensätze zur Verarbeitung vorhanden. ", pscdImports.size());
-        pscdImports.forEach(this::process);
+        if (CollectionUtils.isNotEmpty(pscdImports)) {
+            apentries.initMap();
+            pscdImports.forEach(this::process);
+        }
         log.info("Finished DB To Eakte");
     }
 
-    @LogExecutionTime
     protected void process(final PscdImport data) {
         log.debug("Processing {}", data.getGeschaeftspartnerId());
         try {
@@ -39,6 +44,18 @@ public class DbToEakteService {
         } catch (WebClientResponseException e) {
             log.error("Exception aus der eAkte: WebclientResponseException", e);
             dbLog.log(ERROR, "Exception aus der eAkte: WebclientResponseException", e.getMessage());
+            try {
+                final DmsErrorResponse errorResponse = e.getResponseBodyAs(DmsErrorResponse.class);
+                if (errorResponse != null) {
+                    log.error(errorResponse.toString());
+                    dbLog.log(ERROR, "DmsErrorResponse der WebclientResponseException", errorResponse.toString());
+                } else {
+                    log.error("ResponseBody der WebclientResponseException: {}", e.getResponseBodyAsString());
+                    dbLog.log(ERROR, "ResponseBody der WebclientResponseException", e.getResponseBodyAsString());
+                }
+            } catch (IllegalStateException | DecodingException innerEx) {
+                log.warn("ResponseBody der WebClientResponseException konnte nicht dekodiert werden: {}", e.getResponseBodyAsString(), innerEx);
+            }
         } catch (IllegalStateException e) {
             log.error("Timeout in der eAkte", e);
             dbLog.log(ERROR, "Timeout in der eAkte", e.getMessage());

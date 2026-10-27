@@ -3,35 +3,32 @@ package de.muenchen.oss.pscdeakte.database.entity;
 import de.muenchen.oss.pscdeakte.database.DatensatzStatus;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
-import jakarta.persistence.EntityListeners;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
-import jakarta.persistence.PrePersist;
+import jakarta.persistence.Id;
 import jakarta.persistence.Table;
-
 import java.io.Serial;
-import java.time.Instant;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-import org.springframework.data.annotation.LastModifiedDate;
-import org.springframework.data.jpa.domain.support.AuditingEntityListener;
+import org.jspecify.annotations.Nullable;
+import org.springframework.data.domain.Persistable;
 
 @Getter
 @Setter
 @EqualsAndHashCode(callSuper = true)
 @Entity
-@EntityListeners(AuditingEntityListener.class)
 @Table(name = "pscd_import", schema = "pscdeakte")
 @NoArgsConstructor
-public class PscdImport extends BaseEntity {
+public class PscdImport extends BaseEntity implements Persistable<String> {
 
     @Serial
     private static final long serialVersionUID = 1L;
     //   GP-ID,Name,Vorname,Geb.-Datum,Zentralakt
 
-    @Column(name = "geschaeftspartner_id")
+    @Id
+    @Column(name = "geschaeftspartner_id", nullable = false)
     private String geschaeftspartnerId;
 
     @Column(name = "name")
@@ -62,13 +59,13 @@ public class PscdImport extends BaseEntity {
     @Enumerated(EnumType.STRING)
     private DatensatzStatus status;
 
-    @LastModifiedDate
-    @Column(name = "updated_at", nullable = false)
-    private Instant lastUpdate;
-
-    @PrePersist
-    protected void onCreate() {
-        lastUpdate = Instant.now();
+    @Override
+    public @Nullable String getId() {
+        return geschaeftspartnerId;
     }
 
+    @Override
+    public boolean isNew() {
+        return getCreatedTime() == null;
+    }
 }
