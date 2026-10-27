@@ -5,8 +5,10 @@ import de.muenchen.oss.refarch.integration.dms.model.DmsErrorResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.core.codec.DecodingException;
+import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.client.WebClientResponseException;
 
+@Service
 @RequiredArgsConstructor
 @Slf4j
 public class ErrorHandler {
@@ -18,38 +20,40 @@ public class ErrorHandler {
 
         final StringBuilder builder = new StringBuilder();
         if (gpId != null && !gpId.isEmpty()){
-            builder.append("GpId").append(gpId).append(": ").append(exceptionToCatch.getClass().getName()).append(" aus der eAkte: ");
+            builder.append("GpId").append(gpId).append(": ");
         }
+        builder.append(exceptionToCatch.getClass().getName()).append(" aus der eAkte: ");
+        final String logPrefix = builder.toString();
 
         switch(exceptionToCatch){
             case final WebClientResponseException wcre:
-                System.out.println(wcre);
+                this.handleWebClientResponseException(wcre, logPrefix);
                 break;
             case final IllegalStateException ise:
-                log.error("{} timeout", builder);
-                dbLog.log(ERROR, "Timeout in der eAkte", ise.getMessage());
+                log.error("{} Timeout", logPrefix);
+                dbLog.log(ERROR, logPrefix + "Timeout", ise.getMessage());
                 break;
             default:
-                log.error("{}{}", builder, exceptionToCatch.getStackTrace());
-                dbLog.log(ERROR, builder.toString(), exceptionToCatch.getMessage());
+                log.error("{}{}", logPrefix, exceptionToCatch.getStackTrace());
+                dbLog.log(ERROR, logPrefix, exceptionToCatch.getMessage());
         }
 
     }
 
-    private void handleWebClientResponseException(WebClientResponseException e, StringBuilder gpId){
-        log.error("Exception aus der eAkte: WebclientResponseException", e);
-        dbLog.log(ERROR, "Exception aus der eAkte: WebclientResponseException", e.getMessage());
+    private void handleWebClientResponseException(WebClientResponseException e, String prefix){
+        DmsErrorResponse errorResponse = null;
         try {
-            final DmsErrorResponse errorResponse = e.getResponseBodyAs(DmsErrorResponse.class);
-            if (errorResponse != null) {
-                log.error(errorResponse.toString());
-                dbLog.log(ERROR, "DmsErrorResponse der WebclientResponseException", errorResponse.toString());
-            } else {
-                log.error("ResponseBody der WebclientResponseException: {}", e.getResponseBodyAsString());
-                dbLog.log(ERROR, "ResponseBody der WebclientResponseException", e.getResponseBodyAsString());
-            }
+            errorResponse = e.getResponseBodyAs(DmsErrorResponse.class);
         } catch (IllegalStateException | DecodingException innerEx) {
-            log.warn("ResponseBody der WebClientResponseException konnte nicht dekodiert werden: {}", e.getResponseBodyAsString());
+//            wird unter finally bearbeitet
+        } finally {
+            if (errorResponse != null) {
+                log.error(prefix, errorResponse);
+                dbLog.log(ERROR, prefix, errorResponse.toString());
+            } else {
+                log.error(prefix, e.getResponseBodyAsString());
+                dbLog.log(ERROR, prefix, e.getResponseBodyAsString());
+            }
         }
     }
 

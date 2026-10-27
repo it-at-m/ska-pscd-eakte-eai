@@ -5,14 +5,12 @@ import de.muenchen.oss.pscdeakte.database.entity.PscdImport;
 import de.muenchen.oss.pscdeakte.database.repository.PscdImportRepository;
 import de.muenchen.oss.pscdeakte.dms.Apentries;
 import de.muenchen.oss.pscdeakte.dms.DmsService;
-import de.muenchen.oss.refarch.integration.dms.model.DmsErrorResponse;
+import de.muenchen.oss.pscdeakte.dms.ErrorHandler;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
-import org.springframework.core.codec.DecodingException;
 import org.springframework.stereotype.Service;
-import org.springframework.web.reactive.function.client.WebClientResponseException;
 
 @RequiredArgsConstructor
 @Service
@@ -24,6 +22,7 @@ public class DbToEakteService {
     private final DBLogger dbLog;
     private final DmsService dmsService;
     private final Apentries apentries;
+    private final ErrorHandler errorHandler;
 
     @LogExecutionTime
     public void start() {
@@ -41,27 +40,8 @@ public class DbToEakteService {
         log.debug("Processing {}", data.getGeschaeftspartnerId());
         try {
             datensatzVerarbeitung(data);
-        } catch (WebClientResponseException e) {
-            log.error("Exception aus der eAkte: WebclientResponseException", e);
-            dbLog.log(ERROR, "Exception aus der eAkte: WebclientResponseException", e.getMessage());
-            try {
-                final DmsErrorResponse errorResponse = e.getResponseBodyAs(DmsErrorResponse.class);
-                if (errorResponse != null) {
-                    log.error(errorResponse.toString());
-                    dbLog.log(ERROR, "DmsErrorResponse der WebclientResponseException", errorResponse.toString());
-                } else {
-                    log.error("ResponseBody der WebclientResponseException: {}", e.getResponseBodyAsString());
-                    dbLog.log(ERROR, "ResponseBody der WebclientResponseException", e.getResponseBodyAsString());
-                }
-            } catch (IllegalStateException | DecodingException innerEx) {
-                log.warn("ResponseBody der WebClientResponseException konnte nicht dekodiert werden: {}", e.getResponseBodyAsString());
-            }
-        } catch (IllegalStateException e) {
-            log.error("Timeout in der eAkte", e);
-            dbLog.log(ERROR, "Timeout in der eAkte", e.getMessage());
         } catch (Exception e) {
-            log.error("Exception beim Schreiben in eAkte", e);
-            dbLog.log(ERROR, "Exception beim Schreiben in eAkte", e.getMessage());
+            errorHandler.handleException(e, data.getGeschaeftspartnerId());
         } finally {
             repo.save(data);
         }

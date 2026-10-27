@@ -16,6 +16,7 @@ import de.muenchen.oss.pscdeakte.database.entity.PscdImport;
 import de.muenchen.oss.pscdeakte.database.repository.PscdImportRepository;
 import de.muenchen.oss.pscdeakte.dms.Apentries;
 import de.muenchen.oss.pscdeakte.dms.DmsService;
+import de.muenchen.oss.pscdeakte.dms.ErrorHandler;
 import de.muenchen.oss.refarch.integration.dms.model.DmsErrorResponse;
 import de.muenchen.oss.refarch.integration.dms.model.DmsObjektResponse;
 import java.util.List;
@@ -40,6 +41,9 @@ class DbToEakteServiceTest {
 
     @Mock
     private Apentries apentries;
+
+    @Mock
+    private ErrorHandler errorHandler;
 
     @Test
     void startDoesNotInitializeApentriesWhenNoRecordsExist() {
@@ -242,7 +246,7 @@ class DbToEakteServiceTest {
     }
 
     private DbToEakteService service() {
-        return new DbToEakteService(repository, dbLogger, dmsService, apentries);
+        return new DbToEakteService(repository, dbLogger, dmsService, apentries, errorHandler);
     }
 
     private static PscdImport data(final DatensatzStatus status) {
