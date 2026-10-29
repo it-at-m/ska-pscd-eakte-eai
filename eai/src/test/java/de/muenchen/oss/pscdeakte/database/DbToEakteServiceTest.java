@@ -16,6 +16,7 @@ import de.muenchen.oss.pscdeakte.database.entity.PscdImport;
 import de.muenchen.oss.pscdeakte.database.repository.PscdImportRepository;
 import de.muenchen.oss.pscdeakte.dms.Apentries;
 import de.muenchen.oss.pscdeakte.dms.DmsService;
+import de.muenchen.oss.pscdeakte.dms.ErrorHandler;
 import de.muenchen.oss.refarch.integration.dms.model.DmsErrorResponse;
 import de.muenchen.oss.refarch.integration.dms.model.DmsObjektResponse;
 import java.util.List;
@@ -29,6 +30,7 @@ import org.springframework.web.reactive.function.client.WebClientResponseExcepti
 @ExtendWith(MockitoExtension.class)
 class DbToEakteServiceTest {
 
+    public static final String GP_ID = "gp-id";
     @Mock
     private PscdImportRepository repository;
 
@@ -64,7 +66,7 @@ class DbToEakteServiceTest {
     @Test
     void processNewRecordCreatesAllDmsObjects() {
         final PscdImport data = data(DatensatzStatus.NEW);
-        when(apentries.getApentryCoo("gp-id")).thenReturn("apentry-coo");
+        when(apentries.getApentryCoo(GP_ID)).thenReturn("apentry-coo");
         when(dmsService.createFile(data)).thenReturn(response("akte-coo"));
         when(dmsService.createProcedureBestandsakte("akte-coo")).thenReturn(response("bestandsakt-coo"));
         when(dmsService.createProcedureAV("akte-coo")).thenReturn(response("av-coo"));
@@ -82,7 +84,7 @@ class DbToEakteServiceTest {
     @Test
     void processStartedRecordContinuesWithApentryCreation() {
         final PscdImport data = data(DatensatzStatus.STARTED);
-        when(apentries.getApentryCoo("gp-id")).thenReturn("apentry-coo");
+        when(apentries.getApentryCoo(GP_ID)).thenReturn("apentry-coo");
         when(dmsService.createFile(data)).thenReturn(response("akte-coo"));
         when(dmsService.createProcedureBestandsakte("akte-coo")).thenReturn(response("bestandsakt-coo"));
         when(dmsService.createProcedureAV("akte-coo")).thenReturn(response("av-coo"));
@@ -134,7 +136,7 @@ class DbToEakteServiceTest {
         service().process(data);
 
         verify(dmsService).updateFile(data);
-        verify(dbLogger).log("info", "Gp gp-id hat neue Daten. -> update", null);
+        verify(dbLogger).log("info", "Gp gp-id hat neue Daten. -> update", null, GP_ID);
         assertEquals(DatensatzStatus.DONE, data.getStatus());
     }
 
@@ -154,7 +156,7 @@ class DbToEakteServiceTest {
 
         service().process(data);
 
-        verify(dbLogger).log(DbToEakteService.ERROR, "GpId gp-idsteht auf ERROR.", null);
+        verify(dbLogger).log(DbToEakteService.ERROR, "GpId gp-id steht auf ERROR.", null, GP_ID);
     }
 
     @Test
@@ -179,8 +181,8 @@ class DbToEakteServiceTest {
 
         service().process(data);
 
-        verify(dbLogger).log(DbToEakteService.ERROR, "Exception aus der eAkte: WebclientResponseException", "request failed");
-        verify(dbLogger).log(DbToEakteService.ERROR, "DmsErrorResponse der WebclientResponseException", "typed error");
+        verify(dbLogger).log(DbToEakteService.ERROR, "GpId " + GP_ID + ": WebClientResponseException aus der eAkte", "request failed | typed error", GP_ID);
+
         verify(repository).save(data);
     }
 
@@ -195,7 +197,7 @@ class DbToEakteServiceTest {
 
         service().process(data);
 
-        verify(dbLogger).log(DbToEakteService.ERROR, "ResponseBody der WebclientResponseException", "raw error");
+        verify(dbLogger).log(DbToEakteService.ERROR, "GpId " + GP_ID + ": WebClientResponseException aus der eAkte", "request failed | raw error", GP_ID);
     }
 
     @Test
@@ -203,10 +205,11 @@ class DbToEakteServiceTest {
         final PscdImport data = data(DatensatzStatus.UPDATE);
         final WebClientResponseException exception = mock(WebClientResponseException.class);
         final String rawResponseBody = "undecodable raw response";
+        when(exception.getMessage()).thenReturn("request failed");
         when(exception.getResponseBodyAs(DmsErrorResponse.class)).thenThrow(new IllegalStateException("undecodable"));
         when(exception.getResponseBodyAsString()).thenReturn(rawResponseBody);
         doThrow(exception).when(dmsService).updateFile(data);
-        final Logger logger = (Logger) LoggerFactory.getLogger(DbToEakteService.class);
+        final Logger logger = (Logger) LoggerFactory.getLogger(ErrorHandler.class);
         final ListAppender<ILoggingEvent> appender = new ListAppender<>();
         appender.start();
         logger.addAppender(appender);
@@ -214,7 +217,8 @@ class DbToEakteServiceTest {
         try {
             service().process(data);
 
-            assertTrue(appender.list.stream().anyMatch(event -> event.getLevel() == Level.WARN && event.getFormattedMessage().contains(rawResponseBody)));
+            assertTrue(appender.list.stream().anyMatch(event -> event.getLevel() == Level.ERROR
+                    && event.getFormattedMessage().equals("GpId gp-id: WebClientResponseException aus der eAkte: request failed | undecodable raw response")));
             verify(repository).save(data);
         } finally {
             logger.detachAppender(appender);
@@ -228,7 +232,7 @@ class DbToEakteServiceTest {
 
         service().process(data);
 
-        verify(dbLogger).log(DbToEakteService.ERROR, "Timeout in der eAkte", "timeout");
+        verify(dbLogger).log(DbToEakteService.ERROR, "GpId gp-id: IllegalStateException aus der eAkte: Timeout", "timeout", GP_ID);
     }
 
     @Test
@@ -238,16 +242,16 @@ class DbToEakteServiceTest {
 
         service().process(data);
 
-        verify(dbLogger).log(DbToEakteService.ERROR, "Exception beim Schreiben in eAkte", "unexpected");
+        verify(dbLogger).log(DbToEakteService.ERROR, "GpId " + GP_ID + ": RuntimeException aus der eAkte", "unexpected", GP_ID);
     }
 
     private DbToEakteService service() {
-        return new DbToEakteService(repository, dbLogger, dmsService, apentries);
+        return new DbToEakteService(repository, dbLogger, dmsService, apentries, new ErrorHandler(dbLogger));
     }
 
     private static PscdImport data(final DatensatzStatus status) {
         final PscdImport data = new PscdImport();
-        data.setGeschaeftspartnerId("gp-id");
+        data.setGeschaeftspartnerId(GP_ID);
         data.setStatus(status);
         return data;
     }

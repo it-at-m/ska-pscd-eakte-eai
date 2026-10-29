@@ -14,11 +14,12 @@ public class DBLogger {
 
     @Async
     @Transactional
-    public void log(final String level, final String message, final String exception) {
+    public void log(final String level, final String message, final String exception, final String gpId) {
         final LogEntry logEntry = new LogEntry();
         logEntry.setLevel(level);
         logEntry.setMessage(message);
         logEntry.setException(exception);
+        logEntry.setGpId(gpId);
 
         entityManager.persist(logEntry);
     }
