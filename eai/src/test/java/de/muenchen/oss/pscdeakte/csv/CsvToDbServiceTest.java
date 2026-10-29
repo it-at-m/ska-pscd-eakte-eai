@@ -99,7 +99,7 @@ class CsvToDbServiceTest {
 
         csvToDbService.saveFileToDb("input.csv");
 
-        verify(dbLogger).log("ERROR", "reading/moving file input.csv failed", "S3 unavailable");
+        verify(dbLogger).log("ERROR", "reading/moving file input.csv failed", "S3 unavailable", null);
     }
 
     @Test

@@ -27,6 +27,9 @@ public class LogEntry extends BaseEntity {
 
     private String level;
 
+    @Column(name = "gp_id", length = 10)
+    private String gpId;
+
     @Column(columnDefinition = "TEXT")
     private String message;
 

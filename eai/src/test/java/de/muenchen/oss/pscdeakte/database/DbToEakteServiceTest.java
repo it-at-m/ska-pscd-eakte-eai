@@ -136,7 +136,7 @@ class DbToEakteServiceTest {
         service().process(data);
 
         verify(dmsService).updateFile(data);
-        verify(dbLogger).log("info", "Gp gp-id hat neue Daten. -> update", null);
+        verify(dbLogger).log("info", "Gp gp-id hat neue Daten. -> update", null, GP_ID);
         assertEquals(DatensatzStatus.DONE, data.getStatus());
     }
 
@@ -156,7 +156,7 @@ class DbToEakteServiceTest {
 
         service().process(data);
 
-        verify(dbLogger).log(DbToEakteService.ERROR, "GpId gp-id steht auf ERROR.", null);
+        verify(dbLogger).log(DbToEakteService.ERROR, "GpId gp-id steht auf ERROR.", null, GP_ID);
     }
 
     @Test
@@ -181,7 +181,7 @@ class DbToEakteServiceTest {
 
         service().process(data);
 
-        verify(dbLogger).log(DbToEakteService.ERROR, "GpId " + GP_ID + ": WebClientResponseException aus der eAkte", "request failed | typed error");
+        verify(dbLogger).log(DbToEakteService.ERROR, "GpId " + GP_ID + ": WebClientResponseException aus der eAkte", "request failed | typed error", GP_ID);
 
         verify(repository).save(data);
     }
@@ -197,7 +197,7 @@ class DbToEakteServiceTest {
 
         service().process(data);
 
-        verify(dbLogger).log(DbToEakteService.ERROR, "GpId " + GP_ID + ": WebClientResponseException aus der eAkte", "request failed | raw error");
+        verify(dbLogger).log(DbToEakteService.ERROR, "GpId " + GP_ID + ": WebClientResponseException aus der eAkte", "request failed | raw error", GP_ID);
     }
 
     @Test
@@ -217,7 +217,8 @@ class DbToEakteServiceTest {
         try {
             service().process(data);
 
-            assertTrue(appender.list.stream().anyMatch(event -> event.getLevel() == Level.ERROR && event.getFormattedMessage().equals("GpId gp-id: WebClientResponseException aus der eAkte: request failed | undecodable raw response")));
+            assertTrue(appender.list.stream().anyMatch(event -> event.getLevel() == Level.ERROR
+                    && event.getFormattedMessage().equals("GpId gp-id: WebClientResponseException aus der eAkte: request failed | undecodable raw response")));
             verify(repository).save(data);
         } finally {
             logger.detachAppender(appender);
@@ -231,7 +232,7 @@ class DbToEakteServiceTest {
 
         service().process(data);
 
-        verify(dbLogger).log(DbToEakteService.ERROR, "GpId gp-id: IllegalStateException aus der eAkte: Timeout", "timeout");
+        verify(dbLogger).log(DbToEakteService.ERROR, "GpId gp-id: IllegalStateException aus der eAkte: Timeout", "timeout", GP_ID);
     }
 
     @Test
@@ -241,7 +242,7 @@ class DbToEakteServiceTest {
 
         service().process(data);
 
-        verify(dbLogger).log(DbToEakteService.ERROR, "GpId " + GP_ID + ": RuntimeException aus der eAkte", "unexpected");
+        verify(dbLogger).log(DbToEakteService.ERROR, "GpId " + GP_ID + ": RuntimeException aus der eAkte", "unexpected", GP_ID);
     }
 
     private DbToEakteService service() {
