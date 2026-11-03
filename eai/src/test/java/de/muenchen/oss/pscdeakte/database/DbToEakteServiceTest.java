@@ -43,6 +43,9 @@ class DbToEakteServiceTest {
     @Mock
     private Apentries apentries;
 
+    @Mock
+    private ErrorHandler errorHandler;
+
     @Test
     void startDoesNotInitializeApentriesWhenNoRecordsExist() {
         when(repository.streamAllByStatusIsNotOrderByCreatedTimeAsc(DatensatzStatus.DONE)).thenReturn(List.of());
@@ -246,7 +249,7 @@ class DbToEakteServiceTest {
     }
 
     private DbToEakteService service() {
-        return new DbToEakteService(repository, dbLogger, dmsService, apentries, new ErrorHandler(dbLogger));
+        return new DbToEakteService(repository, dmsService, apentries, errorHandler);
     }
 
     private static PscdImport data(final DatensatzStatus status) {

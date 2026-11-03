@@ -25,14 +25,13 @@ import org.springframework.stereotype.Service;
 @Service
 @RequiredArgsConstructor
 @Slf4j
-public class CsvToDbService {
+public class CsvToDbService extends DBLogger {
 
     public static final String TEST_GPID = "1000000000";
     @Getter
     private final S3OutPort s3;
     private final S3Properties props;
     private final PscdImportRepository pir;
-    private final DBLogger logDb;
 
     /* package */ enum HEADERS {
         GP_ID,
@@ -73,7 +72,8 @@ public class CsvToDbService {
             s3.deleteFile(fileReference);
             log.info("moved file {}/{} to {}/{}", props.getBucket(), filename, props.getBackupBucket(), movedFile);
         } catch (IOException | S3Exception e) {
-            logDb.log("ERROR", "reading/moving file " + filename + " failed", e.getMessage(), null);
+            log.error("reading/moving file {} failed: {}", filename, e.getMessage());
+            log("ERROR", "reading/moving file " + filename + " failed", e.getMessage(), null);
         }
 
     }

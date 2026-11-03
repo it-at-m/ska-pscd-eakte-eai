@@ -11,10 +11,9 @@ import org.springframework.web.reactive.function.client.WebClientResponseExcepti
 @Service
 @RequiredArgsConstructor
 @Slf4j
-public class ErrorHandler {
+public class ErrorHandler extends DBLogger {
 
     public static final String ERROR = "error";
-    private final DBLogger dbLog;
 
     public void handleException(final Exception exceptionToCatch, final String gpId) {
 
@@ -31,11 +30,11 @@ public class ErrorHandler {
             break;
         case final IllegalStateException ise:
             log.error("{}: Timeout", logPrefix);
-            dbLog.log(ERROR, logPrefix + ": Timeout", ise.getMessage(), gpId);
+            log(ERROR, logPrefix + ": Timeout", ise.getMessage(), gpId);
             break;
         default:
             log.error("{}: {}", logPrefix, exceptionToCatch.getStackTrace());
-            dbLog.log(ERROR, logPrefix, exceptionToCatch.getMessage(), gpId);
+            log(ERROR, logPrefix, exceptionToCatch.getMessage(), gpId);
         }
 
     }
@@ -51,12 +50,11 @@ public class ErrorHandler {
             if (errorResponse != null) {
                 log.error("{}: {} | {}", prefix, e.getMessage(), errorResponse);
                 sb.append(errorResponse);
-                dbLog.log(ERROR, prefix, sb.toString(), gpId);
             } else {
                 log.error("{}: {} | {}", prefix, e.getMessage(), e.getResponseBodyAsString());
                 sb.append(e.getResponseBodyAsString());
-                dbLog.log(ERROR, prefix, sb.toString(), gpId);
             }
+            log(ERROR, prefix, sb.toString(), gpId);
         }
     }
 

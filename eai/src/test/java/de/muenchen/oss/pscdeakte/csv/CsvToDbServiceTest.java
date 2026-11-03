@@ -62,7 +62,7 @@ class CsvToDbServiceTest {
         s3Properties.setPrefix("prefix");
         s3Properties.setDelimiter(";");
         s3Properties.setSkipHeader(false);
-        csvToDbService = new CsvToDbService(s3OutPort, s3Properties, pscdImportRepository, dbLogger);
+        csvToDbService = new CsvToDbService(s3OutPort, s3Properties, pscdImportRepository);
     }
 
     @Test
