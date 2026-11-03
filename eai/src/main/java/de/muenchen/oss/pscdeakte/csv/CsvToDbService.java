@@ -20,6 +20,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVRecord;
+import org.postgresql.util.PSQLException;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -73,7 +74,10 @@ public class CsvToDbService {
             s3.deleteFile(fileReference);
             log.info("moved file {}/{} to {}/{}", props.getBucket(), filename, props.getBackupBucket(), movedFile);
         } catch (IOException | S3Exception e) {
+            log.error("reading/moving file {} failed: {}", filename, e.getMessage());
             logDb.log("ERROR", "reading/moving file " + filename + " failed", e.getMessage(), null);
+        } catch (CSVException e) {
+            logDb.log("ERROR", filename + " enthaelt fehlerhaften Datensatz", e.getMessage(), e.getGpId());
         }
 
     }
@@ -86,12 +90,20 @@ public class CsvToDbService {
         }
         final Optional<PscdImport> fromDb = pir.findByGeschaeftspartnerId(fromCsv.getGeschaeftspartnerId());
         if (fromDb.isEmpty()) {
-            pir.save(fromCsv);
-            return;
+            try {
+                pir.save(fromCsv);
+                return;
+            } catch (PSQLException e) {
+                throw new CSVException(fromCsv.getGeschaeftspartnerId(), e);
+            }
         }
         final DuplicateOrUpdate dou = new DuplicateOrUpdate(fromDb.get(), fromCsv);
         if (dou.isUpdate()) {
-            pir.save(dou.createUpdatedPscdImport());
+            try {
+                pir.save(dou.createUpdatedPscdImport());
+            } catch (PSQLException e) {
+                throw new CSVException(fromCsv.getGeschaeftspartnerId(), e);
+            }
         }
     }
 
