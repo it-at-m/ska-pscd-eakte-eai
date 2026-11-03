@@ -2,6 +2,7 @@ package de.muenchen.oss.pscdeakte.database;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.Mockito.atLeastOnce;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
@@ -12,6 +13,7 @@ import ch.qos.logback.classic.Level;
 import ch.qos.logback.classic.Logger;
 import ch.qos.logback.classic.spi.ILoggingEvent;
 import ch.qos.logback.core.read.ListAppender;
+import de.muenchen.oss.pscdeakte.database.entity.LogEntry;
 import de.muenchen.oss.pscdeakte.database.entity.PscdImport;
 import de.muenchen.oss.pscdeakte.database.repository.PscdImportRepository;
 import de.muenchen.oss.pscdeakte.dms.Apentries;
@@ -19,12 +21,16 @@ import de.muenchen.oss.pscdeakte.dms.DmsService;
 import de.muenchen.oss.pscdeakte.dms.ErrorHandler;
 import de.muenchen.oss.refarch.integration.dms.model.DmsErrorResponse;
 import de.muenchen.oss.refarch.integration.dms.model.DmsObjektResponse;
+import jakarta.persistence.EntityManager;
 import java.util.List;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.slf4j.LoggerFactory;
+import org.springframework.test.util.ReflectionTestUtils;
 import org.springframework.web.reactive.function.client.WebClientResponseException;
 
 @ExtendWith(MockitoExtension.class)
@@ -35,7 +41,7 @@ class DbToEakteServiceTest {
     private PscdImportRepository repository;
 
     @Mock
-    private DBLogger dbLogger;
+    private EntityManager entityManager;
 
     @Mock
     private DmsService dmsService;
@@ -43,8 +49,13 @@ class DbToEakteServiceTest {
     @Mock
     private Apentries apentries;
 
-    @Mock
     private ErrorHandler errorHandler;
+
+    @BeforeEach
+    void beforeEach() {
+        errorHandler = new ErrorHandler();
+        ReflectionTestUtils.setField(errorHandler, "entityManager", entityManager);
+    }
 
     @Test
     void startDoesNotInitializeApentriesWhenNoRecordsExist() {
@@ -139,7 +150,7 @@ class DbToEakteServiceTest {
         service().process(data);
 
         verify(dmsService).updateFile(data);
-        verify(dbLogger).log("info", "Gp gp-id hat neue Daten. -> update", null, GP_ID);
+        verifyLog("info", "Gp gp-id hat neue Daten. -> update", null, GP_ID);
         assertEquals(DatensatzStatus.DONE, data.getStatus());
     }
 
@@ -159,7 +170,7 @@ class DbToEakteServiceTest {
 
         service().process(data);
 
-        verify(dbLogger).log(DbToEakteService.ERROR, "GpId gp-id steht auf ERROR.", null, GP_ID);
+        verifyLog(DbToEakteService.ERROR, "GpId gp-id steht auf ERROR.", null, GP_ID);
     }
 
     @Test
@@ -184,7 +195,7 @@ class DbToEakteServiceTest {
 
         service().process(data);
 
-        verify(dbLogger).log(DbToEakteService.ERROR, "GpId " + GP_ID + ": WebClientResponseException aus der eAkte", "request failed | typed error", GP_ID);
+        verifyLog(DbToEakteService.ERROR, "GpId " + GP_ID + ": WebClientResponseException aus der eAkte", "request failed | typed error", GP_ID);
 
         verify(repository).save(data);
     }
@@ -200,7 +211,7 @@ class DbToEakteServiceTest {
 
         service().process(data);
 
-        verify(dbLogger).log(DbToEakteService.ERROR, "GpId " + GP_ID + ": WebClientResponseException aus der eAkte", "request failed | raw error", GP_ID);
+        verifyLog(DbToEakteService.ERROR, "GpId " + GP_ID + ": WebClientResponseException aus der eAkte", "request failed | raw error", GP_ID);
     }
 
     @Test
@@ -235,7 +246,7 @@ class DbToEakteServiceTest {
 
         service().process(data);
 
-        verify(dbLogger).log(DbToEakteService.ERROR, "GpId gp-id: IllegalStateException aus der eAkte: Timeout", "timeout", GP_ID);
+        verifyLog(DbToEakteService.ERROR, "GpId gp-id: IllegalStateException aus der eAkte: Timeout", "timeout", GP_ID);
     }
 
     @Test
@@ -245,11 +256,23 @@ class DbToEakteServiceTest {
 
         service().process(data);
 
-        verify(dbLogger).log(DbToEakteService.ERROR, "GpId " + GP_ID + ": RuntimeException aus der eAkte", "unexpected", GP_ID);
+        verifyLog(DbToEakteService.ERROR, "GpId " + GP_ID + ": RuntimeException aus der eAkte", "unexpected", GP_ID);
     }
 
     private DbToEakteService service() {
-        return new DbToEakteService(repository, dmsService, apentries, errorHandler);
+        final DbToEakteService service = new DbToEakteService(repository, dmsService, apentries, errorHandler);
+        ReflectionTestUtils.setField(service, "entityManager", entityManager);
+        return service;
+    }
+
+    private void verifyLog(final String level, final String message, final String exception, final String gpId) {
+        final ArgumentCaptor<LogEntry> logCaptor = ArgumentCaptor.forClass(LogEntry.class);
+        verify(entityManager, atLeastOnce()).persist(logCaptor.capture());
+        final LogEntry logEntry = logCaptor.getValue();
+        assertEquals(level, logEntry.getLevel());
+        assertEquals(message, logEntry.getMessage());
+        assertEquals(exception, logEntry.getException());
+        assertEquals(gpId, logEntry.getGpId());
     }
 
     private static PscdImport data(final DatensatzStatus status) {
