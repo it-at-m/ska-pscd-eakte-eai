@@ -89,21 +89,17 @@ public class CsvToDbService {
             return;
         }
         final Optional<PscdImport> fromDb = pir.findByGeschaeftspartnerId(fromCsv.getGeschaeftspartnerId());
-        if (fromDb.isEmpty()) {
-            try {
+        try {
+            if (fromDb.isEmpty()) {
                 pir.save(fromCsv);
                 return;
-            } catch (PSQLException e) {
-                throw new CSVException(fromCsv.getGeschaeftspartnerId(), e);
             }
-        }
-        final DuplicateOrUpdate dou = new DuplicateOrUpdate(fromDb.get(), fromCsv);
-        if (dou.isUpdate()) {
-            try {
+            final DuplicateOrUpdate dou = new DuplicateOrUpdate(fromDb.get(), fromCsv);
+            if (dou.isUpdate()) {
                 pir.save(dou.createUpdatedPscdImport());
-            } catch (PSQLException e) {
-                throw new CSVException(fromCsv.getGeschaeftspartnerId(), e);
             }
+        } catch (PSQLException e) {
+            throw new CSVException(fromCsv.getGeschaeftspartnerId(), e);
         }
     }
 

@@ -10,6 +10,6 @@ public class CSVException extends RuntimeException {
         this.gpId = gpId;
     }
 
-    String gpId;
+    final String gpId;
 
 }
