@@ -98,7 +98,7 @@ public class CsvToDbService {
             if (dou.isUpdate()) {
                 pir.save(dou.createUpdatedPscdImport());
             }
-        } catch (PSQLException e) {
+        } catch (Exception e) {
             throw new CSVException(fromCsv.getGeschaeftspartnerId(), e);
         }
     }
