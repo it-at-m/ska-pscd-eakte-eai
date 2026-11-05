@@ -5,7 +5,6 @@ import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 @Service
 public class DBLogger {
@@ -13,12 +12,12 @@ public class DBLogger {
     private EntityManager entityManager;
 
     @Async
-    @Transactional
-    public void log(final String level, final String message, final String exception) {
+    public void log(final String level, final String message, final String exception, final String gpId) {
         final LogEntry logEntry = new LogEntry();
         logEntry.setLevel(level);
         logEntry.setMessage(message);
         logEntry.setException(exception);
+        logEntry.setGpId(gpId);
 
         entityManager.persist(logEntry);
     }

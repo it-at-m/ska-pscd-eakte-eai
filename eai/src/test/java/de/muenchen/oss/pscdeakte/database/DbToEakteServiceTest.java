@@ -2,6 +2,7 @@ package de.muenchen.oss.pscdeakte.database;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.Mockito.atLeastOnce;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
@@ -12,34 +13,49 @@ import ch.qos.logback.classic.Level;
 import ch.qos.logback.classic.Logger;
 import ch.qos.logback.classic.spi.ILoggingEvent;
 import ch.qos.logback.core.read.ListAppender;
+import de.muenchen.oss.pscdeakte.database.entity.LogEntry;
 import de.muenchen.oss.pscdeakte.database.entity.PscdImport;
 import de.muenchen.oss.pscdeakte.database.repository.PscdImportRepository;
 import de.muenchen.oss.pscdeakte.dms.Apentries;
 import de.muenchen.oss.pscdeakte.dms.DmsService;
+import de.muenchen.oss.pscdeakte.dms.ErrorHandler;
 import de.muenchen.oss.refarch.integration.dms.model.DmsErrorResponse;
 import de.muenchen.oss.refarch.integration.dms.model.DmsObjektResponse;
+import jakarta.persistence.EntityManager;
 import java.util.List;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.slf4j.LoggerFactory;
+import org.springframework.test.util.ReflectionTestUtils;
 import org.springframework.web.reactive.function.client.WebClientResponseException;
 
 @ExtendWith(MockitoExtension.class)
 class DbToEakteServiceTest {
 
+    public static final String GP_ID = "gp-id";
     @Mock
     private PscdImportRepository repository;
 
     @Mock
-    private DBLogger dbLogger;
+    private EntityManager entityManager;
 
     @Mock
     private DmsService dmsService;
 
     @Mock
     private Apentries apentries;
+
+    private ErrorHandler errorHandler;
+
+    @BeforeEach
+    void beforeEach() {
+        errorHandler = new ErrorHandler();
+        ReflectionTestUtils.setField(errorHandler, "entityManager", entityManager);
+    }
 
     @Test
     void startDoesNotInitializeApentriesWhenNoRecordsExist() {
@@ -64,7 +80,7 @@ class DbToEakteServiceTest {
     @Test
     void processNewRecordCreatesAllDmsObjects() {
         final PscdImport data = data(DatensatzStatus.NEW);
-        when(apentries.getApentryCoo("gp-id")).thenReturn("apentry-coo");
+        when(apentries.getApentryCoo(GP_ID)).thenReturn("apentry-coo");
         when(dmsService.createFile(data)).thenReturn(response("akte-coo"));
         when(dmsService.createProcedureBestandsakte("akte-coo")).thenReturn(response("bestandsakt-coo"));
         when(dmsService.createProcedureAV("akte-coo")).thenReturn(response("av-coo"));
@@ -82,7 +98,7 @@ class DbToEakteServiceTest {
     @Test
     void processStartedRecordContinuesWithApentryCreation() {
         final PscdImport data = data(DatensatzStatus.STARTED);
-        when(apentries.getApentryCoo("gp-id")).thenReturn("apentry-coo");
+        when(apentries.getApentryCoo(GP_ID)).thenReturn("apentry-coo");
         when(dmsService.createFile(data)).thenReturn(response("akte-coo"));
         when(dmsService.createProcedureBestandsakte("akte-coo")).thenReturn(response("bestandsakt-coo"));
         when(dmsService.createProcedureAV("akte-coo")).thenReturn(response("av-coo"));
@@ -134,7 +150,7 @@ class DbToEakteServiceTest {
         service().process(data);
 
         verify(dmsService).updateFile(data);
-        verify(dbLogger).log("info", "Gp gp-id hat neue Daten. -> update", null);
+        verifyLog("info", "Gp gp-id hat neue Daten. -> update", null, GP_ID);
         assertEquals(DatensatzStatus.DONE, data.getStatus());
     }
 
@@ -154,7 +170,7 @@ class DbToEakteServiceTest {
 
         service().process(data);
 
-        verify(dbLogger).log(DbToEakteService.ERROR, "GpId gp-idsteht auf ERROR.", null);
+        verifyLog(DbToEakteService.ERROR, "GpId gp-id steht auf ERROR.", null, GP_ID);
     }
 
     @Test
@@ -179,8 +195,8 @@ class DbToEakteServiceTest {
 
         service().process(data);
 
-        verify(dbLogger).log(DbToEakteService.ERROR, "Exception aus der eAkte: WebclientResponseException", "request failed");
-        verify(dbLogger).log(DbToEakteService.ERROR, "DmsErrorResponse der WebclientResponseException", "typed error");
+        verifyLog(DbToEakteService.ERROR, "GpId " + GP_ID + ": WebClientResponseException aus der eAkte", "request failed | typed error", GP_ID);
+
         verify(repository).save(data);
     }
 
@@ -195,7 +211,7 @@ class DbToEakteServiceTest {
 
         service().process(data);
 
-        verify(dbLogger).log(DbToEakteService.ERROR, "ResponseBody der WebclientResponseException", "raw error");
+        verifyLog(DbToEakteService.ERROR, "GpId " + GP_ID + ": WebClientResponseException aus der eAkte", "request failed | raw error", GP_ID);
     }
 
     @Test
@@ -203,10 +219,11 @@ class DbToEakteServiceTest {
         final PscdImport data = data(DatensatzStatus.UPDATE);
         final WebClientResponseException exception = mock(WebClientResponseException.class);
         final String rawResponseBody = "undecodable raw response";
+        when(exception.getMessage()).thenReturn("request failed");
         when(exception.getResponseBodyAs(DmsErrorResponse.class)).thenThrow(new IllegalStateException("undecodable"));
         when(exception.getResponseBodyAsString()).thenReturn(rawResponseBody);
         doThrow(exception).when(dmsService).updateFile(data);
-        final Logger logger = (Logger) LoggerFactory.getLogger(DbToEakteService.class);
+        final Logger logger = (Logger) LoggerFactory.getLogger(ErrorHandler.class);
         final ListAppender<ILoggingEvent> appender = new ListAppender<>();
         appender.start();
         logger.addAppender(appender);
@@ -214,7 +231,8 @@ class DbToEakteServiceTest {
         try {
             service().process(data);
 
-            assertTrue(appender.list.stream().anyMatch(event -> event.getLevel() == Level.WARN && event.getFormattedMessage().contains(rawResponseBody)));
+            assertTrue(appender.list.stream().anyMatch(event -> event.getLevel() == Level.ERROR
+                    && event.getFormattedMessage().equals("GpId gp-id: WebClientResponseException aus der eAkte: request failed | undecodable raw response")));
             verify(repository).save(data);
         } finally {
             logger.detachAppender(appender);
@@ -228,7 +246,7 @@ class DbToEakteServiceTest {
 
         service().process(data);
 
-        verify(dbLogger).log(DbToEakteService.ERROR, "Timeout in der eAkte", "timeout");
+        verifyLog(DbToEakteService.ERROR, "GpId gp-id: IllegalStateException aus der eAkte: Timeout", "timeout", GP_ID);
     }
 
     @Test
@@ -238,16 +256,28 @@ class DbToEakteServiceTest {
 
         service().process(data);
 
-        verify(dbLogger).log(DbToEakteService.ERROR, "Exception beim Schreiben in eAkte", "unexpected");
+        verifyLog(DbToEakteService.ERROR, "GpId " + GP_ID + ": RuntimeException aus der eAkte", "unexpected", GP_ID);
     }
 
     private DbToEakteService service() {
-        return new DbToEakteService(repository, dbLogger, dmsService, apentries);
+        final DbToEakteService service = new DbToEakteService(repository, dmsService, apentries, errorHandler);
+        ReflectionTestUtils.setField(service, "entityManager", entityManager);
+        return service;
+    }
+
+    private void verifyLog(final String level, final String message, final String exception, final String gpId) {
+        final ArgumentCaptor<LogEntry> logCaptor = ArgumentCaptor.forClass(LogEntry.class);
+        verify(entityManager, atLeastOnce()).persist(logCaptor.capture());
+        final LogEntry logEntry = logCaptor.getValue();
+        assertEquals(level, logEntry.getLevel());
+        assertEquals(message, logEntry.getMessage());
+        assertEquals(exception, logEntry.getException());
+        assertEquals(gpId, logEntry.getGpId());
     }
 
     private static PscdImport data(final DatensatzStatus status) {
         final PscdImport data = new PscdImport();
-        data.setGeschaeftspartnerId("gp-id");
+        data.setGeschaeftspartnerId(GP_ID);
         data.setStatus(status);
         return data;
     }
