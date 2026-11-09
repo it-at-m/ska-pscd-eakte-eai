@@ -26,8 +26,8 @@ public class ErrorHandler {
         final String logPrefix = builder.toString();
 
         switch (exceptionToCatch) {
-        case final RestClientResponseException wcre:
-            this.handleWebClientResponseException(wcre, logPrefix, gpId);
+        case final RestClientResponseException rcre:
+            this.handleRestClientResponseException(rcre, logPrefix, gpId);
             break;
         case final IllegalStateException ise:
             log.error("{}: Timeout", logPrefix);
@@ -40,19 +40,24 @@ public class ErrorHandler {
 
     }
 
-    private void handleWebClientResponseException(final RestClientResponseException e, final String prefix, final String gpId) {
+    @SuppressWarnings("PMD.EmptyCatchBlock")
+    private void handleRestClientResponseException(final RestClientResponseException e, final String prefix, final String gpId) {
         final StringBuilder sb = new StringBuilder(e.getMessage()).append(" | ");
+        DmsErrorResponse errorResponse = null;
         try {
-            final DmsErrorResponse errorResponse = e.getResponseBodyAs(DmsErrorResponse.class);
+            errorResponse = e.getResponseBodyAs(DmsErrorResponse.class);
+        } catch (IllegalStateException | DecodingException innerEx) {
+//            wird unter finally bearbeitet
+        } finally {
             if (errorResponse != null) {
                 log.error("{}: {} | {}", prefix, e.getMessage(), errorResponse);
                 sb.append(errorResponse);
+            } else {
+                log.error("{}: {} | {}", prefix, e.getMessage(), e.getResponseBodyAsString());
+                sb.append(e.getResponseBodyAsString());
             }
-        } catch (IllegalStateException | DecodingException innerEx) {
-            log.error("{}: {} | {}", prefix, e.getMessage(), e.getResponseBodyAsString());
-            sb.append(e.getResponseBodyAsString());
+            dbLogger.log(ERROR, prefix, sb.toString(), gpId);
         }
-        dbLogger.log(ERROR, prefix, sb.toString(), gpId);
     }
 
 }

@@ -13,15 +13,15 @@ import ch.qos.logback.classic.Level;
 import ch.qos.logback.classic.Logger;
 import ch.qos.logback.classic.spi.ILoggingEvent;
 import ch.qos.logback.core.read.ListAppender;
+import de.muenchen.oss.eakte.v1.generated.model.DmsErrorResponse;
+import de.muenchen.oss.eakte.v1.generated.model.DmsObjektResponse;
 import de.muenchen.oss.pscdeakte.database.entity.LogEntry;
 import de.muenchen.oss.pscdeakte.database.entity.PscdImport;
+import de.muenchen.oss.pscdeakte.database.repository.LogEntryRepository;
 import de.muenchen.oss.pscdeakte.database.repository.PscdImportRepository;
 import de.muenchen.oss.pscdeakte.dms.Apentries;
 import de.muenchen.oss.pscdeakte.dms.DmsService;
 import de.muenchen.oss.pscdeakte.dms.ErrorHandler;
-import de.muenchen.oss.refarch.integration.dms.model.DmsErrorResponse;
-import de.muenchen.oss.refarch.integration.dms.model.DmsObjektResponse;
-import jakarta.persistence.EntityManager;
 import java.util.List;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -30,8 +30,7 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.slf4j.LoggerFactory;
-import org.springframework.test.util.ReflectionTestUtils;
-import org.springframework.web.reactive.function.client.WebClientResponseException;
+import org.springframework.web.client.RestClientResponseException;
 
 @ExtendWith(MockitoExtension.class)
 class DbToEakteServiceTest {
@@ -41,7 +40,7 @@ class DbToEakteServiceTest {
     private PscdImportRepository repository;
 
     @Mock
-    private EntityManager entityManager;
+    private LogEntryRepository logEntryRepository;
 
     @Mock
     private DmsService dmsService;
@@ -50,11 +49,12 @@ class DbToEakteServiceTest {
     private Apentries apentries;
 
     private ErrorHandler errorHandler;
+    private DBLogger dbLogger;
 
     @BeforeEach
     void beforeEach() {
-        errorHandler = new ErrorHandler();
-        ReflectionTestUtils.setField(errorHandler, "entityManager", entityManager);
+        dbLogger = new DBLogger(logEntryRepository);
+        errorHandler = new ErrorHandler(dbLogger);
     }
 
     @Test
@@ -184,9 +184,9 @@ class DbToEakteServiceTest {
     }
 
     @Test
-    void processLogsTypedWebClientErrorResponse() {
+    void processLogsTypedRestClientErrorResponse() {
         final PscdImport data = data(DatensatzStatus.UPDATE);
-        final WebClientResponseException exception = mock(WebClientResponseException.class);
+        final RestClientResponseException exception = mock(RestClientResponseException.class);
         final DmsErrorResponse errorResponse = mock(DmsErrorResponse.class);
         when(exception.getMessage()).thenReturn("request failed");
         when(exception.getResponseBodyAs(DmsErrorResponse.class)).thenReturn(errorResponse);
@@ -195,15 +195,15 @@ class DbToEakteServiceTest {
 
         service().process(data);
 
-        verifyLog(DbToEakteService.ERROR, "GpId " + GP_ID + ": WebClientResponseException aus der eAkte", "request failed | typed error", GP_ID);
+        verifyLog(DbToEakteService.ERROR, "GpId " + GP_ID + ": RestClientResponseException aus der eAkte", "request failed | typed error", GP_ID);
 
         verify(repository).save(data);
     }
 
     @Test
-    void processLogsRawWebClientErrorResponse() {
+    void processLogsRawRestClientErrorResponse() {
         final PscdImport data = data(DatensatzStatus.UPDATE);
-        final WebClientResponseException exception = mock(WebClientResponseException.class);
+        final RestClientResponseException exception = mock(RestClientResponseException.class);
         when(exception.getMessage()).thenReturn("request failed");
         when(exception.getResponseBodyAs(DmsErrorResponse.class)).thenReturn(null);
         when(exception.getResponseBodyAsString()).thenReturn("raw error");
@@ -211,13 +211,13 @@ class DbToEakteServiceTest {
 
         service().process(data);
 
-        verifyLog(DbToEakteService.ERROR, "GpId " + GP_ID + ": WebClientResponseException aus der eAkte", "request failed | raw error", GP_ID);
+        verifyLog(DbToEakteService.ERROR, "GpId " + GP_ID + ": RestClientResponseException aus der eAkte", "request failed | raw error", GP_ID);
     }
 
     @Test
-    void processHandlesUndecodableWebClientErrorResponse() {
+    void processHandlesUndecodableRestClientErrorResponse() {
         final PscdImport data = data(DatensatzStatus.UPDATE);
-        final WebClientResponseException exception = mock(WebClientResponseException.class);
+        final RestClientResponseException exception = mock(RestClientResponseException.class);
         final String rawResponseBody = "undecodable raw response";
         when(exception.getMessage()).thenReturn("request failed");
         when(exception.getResponseBodyAs(DmsErrorResponse.class)).thenThrow(new IllegalStateException("undecodable"));
@@ -232,7 +232,7 @@ class DbToEakteServiceTest {
             service().process(data);
 
             assertTrue(appender.list.stream().anyMatch(event -> event.getLevel() == Level.ERROR
-                    && event.getFormattedMessage().equals("GpId gp-id: WebClientResponseException aus der eAkte: request failed | undecodable raw response")));
+                    && event.getFormattedMessage().equals("GpId gp-id: RestClientResponseException aus der eAkte: request failed | undecodable raw response")));
             verify(repository).save(data);
         } finally {
             logger.detachAppender(appender);
@@ -260,14 +260,12 @@ class DbToEakteServiceTest {
     }
 
     private DbToEakteService service() {
-        final DbToEakteService service = new DbToEakteService(repository, dmsService, apentries, errorHandler);
-        ReflectionTestUtils.setField(service, "entityManager", entityManager);
-        return service;
+        return new DbToEakteService(repository, dmsService, apentries, errorHandler, dbLogger);
     }
 
     private void verifyLog(final String level, final String message, final String exception, final String gpId) {
         final ArgumentCaptor<LogEntry> logCaptor = ArgumentCaptor.forClass(LogEntry.class);
-        verify(entityManager, atLeastOnce()).persist(logCaptor.capture());
+        verify(logEntryRepository, atLeastOnce()).save(logCaptor.capture());
         final LogEntry logEntry = logCaptor.getValue();
         assertEquals(level, logEntry.getLevel());
         assertEquals(message, logEntry.getMessage());
