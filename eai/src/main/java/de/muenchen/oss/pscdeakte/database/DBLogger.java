@@ -12,12 +12,12 @@ public class DBLogger {
     private EntityManager entityManager;
 
     @Async
-    public void log(final String level, final String message, final String exception, final String gpId) {
+    public void log(final DBLogEntry entry) {
         final LogEntry logEntry = new LogEntry();
-        logEntry.setLevel(level);
-        logEntry.setMessage(message);
-        logEntry.setException(exception);
-        logEntry.setGpId(gpId);
+        logEntry.setLevel(entry.level());
+        logEntry.setMessage(entry.message());
+        logEntry.setException(entry.exception());
+        logEntry.setGpId(entry.gpId());
 
         entityManager.persist(logEntry);
     }

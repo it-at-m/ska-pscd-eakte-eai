@@ -1,20 +1,20 @@
 package de.muenchen.oss.pscdeakte.dms;
 
-import de.muenchen.oss.refarch.integration.dms.ApiClient;
-import de.muenchen.oss.refarch.integration.dms.api.ApentriesApi;
-import de.muenchen.oss.refarch.integration.dms.api.FilesApi;
-import de.muenchen.oss.refarch.integration.dms.api.ProceduresApi;
-import de.muenchen.oss.refarch.integration.dms.api.SubjectAreaUnitsApi;
-import de.muenchen.oss.refarch.integration.dms.api.UserFormsDataApi;
+import de.muenchen.oss.eakte.v1.generated.api.ApentriesApi;
+import de.muenchen.oss.eakte.v1.generated.api.FilesApi;
+import de.muenchen.oss.eakte.v1.generated.api.ProceduresApi;
+import de.muenchen.oss.eakte.v1.generated.api.SubjectAreaUnitsApi;
+import de.muenchen.oss.eakte.v1.generated.api.UserFormsDataApi;
+import de.muenchen.oss.eakte.v1.generated.dms.ApiClient;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.web.reactive.function.client.WebClient;
+import org.springframework.web.client.RestClient;
 
 @Configuration
 class ApiClientConfiguration {
     @Bean
     public ApiClient apiClient(final DmsProperties dmsProperties) {
-        final WebClient webClient = WebClient.builder().build();
+        final RestClient webClient = RestClient.builder().build();
         final ApiClient apiClient = new ApiClient(webClient);
         apiClient.setBasePath(dmsProperties.getBaseUrl());
         apiClient.setUsername(dmsProperties.getUsername());

@@ -1,6 +1,7 @@
 package de.muenchen.oss.pscdeakte.csv;
 
 import de.muenchen.oss.pscdeakte.configuration.annotation.LogExecutionTime;
+import de.muenchen.oss.pscdeakte.database.DBLogEntry;
 import de.muenchen.oss.pscdeakte.database.DBLogger;
 import de.muenchen.oss.pscdeakte.database.DatensatzStatus;
 import de.muenchen.oss.pscdeakte.database.entity.PscdImport;
@@ -73,10 +74,10 @@ public class CsvToDbService extends DBLogger {
             log.info("moved file {}/{} to {}/{}", props.getBucket(), filename, props.getBackupBucket(), movedFile);
         } catch (IOException | S3Exception e) {
             log.error("reading/moving file {} failed: {}", filename, e.getMessage());
-            log("ERROR", "reading/moving file " + filename + " failed", e.getMessage(), null);
+            log(new DBLogEntry("ERROR", "reading/moving file " + filename + " failed", e.getMessage(), null));
         } catch (DBException e) {
             log.error("Exception von DB bei file {}, GP-Id {}: {}", filename, e.getGpId(), e.getMessage());
-            log("ERROR", "Exception von DB bei file " + filename + ", GP-Id " + e.getGpId(), e.getMessage(), e.getGpId());
+            log(new DBLogEntry("ERROR", "Exception von DB bei file " + filename + ", GP-Id " + e.getGpId(), e.getMessage(), e.getGpId()));
         }
 
     }

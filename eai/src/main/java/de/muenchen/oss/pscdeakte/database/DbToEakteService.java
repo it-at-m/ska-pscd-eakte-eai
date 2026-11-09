@@ -68,7 +68,7 @@ public class DbToEakteService extends DBLogger {
             this.log(data, DatensatzStatus.DONE);
             break;
         case DatensatzStatus.UPDATE:
-            log("info", "Gp " + data.getGeschaeftspartnerId() + " hat neue Daten. -> update", null, data.getGeschaeftspartnerId());
+            log(new DBLogEntry("info", "Gp " + data.getGeschaeftspartnerId() + " hat neue Daten. -> update", null, data.getGeschaeftspartnerId()));
             dmsService.updateFile(data);
             this.log(data, DatensatzStatus.DONE);
             break;
@@ -76,7 +76,7 @@ public class DbToEakteService extends DBLogger {
             // personenbezogene Daten entfernen wird vom Projekt nicht erwartet.
             break;
         case DatensatzStatus.ERROR:
-            log(ERROR, "GpId " + data.getGeschaeftspartnerId() + " steht auf ERROR.", null, data.getGeschaeftspartnerId());
+            log(new DBLogEntry(ERROR, "GpId " + data.getGeschaeftspartnerId() + " steht auf ERROR.", null, data.getGeschaeftspartnerId()));
             break;
         default:
             log.warn("Status steht auf {}", data.getStatus().getValue());

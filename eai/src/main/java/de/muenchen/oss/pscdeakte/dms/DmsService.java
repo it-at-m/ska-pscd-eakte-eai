@@ -1,23 +1,22 @@
 package de.muenchen.oss.pscdeakte.dms;
 
+import de.muenchen.oss.eakte.v1.generated.api.ApentriesApi;
+import de.muenchen.oss.eakte.v1.generated.api.FilesApi;
+import de.muenchen.oss.eakte.v1.generated.api.ProceduresApi;
+import de.muenchen.oss.eakte.v1.generated.api.SubjectAreaUnitsApi;
+import de.muenchen.oss.eakte.v1.generated.api.UserFormsDataApi;
+import de.muenchen.oss.eakte.v1.generated.model.CreateFileDTO;
+import de.muenchen.oss.eakte.v1.generated.model.CreateProcedureDTO;
+import de.muenchen.oss.eakte.v1.generated.model.CreateSubjectAreaUnitAnfrageDTO;
+import de.muenchen.oss.eakte.v1.generated.model.DmsObjektResponse;
+import de.muenchen.oss.eakte.v1.generated.model.ReadApentryAntwortDTO;
+import de.muenchen.oss.eakte.v1.generated.model.SearchApentryDTO;
+import de.muenchen.oss.eakte.v1.generated.model.SearchApentryResponseDTO;
+import de.muenchen.oss.eakte.v1.generated.model.UpdateFileDTO;
+import de.muenchen.oss.eakte.v1.generated.model.UpdateUserFormsDataRequestDTO;
+import de.muenchen.oss.eakte.v1.generated.model.UserFormsReferenz;
 import de.muenchen.oss.pscdeakte.database.entity.PscdImport;
 import de.muenchen.oss.pscdeakte.helper.DateHelper;
-import de.muenchen.oss.refarch.integration.dms.api.ApentriesApi;
-import de.muenchen.oss.refarch.integration.dms.api.FilesApi;
-import de.muenchen.oss.refarch.integration.dms.api.ProceduresApi;
-import de.muenchen.oss.refarch.integration.dms.api.SubjectAreaUnitsApi;
-import de.muenchen.oss.refarch.integration.dms.api.UserFormsDataApi;
-import de.muenchen.oss.refarch.integration.dms.model.CreateFileDTO;
-import de.muenchen.oss.refarch.integration.dms.model.CreateProcedureDTO;
-import de.muenchen.oss.refarch.integration.dms.model.CreateSubjectAreaUnitAnfrageDTO;
-import de.muenchen.oss.refarch.integration.dms.model.DmsObjektResponse;
-import de.muenchen.oss.refarch.integration.dms.model.ReadApentryAntwortDTO;
-import de.muenchen.oss.refarch.integration.dms.model.SearchApentryDTO;
-import de.muenchen.oss.refarch.integration.dms.model.SearchApentryResponseDTO;
-import de.muenchen.oss.refarch.integration.dms.model.UpdateFileDTO;
-import de.muenchen.oss.refarch.integration.dms.model.UpdateUserFormsDataRequestDTO;
-import de.muenchen.oss.refarch.integration.dms.model.UserFormsReferenz;
-import java.time.Duration;
 import java.util.ArrayList;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
@@ -36,14 +35,14 @@ public class DmsService {
 
     public ReadApentryAntwortDTO getApentries() {
         return apentriesApi.readApentry(dmsProperties.getCooEinzelakte(), dmsProperties.getXAnwendung(), dmsProperties.getUserlogin(), dmsProperties.getJoboe(),
-                dmsProperties.getJobposition()).timeout(Duration.ofSeconds(dmsProperties.getTimeout())).block();
+                dmsProperties.getJobposition());
     }
 
     public SearchApentryResponseDTO getApentryFor(final int lfdnr) {
         final SearchApentryDTO dto = new SearchApentryDTO();
         dto.setBasenr(dmsProperties.getAktenplannummer() + "." + lfdnr);
-        return apentriesApi.searchApentry(dto, dmsProperties.getXAnwendung(), dmsProperties.getUserlogin(), dmsProperties.getJoboe(),
-                dmsProperties.getJobposition()).timeout(Duration.ofSeconds(dmsProperties.getTimeout())).block();
+        return apentriesApi.searchApentry(dmsProperties.getUserlogin(), dto, dmsProperties.getXAnwendung(), dmsProperties.getJoboe(),
+                dmsProperties.getJobposition());
     }
 
     /**
@@ -58,8 +57,8 @@ public class DmsService {
         dto.setBasenr(dmsProperties.getAktenplannummer() + "." + laufendeNr);
         dto.setShortterm(bereich);
         dto.setObjaddress(dmsProperties.getCooEinzelakte());
-        return subjectAreaUnitsApi.createSubjectAreaUnit(dto, dmsProperties.getXAnwendung(), dmsProperties.getUserlogin(), dmsProperties.getJoboe(),
-                dmsProperties.getJobposition()).timeout(Duration.ofSeconds(dmsProperties.getTimeout())).block();
+        return subjectAreaUnitsApi.createSubjectAreaUnit(dmsProperties.getUserlogin(), dto, dmsProperties.getXAnwendung(), dmsProperties.getJoboe(),
+                dmsProperties.getJobposition());
     }
 
     /**
@@ -72,22 +71,19 @@ public class DmsService {
         final CreateFileDTO dto = new CreateFileDTO();
         dto.shortname(data.getGeschaeftspartnerId()).filesubj(data.getZentralakt()).apentry(data.getBetreffseinheit()).definition(dmsProperties.getCooKmAkte());
         dto.userformsdata(getUserFormsData(data));
-        return filesApi.createFile(dto, dmsProperties.getXAnwendung(), dmsProperties.getUserlogin(), dmsProperties.getJoboe(), dmsProperties.getJobposition())
-                .timeout(Duration.ofSeconds(dmsProperties.getTimeout())).block();
+        return filesApi.createFile(dmsProperties.getUserlogin(), dto, dmsProperties.getXAnwendung(), dmsProperties.getJoboe(), dmsProperties.getJobposition());
     }
 
     public void updateFile(final PscdImport data) {
         final UpdateUserFormsDataRequestDTO dto = new UpdateUserFormsDataRequestDTO();
         dto.userformsdata(getUserFormsData(data));
         userFormsDataApi
-                .updateUserFormsData(data.getAkte(), dto, dmsProperties.getXAnwendung(), dmsProperties.getUserlogin(), dmsProperties.getJoboe(),
-                        dmsProperties.getJobposition())
-                .timeout(Duration.ofSeconds(dmsProperties.getTimeout())).block();
+                .updateUserFormsData(dmsProperties.getUserlogin(), data.getAkte(), dto, dmsProperties.getXAnwendung(), dmsProperties.getJoboe(),
+                        dmsProperties.getJobposition());
         final UpdateFileDTO ufdto = new UpdateFileDTO();
         ufdto.shortname(data.getGeschaeftspartnerId()).filesubj(data.getZentralakt());
-        filesApi.updateFile(data.getAkte(), ufdto, dmsProperties.getXAnwendung(), dmsProperties.getUserlogin(), dmsProperties.getJoboe(),
-                dmsProperties.getJobposition())
-                .timeout(Duration.ofSeconds(dmsProperties.getTimeout())).block();
+        filesApi.updateFile(dmsProperties.getUserlogin(), data.getAkte(), ufdto, dmsProperties.getXAnwendung(), dmsProperties.getJoboe(),
+                dmsProperties.getJobposition());
     }
 
     private static List<UserFormsReferenz> getUserFormsData(final PscdImport data) {
@@ -143,7 +139,6 @@ public class DmsService {
         final CreateProcedureDTO dto = new CreateProcedureDTO();
         dto.shortname(shortname).accdef("Aktengebunden").referrednumber(referrednumber);
         return proceduresApi
-                .createProcedure(dto, dmsProperties.getXAnwendung(), dmsProperties.getUserlogin(), dmsProperties.getJoboe(), dmsProperties.getJobposition())
-                .timeout(Duration.ofSeconds(dmsProperties.getTimeout())).block();
+                .createProcedure(dmsProperties.getUserlogin(), dto, dmsProperties.getXAnwendung(), dmsProperties.getJoboe(), dmsProperties.getJobposition());
     }
 }
