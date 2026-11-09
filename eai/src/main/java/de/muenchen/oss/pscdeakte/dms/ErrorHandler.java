@@ -1,7 +1,6 @@
 package de.muenchen.oss.pscdeakte.dms;
 
 import de.muenchen.oss.eakte.v1.generated.model.DmsErrorResponse;
-import de.muenchen.oss.pscdeakte.database.DBLogEntry;
 import de.muenchen.oss.pscdeakte.database.DBLogger;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -12,8 +11,9 @@ import org.springframework.web.client.RestClientResponseException;
 @Service
 @RequiredArgsConstructor
 @Slf4j
-public class ErrorHandler extends DBLogger {
+public class ErrorHandler {
 
+    private final DBLogger dbLogger;
     public static final String ERROR = "error";
 
     public void handleException(final Exception exceptionToCatch, final String gpId) {
@@ -31,29 +31,28 @@ public class ErrorHandler extends DBLogger {
             break;
         case final IllegalStateException ise:
             log.error("{}: Timeout", logPrefix);
-            log(new DBLogEntry(ERROR, logPrefix + ": Timeout", ise.getMessage(), gpId));
+            dbLogger.log(ERROR, logPrefix + ": Timeout", ise.getMessage(), gpId);
             break;
         default:
             log.error("{}: {}", logPrefix, exceptionToCatch.getStackTrace());
-            log(new DBLogEntry(ERROR, logPrefix, exceptionToCatch.getMessage(), gpId));
+            dbLogger.log(ERROR, logPrefix, exceptionToCatch.getMessage(), gpId);
         }
 
     }
 
     private void handleWebClientResponseException(final RestClientResponseException e, final String prefix, final String gpId) {
         final StringBuilder sb = new StringBuilder(e.getMessage()).append(" | ");
-        DmsErrorResponse errorResponse = null;
         try {
-            errorResponse = e.getResponseBodyAs(DmsErrorResponse.class);
+            final DmsErrorResponse errorResponse = e.getResponseBodyAs(DmsErrorResponse.class);
+            if (errorResponse != null) {
+                log.error("{}: {} | {}", prefix, e.getMessage(), errorResponse);
+                sb.append(errorResponse);
+            }
         } catch (IllegalStateException | DecodingException innerEx) {
             log.error("{}: {} | {}", prefix, e.getMessage(), e.getResponseBodyAsString());
             sb.append(e.getResponseBodyAsString());
         }
-        if (errorResponse != null) {
-            log.error("{}: {} | {}", prefix, e.getMessage(), errorResponse);
-            sb.append(errorResponse);
-        }
-        log(new DBLogEntry(ERROR, prefix, sb.toString(), gpId));
+        dbLogger.log(ERROR, prefix, sb.toString(), gpId);
     }
 
 }

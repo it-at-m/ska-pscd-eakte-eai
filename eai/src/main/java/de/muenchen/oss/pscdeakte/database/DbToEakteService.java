@@ -15,13 +15,14 @@ import org.springframework.stereotype.Service;
 @RequiredArgsConstructor
 @Service
 @Slf4j
-public class DbToEakteService extends DBLogger {
+public class DbToEakteService {
 
     public static final String ERROR = "error";
     private final PscdImportRepository repo;
     private final DmsService dmsService;
     private final Apentries apentries;
     private final ErrorHandler errorHandler;
+    private final DBLogger dbLogger;
 
     @LogExecutionTime
     public void start() {
@@ -68,7 +69,7 @@ public class DbToEakteService extends DBLogger {
             this.log(data, DatensatzStatus.DONE);
             break;
         case DatensatzStatus.UPDATE:
-            log(new DBLogEntry("info", "Gp " + data.getGeschaeftspartnerId() + " hat neue Daten. -> update", null, data.getGeschaeftspartnerId()));
+            dbLogger.log("info", "Gp " + data.getGeschaeftspartnerId() + " hat neue Daten. -> update", null, data.getGeschaeftspartnerId());
             dmsService.updateFile(data);
             this.log(data, DatensatzStatus.DONE);
             break;
@@ -76,7 +77,7 @@ public class DbToEakteService extends DBLogger {
             // personenbezogene Daten entfernen wird vom Projekt nicht erwartet.
             break;
         case DatensatzStatus.ERROR:
-            log(new DBLogEntry(ERROR, "GpId " + data.getGeschaeftspartnerId() + " steht auf ERROR.", null, data.getGeschaeftspartnerId()));
+            dbLogger.log(ERROR, "GpId " + data.getGeschaeftspartnerId() + " steht auf ERROR.", null, data.getGeschaeftspartnerId());
             break;
         default:
             log.warn("Status steht auf {}", data.getStatus().getValue());

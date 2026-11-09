@@ -1,24 +1,26 @@
 package de.muenchen.oss.pscdeakte.database;
 
 import de.muenchen.oss.pscdeakte.database.entity.LogEntry;
-import jakarta.persistence.EntityManager;
-import jakarta.persistence.PersistenceContext;
+import de.muenchen.oss.pscdeakte.database.repository.LogEntryRepository;
+import lombok.RequiredArgsConstructor;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
 @Service
+@RequiredArgsConstructor
 public class DBLogger {
-    @PersistenceContext
-    private EntityManager entityManager;
+
+    private final LogEntryRepository logEntryRepo;
 
     @Async
-    public void log(final DBLogEntry entry) {
+    @SuppressWarnings("PMD.UseObjectForClearerAPI")
+    public void log(final String level, final String message, final String exception, final String gpId) {
         final LogEntry logEntry = new LogEntry();
-        logEntry.setLevel(entry.level());
-        logEntry.setMessage(entry.message());
-        logEntry.setException(entry.exception());
-        logEntry.setGpId(entry.gpId());
+        logEntry.setLevel(level);
+        logEntry.setMessage(message);
+        logEntry.setException(exception);
+        logEntry.setGpId(gpId);
 
-        entityManager.persist(logEntry);
+        logEntryRepo.save(logEntry);
     }
 }
