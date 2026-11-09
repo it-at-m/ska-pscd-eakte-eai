@@ -25,6 +25,7 @@ logging:
 
 dms:
   userlogin: "admin"
+eakte:
   username: "admin"
   password: "password"
   base-url: "http://localhost:8080"

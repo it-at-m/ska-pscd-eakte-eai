@@ -1,9 +1,9 @@
 package de.muenchen.oss.pscdeakte.dms;
 
+import de.muenchen.oss.eakte.v1.generated.model.DmsObjektResponse;
+import de.muenchen.oss.eakte.v1.generated.model.Objektreferenz;
+import de.muenchen.oss.eakte.v1.generated.model.ReadApentryAntwortDTO;
 import de.muenchen.oss.pscdeakte.configuration.annotation.LogExecutionTime;
-import de.muenchen.oss.refarch.integration.dms.model.DmsObjektResponse;
-import de.muenchen.oss.refarch.integration.dms.model.Objektreferenz;
-import de.muenchen.oss.refarch.integration.dms.model.ReadApentryAntwortDTO;
 
 import java.util.List;
 import java.util.Map;

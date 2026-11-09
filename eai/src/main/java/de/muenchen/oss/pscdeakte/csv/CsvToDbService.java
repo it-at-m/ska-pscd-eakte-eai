@@ -25,13 +25,14 @@ import org.springframework.stereotype.Service;
 @Service
 @RequiredArgsConstructor
 @Slf4j
-public class CsvToDbService extends DBLogger {
+public class CsvToDbService {
 
     public static final String TEST_GPID = "1000000000";
     @Getter
     private final S3OutPort s3;
     private final S3Properties props;
     private final PscdImportRepository pir;
+    private final DBLogger dbLogger;
 
     /* package */ enum HEADERS {
         GP_ID,
@@ -73,10 +74,10 @@ public class CsvToDbService extends DBLogger {
             log.info("moved file {}/{} to {}/{}", props.getBucket(), filename, props.getBackupBucket(), movedFile);
         } catch (IOException | S3Exception e) {
             log.error("reading/moving file {} failed: {}", filename, e.getMessage());
-            log("ERROR", "reading/moving file " + filename + " failed", e.getMessage(), null);
+            dbLogger.log("ERROR", "reading/moving file " + filename + " failed", e.getMessage(), null);
         } catch (DBException e) {
             log.error("Exception von DB bei file {}, GP-Id {}: {}", filename, e.getGpId(), e.getMessage());
-            log("ERROR", "Exception von DB bei file " + filename + ", GP-Id " + e.getGpId(), e.getMessage(), e.getGpId());
+            dbLogger.log("ERROR", "Exception von DB bei file " + filename + ", GP-Id " + e.getGpId(), e.getMessage(), e.getGpId());
         }
 
     }

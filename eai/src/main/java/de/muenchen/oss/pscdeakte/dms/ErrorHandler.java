@@ -1,18 +1,19 @@
 package de.muenchen.oss.pscdeakte.dms;
 
+import de.muenchen.oss.eakte.v1.generated.model.DmsErrorResponse;
 import de.muenchen.oss.pscdeakte.database.DBLogger;
-import de.muenchen.oss.refarch.integration.dms.model.DmsErrorResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.core.codec.DecodingException;
 import org.springframework.stereotype.Service;
-import org.springframework.web.reactive.function.client.WebClientResponseException;
+import org.springframework.web.client.RestClientResponseException;
 
 @Service
 @RequiredArgsConstructor
 @Slf4j
-public class ErrorHandler extends DBLogger {
+public class ErrorHandler {
 
+    private final DBLogger dbLogger;
     public static final String ERROR = "error";
 
     public void handleException(final Exception exceptionToCatch, final String gpId) {
@@ -25,27 +26,28 @@ public class ErrorHandler extends DBLogger {
         final String logPrefix = builder.toString();
 
         switch (exceptionToCatch) {
-        case final WebClientResponseException wcre:
-            this.handleWebClientResponseException(wcre, logPrefix, gpId);
+        case final RestClientResponseException rcre:
+            this.handleRestClientResponseException(rcre, logPrefix, gpId);
             break;
         case final IllegalStateException ise:
             log.error("{}: Timeout", logPrefix);
-            log(ERROR, logPrefix + ": Timeout", ise.getMessage(), gpId);
+            dbLogger.log(ERROR, logPrefix + ": Timeout", ise.getMessage(), gpId);
             break;
         default:
             log.error("{}: {}", logPrefix, exceptionToCatch.getStackTrace());
-            log(ERROR, logPrefix, exceptionToCatch.getMessage(), gpId);
+            dbLogger.log(ERROR, logPrefix, exceptionToCatch.getMessage(), gpId);
         }
 
     }
 
-    private void handleWebClientResponseException(WebClientResponseException e, String prefix, String gpId) {
+    @SuppressWarnings("PMD.EmptyCatchBlock")
+    private void handleRestClientResponseException(final RestClientResponseException e, final String prefix, final String gpId) {
         final StringBuilder sb = new StringBuilder(e.getMessage()).append(" | ");
         DmsErrorResponse errorResponse = null;
         try {
             errorResponse = e.getResponseBodyAs(DmsErrorResponse.class);
         } catch (IllegalStateException | DecodingException innerEx) {
-            //            wird unter finally bearbeitet
+            // wird unter finally bearbeitet
         } finally {
             if (errorResponse != null) {
                 log.error("{}: {} | {}", prefix, e.getMessage(), errorResponse);
@@ -54,7 +56,7 @@ public class ErrorHandler extends DBLogger {
                 log.error("{}: {} | {}", prefix, e.getMessage(), e.getResponseBodyAsString());
                 sb.append(e.getResponseBodyAsString());
             }
-            log(ERROR, prefix, sb.toString(), gpId);
+            dbLogger.log(ERROR, prefix, sb.toString(), gpId);
         }
     }
 

@@ -9,9 +9,11 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
+import de.muenchen.oss.pscdeakte.database.DBLogger;
 import de.muenchen.oss.pscdeakte.database.DatensatzStatus;
 import de.muenchen.oss.pscdeakte.database.entity.LogEntry;
 import de.muenchen.oss.pscdeakte.database.entity.PscdImport;
+import de.muenchen.oss.pscdeakte.database.repository.LogEntryRepository;
 import de.muenchen.oss.pscdeakte.database.repository.PscdImportRepository;
 import de.muenchen.oss.pscdeakte.s3.S3Properties;
 import de.muenchen.oss.refarch.integration.s3.application.port.out.S3OutPort;
@@ -19,7 +21,6 @@ import de.muenchen.oss.refarch.integration.s3.domain.exception.S3Exception;
 import de.muenchen.oss.refarch.integration.s3.domain.model.FileMetadata;
 import de.muenchen.oss.refarch.integration.s3.domain.model.FileReference;
 import de.muenchen.oss.refarch.integration.s3.domain.model.ListResult;
-import jakarta.persistence.EntityManager;
 import java.io.ByteArrayInputStream;
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -39,7 +40,6 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.test.util.ReflectionTestUtils;
 
 @ExtendWith(MockitoExtension.class)
 class CsvToDbServiceTest {
@@ -51,7 +51,7 @@ class CsvToDbServiceTest {
     private PscdImportRepository pscdImportRepository;
 
     @Mock
-    private EntityManager entityManager;
+    private LogEntryRepository logEntryRepository;
 
     private CsvToDbService csvToDbService;
 
@@ -65,8 +65,7 @@ class CsvToDbServiceTest {
         s3Properties.setPrefix("prefix");
         s3Properties.setDelimiter(";");
         s3Properties.setSkipHeader(false);
-        csvToDbService = new CsvToDbService(s3OutPort, s3Properties, pscdImportRepository);
-        ReflectionTestUtils.setField(csvToDbService, "entityManager", entityManager);
+        csvToDbService = new CsvToDbService(s3OutPort, s3Properties, pscdImportRepository, new DBLogger(logEntryRepository));
     }
 
     @Test
@@ -104,7 +103,7 @@ class CsvToDbServiceTest {
         csvToDbService.saveFileToDb("input.csv");
 
         final ArgumentCaptor<LogEntry> logCaptor = ArgumentCaptor.forClass(LogEntry.class);
-        verify(entityManager).persist(logCaptor.capture());
+        verify(logEntryRepository).save(logCaptor.capture());
         assertEquals("ERROR", logCaptor.getValue().getLevel());
         assertEquals("reading/moving file input.csv failed", logCaptor.getValue().getMessage());
         assertEquals("S3 unavailable", logCaptor.getValue().getException());
