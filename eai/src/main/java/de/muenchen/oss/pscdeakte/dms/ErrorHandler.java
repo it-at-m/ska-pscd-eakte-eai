@@ -47,7 +47,7 @@ public class ErrorHandler {
         try {
             errorResponse = e.getResponseBodyAs(DmsErrorResponse.class);
         } catch (IllegalStateException | DecodingException innerEx) {
-//            wird unter finally bearbeitet
+            // wird unter finally bearbeitet
         } finally {
             if (errorResponse != null) {
                 log.error("{}: {} | {}", prefix, e.getMessage(), errorResponse);
