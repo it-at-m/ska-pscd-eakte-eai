@@ -9,12 +9,9 @@ import org.springframework.validation.annotation.Validated;
 @ConfigurationProperties(prefix = "dms")
 @Data
 @Validated
-@ToString(exclude = "password")
+@ToString
 public class DmsProperties {
     @NotBlank private String xAnwendung;
-    @NotBlank private String baseUrl;
-    @NotBlank private String username;
-    @NotBlank private String password;
     @NotBlank private String cooEinzelakte;
     @NotBlank private String cooKmAkte;
     @NotBlank private String jobposition;

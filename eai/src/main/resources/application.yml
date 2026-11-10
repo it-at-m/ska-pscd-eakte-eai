@@ -94,7 +94,6 @@ info:
 # Must be configured and empty
 dms:
   XAnwendung: # Must be configured
-  base-url: # Must be configured
   aktenplannummer: # Must be configured
   coo-einzelakte: # Must be configured
   coo-km-akte: # Must be configured
@@ -116,3 +115,11 @@ s3csv:
   delimiter: #optional; defaults to ";"
   escape: #optional; defaults to '\\'
   skip-header: #optional; defaults to false
+
+# Properties des eAkte-Starters
+eakte:
+  base-url: # Must be configured
+  username: # Must be configured
+  password: # Must be configured
+  connection-timeout: # Optional, default 30s
+  response-timeout: # Optional, default 120s

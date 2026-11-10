@@ -34,7 +34,7 @@ public class DmsService {
     private final UserFormsDataApi userFormsDataApi;
 
     public ReadApentryAntwortDTO getApentries() {
-        return apentriesApi.readApentry(dmsProperties.getCooEinzelakte(), dmsProperties.getXAnwendung(), dmsProperties.getUserlogin(), dmsProperties.getJoboe(),
+        return apentriesApi.readApentry(dmsProperties.getUserlogin(), dmsProperties.getCooEinzelakte(), dmsProperties.getXAnwendung(), dmsProperties.getJoboe(),
                 dmsProperties.getJobposition());
     }
 
