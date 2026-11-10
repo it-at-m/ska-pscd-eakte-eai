@@ -13,14 +13,21 @@ public class DBLogger {
     private final LogEntryRepository logEntryRepo;
 
     @Async
-    @SuppressWarnings("PMD.UseObjectForClearerAPI")
-    public void log(final String level, final String message, final String exception, final String gpId) {
+    public void log(final Level level, final String message, final String exception, final String gpId) {
         final LogEntry logEntry = new LogEntry();
-        logEntry.setLevel(level);
+        logEntry.setLevel(level.toString());
         logEntry.setMessage(message);
         logEntry.setException(exception);
         logEntry.setGpId(gpId);
 
         logEntryRepo.save(logEntry);
+    }
+
+    public void info(final String message, final String exception, final String gpId) {
+        this.log(Level.INFO, message, exception, gpId);
+    }
+
+    public void error(final String message, final String exception, final String gpId) {
+        this.log(Level.ERROR, message, exception, gpId);
     }
 }

@@ -74,10 +74,10 @@ public class CsvToDbService {
             log.info("moved file {}/{} to {}/{}", props.getBucket(), filename, props.getBackupBucket(), movedFile);
         } catch (IOException | S3Exception e) {
             log.error("reading/moving file {} failed: {}", filename, e.getMessage());
-            dbLogger.log("ERROR", "reading/moving file " + filename + " failed", e.getMessage(), null);
+            dbLogger.error("reading/moving file " + filename + " failed", e.getMessage(), null);
         } catch (DBException e) {
             log.error("Exception von DB bei file {}, GP-Id {}: {}", filename, e.getGpId(), e.getMessage());
-            dbLogger.log("ERROR", "Exception von DB bei file " + filename + ", GP-Id " + e.getGpId(), e.getMessage(), e.getGpId());
+            dbLogger.error("Exception von DB bei file " + filename + ", GP-Id " + e.getGpId(), e.getMessage(), e.getGpId());
         }
 
     }

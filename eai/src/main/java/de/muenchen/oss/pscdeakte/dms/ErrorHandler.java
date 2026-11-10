@@ -14,7 +14,6 @@ import org.springframework.web.client.RestClientResponseException;
 public class ErrorHandler {
 
     private final DBLogger dbLogger;
-    public static final String ERROR = "error";
 
     public void handleException(final Exception exceptionToCatch, final String gpId) {
 
@@ -31,11 +30,11 @@ public class ErrorHandler {
             break;
         case final IllegalStateException ise:
             log.error("{}: Timeout", logPrefix);
-            dbLogger.log(ERROR, logPrefix + ": Timeout", ise.getMessage(), gpId);
+            dbLogger.error(logPrefix + ": Timeout", ise.getMessage(), gpId);
             break;
         default:
             log.error("{}: {}", logPrefix, exceptionToCatch.getStackTrace());
-            dbLogger.log(ERROR, logPrefix, exceptionToCatch.getMessage(), gpId);
+            dbLogger.error(logPrefix, exceptionToCatch.getMessage(), gpId);
         }
 
     }
@@ -56,7 +55,7 @@ public class ErrorHandler {
                 log.error("{}: {} | {}", prefix, e.getMessage(), e.getResponseBodyAsString());
                 sb.append(e.getResponseBodyAsString());
             }
-            dbLogger.log(ERROR, prefix, sb.toString(), gpId);
+            dbLogger.error(prefix, sb.toString(), gpId);
         }
     }
 
