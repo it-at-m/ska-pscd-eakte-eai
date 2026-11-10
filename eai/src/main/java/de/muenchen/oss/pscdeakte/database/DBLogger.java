@@ -12,6 +12,11 @@ public class DBLogger {
 
     private final LogEntryRepository logEntryRepo;
 
+    public enum Level {
+        INFO,
+        ERROR
+    }
+
     @Async
     public void log(final Level level, final String message, final String exception, final String gpId) {
         final LogEntry logEntry = new LogEntry();
@@ -19,7 +24,6 @@ public class DBLogger {
         logEntry.setMessage(message);
         logEntry.setException(exception);
         logEntry.setGpId(gpId);
-
         logEntryRepo.save(logEntry);
     }
 

@@ -17,7 +17,6 @@ import org.springframework.stereotype.Service;
 @Slf4j
 public class DbToEakteService {
 
-    public static final String ERROR = "error";
     private final PscdImportRepository repo;
     private final DmsService dmsService;
     private final Apentries apentries;
@@ -51,19 +50,19 @@ public class DbToEakteService {
         switch (data.getStatus()) {
         case DatensatzStatus.NEW:
             this.log(data, DatensatzStatus.STARTED);
-            //              fallthrough
+            // fallthrough
         case DatensatzStatus.STARTED:
             data.setBetreffseinheit(apentries.getApentryCoo(data.getGeschaeftspartnerId()));
             this.log(data, DatensatzStatus.APENTRY_EXISTS);
-            //              fallthrough
+            // fallthrough
         case DatensatzStatus.APENTRY_EXISTS:
             data.setAkte(dmsService.createFile(data).getObjid());
             this.log(data, DatensatzStatus.FILE_CREATED);
-            //              fallthrough
+            // fallthrough
         case DatensatzStatus.FILE_CREATED:
             data.setBestandsakt(dmsService.createProcedureBestandsakte(data.getAkte()).getObjid());
             this.log(data, DatensatzStatus.BESTANDSAKT_CREATED);
-            //              fallthrough
+            // fallthrough
         case DatensatzStatus.BESTANDSAKT_CREATED:
             data.setAv(dmsService.createProcedureAV(data.getAkte()).getObjid());
             this.log(data, DatensatzStatus.DONE);
