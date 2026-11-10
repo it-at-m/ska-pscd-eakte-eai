@@ -7,22 +7,22 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import de.muenchen.oss.eakte.v1.generated.api.ApentriesApi;
+import de.muenchen.oss.eakte.v1.generated.api.FilesApi;
+import de.muenchen.oss.eakte.v1.generated.api.ProceduresApi;
+import de.muenchen.oss.eakte.v1.generated.api.SubjectAreaUnitsApi;
+import de.muenchen.oss.eakte.v1.generated.api.UserFormsDataApi;
+import de.muenchen.oss.eakte.v1.generated.model.CreateFileDTO;
+import de.muenchen.oss.eakte.v1.generated.model.CreateProcedureDTO;
+import de.muenchen.oss.eakte.v1.generated.model.CreateSubjectAreaUnitAnfrageDTO;
+import de.muenchen.oss.eakte.v1.generated.model.DmsObjektResponse;
+import de.muenchen.oss.eakte.v1.generated.model.ReadApentryAntwortDTO;
+import de.muenchen.oss.eakte.v1.generated.model.SearchApentryDTO;
+import de.muenchen.oss.eakte.v1.generated.model.SearchApentryResponseDTO;
+import de.muenchen.oss.eakte.v1.generated.model.UpdateFileDTO;
+import de.muenchen.oss.eakte.v1.generated.model.UpdateUserFormsDataRequestDTO;
+import de.muenchen.oss.eakte.v1.generated.model.UserFormsReferenz;
 import de.muenchen.oss.pscdeakte.database.entity.PscdImport;
-import de.muenchen.oss.refarch.integration.dms.api.ApentriesApi;
-import de.muenchen.oss.refarch.integration.dms.api.FilesApi;
-import de.muenchen.oss.refarch.integration.dms.api.ProceduresApi;
-import de.muenchen.oss.refarch.integration.dms.api.SubjectAreaUnitsApi;
-import de.muenchen.oss.refarch.integration.dms.api.UserFormsDataApi;
-import de.muenchen.oss.refarch.integration.dms.model.CreateFileDTO;
-import de.muenchen.oss.refarch.integration.dms.model.CreateProcedureDTO;
-import de.muenchen.oss.refarch.integration.dms.model.CreateSubjectAreaUnitAnfrageDTO;
-import de.muenchen.oss.refarch.integration.dms.model.DmsObjektResponse;
-import de.muenchen.oss.refarch.integration.dms.model.ReadApentryAntwortDTO;
-import de.muenchen.oss.refarch.integration.dms.model.SearchApentryDTO;
-import de.muenchen.oss.refarch.integration.dms.model.SearchApentryResponseDTO;
-import de.muenchen.oss.refarch.integration.dms.model.UpdateFileDTO;
-import de.muenchen.oss.refarch.integration.dms.model.UpdateUserFormsDataRequestDTO;
-import de.muenchen.oss.refarch.integration.dms.model.UserFormsReferenz;
 import java.util.List;
 import java.util.Objects;
 import org.junit.jupiter.api.Assertions;
@@ -31,7 +31,6 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import reactor.core.publisher.Mono;
 
 @ExtendWith(MockitoExtension.class)
 class DmsServiceTest {
@@ -62,7 +61,7 @@ class DmsServiceTest {
     @Test
     void getApentriesReturnsResponseFromApi() {
         final ReadApentryAntwortDTO response = new ReadApentryAntwortDTO();
-        when(apentriesApi.readApentry(COO_EINZELAKTE, X_ANWENDUNG, USERLOGIN, JOBOE, JOBPOSITION)).thenReturn(Mono.just(response));
+        when(apentriesApi.readApentry(COO_EINZELAKTE, X_ANWENDUNG, USERLOGIN, JOBOE, JOBPOSITION)).thenReturn(response);
 
         assertSame(response, dmsService().getApentries());
     }
@@ -70,26 +69,26 @@ class DmsServiceTest {
     @Test
     void getApentryForSendsConfiguredBaseNumber() {
         final SearchApentryResponseDTO response = new SearchApentryResponseDTO();
-        when(apentriesApi.searchApentry(any(SearchApentryDTO.class), eq(X_ANWENDUNG), eq(USERLOGIN), eq(JOBOE), eq(JOBPOSITION)))
-                .thenReturn(Mono.just(response));
+        when(apentriesApi.searchApentry(eq(USERLOGIN), any(SearchApentryDTO.class), eq(X_ANWENDUNG), eq(JOBOE), eq(JOBPOSITION)))
+                .thenReturn(response);
 
         assertSame(response, dmsService().getApentryFor(4));
 
         final ArgumentCaptor<SearchApentryDTO> requestCaptor = ArgumentCaptor.forClass(SearchApentryDTO.class);
-        verify(apentriesApi).searchApentry(requestCaptor.capture(), eq(X_ANWENDUNG), eq(USERLOGIN), eq(JOBOE), eq(JOBPOSITION));
+        verify(apentriesApi).searchApentry(eq(USERLOGIN), requestCaptor.capture(), eq(X_ANWENDUNG), eq(JOBOE), eq(JOBPOSITION));
         Assertions.assertEquals(AKTENPLANNUMMER + ".4", requestCaptor.getValue().getBasenr());
     }
 
     @Test
     void createSubjectAreaUnitSendsConfiguredData() {
         final DmsObjektResponse response = new DmsObjektResponse();
-        when(subjectAreaUnitsApi.createSubjectAreaUnit(any(CreateSubjectAreaUnitAnfrageDTO.class), eq(X_ANWENDUNG), eq(USERLOGIN), eq(JOBOE), eq(JOBPOSITION)))
-                .thenReturn(Mono.just(response));
+        when(subjectAreaUnitsApi.createSubjectAreaUnit(eq(USERLOGIN), any(CreateSubjectAreaUnitAnfrageDTO.class), eq(X_ANWENDUNG), eq(JOBOE), eq(JOBPOSITION)))
+                .thenReturn(response);
 
         assertSame(response, dmsService().createSubjectAreaUnit(4, "bereich"));
 
         final ArgumentCaptor<CreateSubjectAreaUnitAnfrageDTO> requestCaptor = ArgumentCaptor.forClass(CreateSubjectAreaUnitAnfrageDTO.class);
-        verify(subjectAreaUnitsApi).createSubjectAreaUnit(requestCaptor.capture(), eq(X_ANWENDUNG), eq(USERLOGIN), eq(JOBOE), eq(JOBPOSITION));
+        verify(subjectAreaUnitsApi).createSubjectAreaUnit(eq(USERLOGIN), requestCaptor.capture(), eq(X_ANWENDUNG), eq(JOBOE), eq(JOBPOSITION));
         Assertions.assertEquals(AKTENPLANNUMMER + ".4", requestCaptor.getValue().getBasenr());
         Assertions.assertEquals("bereich", requestCaptor.getValue().getShortterm());
         Assertions.assertEquals(COO_EINZELAKTE, requestCaptor.getValue().getObjaddress());
@@ -98,7 +97,7 @@ class DmsServiceTest {
     @Test
     void createFileHandlesMissingEmptyAndPopulatedOptionalFields() {
         final DmsObjektResponse response = new DmsObjektResponse();
-        when(filesApi.createFile(any(CreateFileDTO.class), eq(X_ANWENDUNG), eq(USERLOGIN), eq(JOBOE), eq(JOBPOSITION))).thenReturn(Mono.just(response));
+        when(filesApi.createFile(eq(USERLOGIN), any(CreateFileDTO.class), eq(X_ANWENDUNG), eq(JOBOE), eq(JOBPOSITION))).thenReturn(response);
         final DmsService dmsService = dmsService();
 
         assertSame(response, dmsService.createFile(fileData(null, null, null)));
@@ -106,7 +105,7 @@ class DmsServiceTest {
         assertSame(response, dmsService.createFile(fileData("Vorname", "Name", "01.02.2020")));
 
         final ArgumentCaptor<CreateFileDTO> requestCaptor = ArgumentCaptor.forClass(CreateFileDTO.class);
-        verify(filesApi, times(3)).createFile(requestCaptor.capture(), eq(X_ANWENDUNG), eq(USERLOGIN), eq(JOBOE), eq(JOBPOSITION));
+        verify(filesApi, times(3)).createFile(eq(USERLOGIN), requestCaptor.capture(), eq(X_ANWENDUNG), eq(JOBOE), eq(JOBPOSITION));
         assertFileRequest(requestCaptor.getAllValues().get(0));
         Assertions.assertEquals(List.of(), requestCaptor.getAllValues().get(0).getUserformsdata());
         assertFileRequest(requestCaptor.getAllValues().get(1));
@@ -117,18 +116,14 @@ class DmsServiceTest {
 
     @Test
     void updateFileUpdatesUserFormsDataAndFile() {
-        when(userFormsDataApi.updateUserFormsData(eq("akte"), any(UpdateUserFormsDataRequestDTO.class), eq(X_ANWENDUNG), eq(USERLOGIN), eq(JOBOE),
-                eq(JOBPOSITION))).thenReturn(Mono.empty());
-        when(filesApi.updateFile(eq("akte"), any(UpdateFileDTO.class), eq(X_ANWENDUNG), eq(USERLOGIN), eq(JOBOE), eq(JOBPOSITION))).thenReturn(Mono.empty());
-
         dmsService().updateFile(fileData("Vorname", "Name", "01.02.2020"));
 
         final ArgumentCaptor<UpdateUserFormsDataRequestDTO> userFormsCaptor = ArgumentCaptor.forClass(UpdateUserFormsDataRequestDTO.class);
-        verify(userFormsDataApi).updateUserFormsData(eq("akte"), userFormsCaptor.capture(), eq(X_ANWENDUNG), eq(USERLOGIN), eq(JOBOE),
+        verify(userFormsDataApi).updateUserFormsData(eq(USERLOGIN), eq("akte"), userFormsCaptor.capture(), eq(X_ANWENDUNG), eq(JOBOE),
                 eq(JOBPOSITION));
         assertUserForms(Objects.requireNonNull(userFormsCaptor.getValue().getUserformsdata()));
         final ArgumentCaptor<UpdateFileDTO> fileCaptor = ArgumentCaptor.forClass(UpdateFileDTO.class);
-        verify(filesApi).updateFile(eq("akte"), fileCaptor.capture(), eq(X_ANWENDUNG), eq(USERLOGIN), eq(JOBOE), eq(JOBPOSITION));
+        verify(filesApi).updateFile(eq(USERLOGIN), eq("akte"), fileCaptor.capture(), eq(X_ANWENDUNG), eq(JOBOE), eq(JOBPOSITION));
         Assertions.assertEquals("gp-id", fileCaptor.getValue().getShortname());
         Assertions.assertEquals("zentralakt", fileCaptor.getValue().getFilesubj());
     }
@@ -136,15 +131,15 @@ class DmsServiceTest {
     @Test
     void createProceduresUseExpectedShortNames() {
         final DmsObjektResponse response = new DmsObjektResponse();
-        when(proceduresApi.createProcedure(any(CreateProcedureDTO.class), eq(X_ANWENDUNG), eq(USERLOGIN), eq(JOBOE), eq(JOBPOSITION)))
-                .thenReturn(Mono.just(response));
+        when(proceduresApi.createProcedure(eq(USERLOGIN), any(CreateProcedureDTO.class), eq(X_ANWENDUNG), eq(JOBOE), eq(JOBPOSITION)))
+                .thenReturn(response);
         final DmsService dmsService = dmsService();
 
         assertSame(response, dmsService.createProcedureBestandsakte("coo-akte"));
         assertSame(response, dmsService.createProcedureAV("coo-akte"));
 
         final ArgumentCaptor<CreateProcedureDTO> requestCaptor = ArgumentCaptor.forClass(CreateProcedureDTO.class);
-        verify(proceduresApi, times(2)).createProcedure(requestCaptor.capture(), eq(X_ANWENDUNG), eq(USERLOGIN), eq(JOBOE), eq(JOBPOSITION));
+        verify(proceduresApi, times(2)).createProcedure(eq(USERLOGIN), requestCaptor.capture(), eq(X_ANWENDUNG), eq(JOBOE), eq(JOBPOSITION));
         Assertions.assertEquals("Bestandsakten", requestCaptor.getAllValues().get(0).getShortname());
         Assertions.assertEquals("AVs, Titel, Haftbefehle", requestCaptor.getAllValues().get(1).getShortname());
         for (CreateProcedureDTO request : requestCaptor.getAllValues()) {

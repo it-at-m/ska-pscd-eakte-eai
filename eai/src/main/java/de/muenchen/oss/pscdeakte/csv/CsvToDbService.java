@@ -32,7 +32,7 @@ public class CsvToDbService {
     private final S3OutPort s3;
     private final S3Properties props;
     private final PscdImportRepository pir;
-    private final DBLogger logDb;
+    private final DBLogger dbLogger;
 
     /* package */ enum HEADERS {
         GP_ID,
@@ -73,7 +73,11 @@ public class CsvToDbService {
             s3.deleteFile(fileReference);
             log.info("moved file {}/{} to {}/{}", props.getBucket(), filename, props.getBackupBucket(), movedFile);
         } catch (IOException | S3Exception e) {
-            logDb.log("ERROR", "reading/moving file " + filename + " failed", e.getMessage());
+            log.error("reading/moving file {} failed: {}", filename, e.getMessage());
+            dbLogger.log("ERROR", "reading/moving file " + filename + " failed", e.getMessage(), null);
+        } catch (DBException e) {
+            log.error("Exception von DB bei file {}, GP-Id {}: {}", filename, e.getGpId(), e.getMessage());
+            dbLogger.log("ERROR", "Exception von DB bei file " + filename + ", GP-Id " + e.getGpId(), e.getMessage(), e.getGpId());
         }
 
     }
@@ -84,14 +88,18 @@ public class CsvToDbService {
             // Test GP-Id ueberspringen
             return;
         }
-        final Optional<PscdImport> fromDb = pir.findByGeschaeftspartnerId(fromCsv.getGeschaeftspartnerId());
-        if (fromDb.isEmpty()) {
-            pir.save(fromCsv);
-            return;
-        }
-        final DuplicateOrUpdate dou = new DuplicateOrUpdate(fromDb.get(), fromCsv);
-        if (dou.isUpdate()) {
-            pir.save(dou.createUpdatedPscdImport());
+        try {
+            final Optional<PscdImport> fromDb = pir.findByGeschaeftspartnerId(fromCsv.getGeschaeftspartnerId());
+            if (fromDb.isEmpty()) {
+                pir.save(fromCsv);
+                return;
+            }
+            final DuplicateOrUpdate dou = new DuplicateOrUpdate(fromDb.get(), fromCsv);
+            if (dou.isUpdate()) {
+                pir.save(dou.createUpdatedPscdImport());
+            }
+        } catch (Exception e) {
+            throw new DBException(fromCsv.getGeschaeftspartnerId(), e);
         }
     }
 

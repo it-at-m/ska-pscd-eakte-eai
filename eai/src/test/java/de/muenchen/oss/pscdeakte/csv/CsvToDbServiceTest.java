@@ -1,6 +1,7 @@
 package de.muenchen.oss.pscdeakte.csv;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.never;
@@ -10,7 +11,9 @@ import static org.mockito.Mockito.when;
 
 import de.muenchen.oss.pscdeakte.database.DBLogger;
 import de.muenchen.oss.pscdeakte.database.DatensatzStatus;
+import de.muenchen.oss.pscdeakte.database.entity.LogEntry;
 import de.muenchen.oss.pscdeakte.database.entity.PscdImport;
+import de.muenchen.oss.pscdeakte.database.repository.LogEntryRepository;
 import de.muenchen.oss.pscdeakte.database.repository.PscdImportRepository;
 import de.muenchen.oss.pscdeakte.s3.S3Properties;
 import de.muenchen.oss.refarch.integration.s3.application.port.out.S3OutPort;
@@ -48,7 +51,7 @@ class CsvToDbServiceTest {
     private PscdImportRepository pscdImportRepository;
 
     @Mock
-    private DBLogger dbLogger;
+    private LogEntryRepository logEntryRepository;
 
     private CsvToDbService csvToDbService;
 
@@ -62,7 +65,7 @@ class CsvToDbServiceTest {
         s3Properties.setPrefix("prefix");
         s3Properties.setDelimiter(";");
         s3Properties.setSkipHeader(false);
-        csvToDbService = new CsvToDbService(s3OutPort, s3Properties, pscdImportRepository, dbLogger);
+        csvToDbService = new CsvToDbService(s3OutPort, s3Properties, pscdImportRepository, new DBLogger(logEntryRepository));
     }
 
     @Test
@@ -99,7 +102,12 @@ class CsvToDbServiceTest {
 
         csvToDbService.saveFileToDb("input.csv");
 
-        verify(dbLogger).log("ERROR", "reading/moving file input.csv failed", "S3 unavailable");
+        final ArgumentCaptor<LogEntry> logCaptor = ArgumentCaptor.forClass(LogEntry.class);
+        verify(logEntryRepository).save(logCaptor.capture());
+        assertEquals("ERROR", logCaptor.getValue().getLevel());
+        assertEquals("reading/moving file input.csv failed", logCaptor.getValue().getMessage());
+        assertEquals("S3 unavailable", logCaptor.getValue().getException());
+        assertNull(logCaptor.getValue().getGpId());
     }
 
     @Test
