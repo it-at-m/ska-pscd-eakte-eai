@@ -61,7 +61,7 @@ class DmsServiceTest {
     @Test
     void getApentriesReturnsResponseFromApi() {
         final ReadApentryAntwortDTO response = new ReadApentryAntwortDTO();
-        when(apentriesApi.readApentry(COO_EINZELAKTE, X_ANWENDUNG, USERLOGIN, JOBOE, JOBPOSITION)).thenReturn(response);
+        when(apentriesApi.readApentry(USERLOGIN, COO_EINZELAKTE, X_ANWENDUNG, JOBOE, JOBPOSITION)).thenReturn(response);
 
         assertSame(response, dmsService().getApentries());
     }
