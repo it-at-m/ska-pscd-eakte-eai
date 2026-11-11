@@ -150,7 +150,7 @@ class DbToEakteServiceTest {
         service().process(data);
 
         verify(dmsService).updateFile(data);
-        verifyLog("info", "Gp gp-id hat neue Daten. -> update", null, GP_ID);
+        verifyLog(DBLogger.Level.INFO.toString(), "GpId gp-id hat neue Daten. -> update", null, GP_ID);
         assertEquals(DatensatzStatus.DONE, data.getStatus());
     }
 
@@ -170,7 +170,7 @@ class DbToEakteServiceTest {
 
         service().process(data);
 
-        verifyLog(DbToEakteService.ERROR, "GpId gp-id steht auf ERROR.", null, GP_ID);
+        verifyLog(DBLogger.Level.ERROR.toString(), "GpId gp-id steht auf ERROR.", null, GP_ID);
     }
 
     @Test
@@ -195,7 +195,7 @@ class DbToEakteServiceTest {
 
         service().process(data);
 
-        verifyLog(DbToEakteService.ERROR, "GpId " + GP_ID + ": RestClientResponseException aus der eAkte", "request failed | typed error", GP_ID);
+        verifyLog(DBLogger.Level.ERROR.toString(), "GpId " + GP_ID + ": RestClientResponseException aus der eAkte", "request failed | typed error", GP_ID);
 
         verify(repository).save(data);
     }
@@ -211,7 +211,7 @@ class DbToEakteServiceTest {
 
         service().process(data);
 
-        verifyLog(DbToEakteService.ERROR, "GpId " + GP_ID + ": RestClientResponseException aus der eAkte", "request failed | raw error", GP_ID);
+        verifyLog(DBLogger.Level.ERROR.toString(), "GpId " + GP_ID + ": RestClientResponseException aus der eAkte", "request failed | raw error", GP_ID);
     }
 
     @Test
@@ -246,7 +246,7 @@ class DbToEakteServiceTest {
 
         service().process(data);
 
-        verifyLog(DbToEakteService.ERROR, "GpId gp-id: IllegalStateException aus der eAkte: Timeout", "timeout", GP_ID);
+        verifyLog(DBLogger.Level.ERROR.toString(), "GpId gp-id: IllegalStateException aus der eAkte: Timeout", "timeout", GP_ID);
     }
 
     @Test
@@ -256,7 +256,7 @@ class DbToEakteServiceTest {
 
         service().process(data);
 
-        verifyLog(DbToEakteService.ERROR, "GpId " + GP_ID + ": RuntimeException aus der eAkte", "unexpected", GP_ID);
+        verifyLog(DBLogger.Level.ERROR.toString(), "GpId " + GP_ID + ": RuntimeException aus der eAkte", "unexpected", GP_ID);
     }
 
     private DbToEakteService service() {
