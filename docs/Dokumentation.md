@@ -2,13 +2,17 @@
 ## Konfiguration
 ### Allgemeine Properties
 
-| Property | Erklärung | Default |
-| -------- | ------- | ------- |
-|  |  |  |
-|  |  |  |
-|  |  |  |
-|  |  |  |
-|  |  |  |
+| Property                | Erklärung                                                                                         | Default |
+|-------------------------|---------------------------------------------------------------------------------------------------|---------|
+| SPRING_FLYWAY_SCHEMAS   | Schema in der Datenbank                                                                           | -       |
+| DMS_XANWENDUNG          | Name des ausführenden Fachverfahren                                                               | -       |
+| DMS_AKTENPLANNUMMER     | Geschäftszeichen (aka Aktenplankennzeichen) des Übergeordneten Aktenplaneintrages ("Einzelakten") | -       |
+| DMS_JOBPOSITION         | Rolle des Organisationsuser in der eAkte                                                          | -       |
+| EAKTE_CONNECTIONTIMEOUT | Timeout für die Verbindung zur eAkte API                                                          | 30sec   |
+| EAKTE_RESPONSETIMEOUT   | Timeout für die Antwort der eAkte API                                                             | 120sec  |
+| S3CSV_DELIMITER         | Trennzeichen der CSV                                                                              | ';'     |
+| S3CSV_SKIPHEADER        | Gibt an ob eine Headerzeile in der CSV übersprungen werden muss                                   | false   |
+| S2CSV_ESCAPE            | Escape-Character in der CSV                                                                       | '\\'    |
 
 
 ### Umgebungsspezifische ConfigMaps
@@ -26,6 +30,28 @@
 | S3CSV_BUCKET          | Name des Buckets, indem die einzulesenden Dateien liegen          | -       |
 | S3CSV_BACKUPBUCKET    | Name des Buckets, indem die eingelesenen Dateien abgelegt werden  | -       |
 | S3CSV_PREFIX          | Prefix der einzulesenden Dateien                                  | -       |
+
+### Secrets
+Es werden zum Starten in der CAP folgende Secrets benötigt
+
+#### pscd-import-s3 
+| Property             | Erklärung            | 
+|----------------------|----------------------|
+| REFARCH_S3_ACCESSKEY | Accesskey für den S3 |
+| REFARCH_S3_SECRETKEY | Secretkey für den S3 |
+
+#### pscd-import-dms
+| Property       | Erklärung                               | 
+|----------------|-----------------------------------------|
+| EAKTE_USERNAME | Nutzername für die eAkte API            |
+| EAKTE_PASSWORD | Passwort für die eAkte API              |
+| DMS_USERLOGIN  | Userlogin für den Zugriff auf die eAkte |
+
+#### pscd-import-db
+| Property                   | Erklärung                                    | 
+|----------------------------|----------------------------------------------|
+| SPRING_DATASOURCE_USERNAME | Nutzername für den Zugriff auf die Datenbank |
+| SPRING_DATASOURCE_PASSWORD | Passwort für den Zugriff auf die Datenbank   |
 
 ### Datenbank
 
@@ -95,7 +121,7 @@ Zusätzlich unterscheidet sich mindestens ein Wert in den Feldern 'name', 'vorna
 Der DmsService wird beim darauffolgenden Lauf die Daten in der bereits bestehende Einzelakte aktualisieren.
 Alle vier Felder mit coo-Adressen sind gefüllt. 
 
-##### created_at
-Wann der Datensatz angelegt wurde. Wird von der Datenbank verwaltet.
-##### updated_at
-Zeitpunkt der letzten Änderung. Wird von der Datenbank verwaltet
+##### created_time
+Wann der Datensatz angelegt wurde. Wird automatisch gesetzt.
+##### updated_time
+Zeitpunkt der letzten Änderung. Wird automatisch gesetzt.
