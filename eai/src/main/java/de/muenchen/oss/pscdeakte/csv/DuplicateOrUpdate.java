@@ -26,19 +26,12 @@ public class DuplicateOrUpdate {
     }
 
     public PscdImport createUpdatedPscdImport() {
-        final PscdImport updated = new PscdImport();
-        updated.setGeschaeftspartnerId(existingImport.getGeschaeftspartnerId());
-        updated.setBetreffseinheit(existingImport.getBetreffseinheit());
-        updated.setAkte(existingImport.getAkte());
-        updated.setBestandsakt(existingImport.getBestandsakt());
-        updated.setAv(existingImport.getAv());
-
-        updated.setVorname(newImport.getVorname());
-        updated.setName(newImport.getName());
-        updated.setGeburtsdatum(newImport.getGeburtsdatum());
-        updated.setZentralakt(newImport.getZentralakt());
-        updated.setStatus(DatensatzStatus.UPDATE);
-        return updated;
+        existingImport.setVorname(newImport.getVorname());
+        existingImport.setName(newImport.getName());
+        existingImport.setGeburtsdatum(newImport.getGeburtsdatum());
+        existingImport.setZentralakt(newImport.getZentralakt());
+        existingImport.setStatus(DatensatzStatus.UPDATE);
+        return existingImport;
     }
 
 }
