@@ -2,6 +2,7 @@ package de.muenchen.oss.pscdeakte.csv;
 
 import de.muenchen.oss.pscdeakte.database.DatensatzStatus;
 import de.muenchen.oss.pscdeakte.database.entity.PscdImport;
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import org.apache.commons.codec.binary.StringUtils;
 
 public class DuplicateOrUpdate {
@@ -25,20 +26,16 @@ public class DuplicateOrUpdate {
         return !isDuplicate();
     }
 
+    @SuppressFBWarnings("EI_EXPOSE_REP")
+    // mit existingImport werden interne Daten herausgegeben.
+    // Dies ist hier gewuenscht, da genau existingImport in der Datenbank landen soll.
     public PscdImport createUpdatedPscdImport() {
-        final PscdImport updated = new PscdImport();
-        updated.setGeschaeftspartnerId(existingImport.getGeschaeftspartnerId());
-        updated.setBetreffseinheit(existingImport.getBetreffseinheit());
-        updated.setAkte(existingImport.getAkte());
-        updated.setBestandsakt(existingImport.getBestandsakt());
-        updated.setAv(existingImport.getAv());
-
-        updated.setVorname(newImport.getVorname());
-        updated.setName(newImport.getName());
-        updated.setGeburtsdatum(newImport.getGeburtsdatum());
-        updated.setZentralakt(newImport.getZentralakt());
-        updated.setStatus(DatensatzStatus.UPDATE);
-        return updated;
+        existingImport.setVorname(newImport.getVorname());
+        existingImport.setName(newImport.getName());
+        existingImport.setGeburtsdatum(newImport.getGeburtsdatum());
+        existingImport.setZentralakt(newImport.getZentralakt());
+        existingImport.setStatus(DatensatzStatus.UPDATE);
+        return existingImport;
     }
 
 }
