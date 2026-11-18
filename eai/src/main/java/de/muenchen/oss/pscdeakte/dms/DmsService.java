@@ -20,10 +20,12 @@ import de.muenchen.oss.pscdeakte.helper.DateHelper;
 import java.util.ArrayList;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 @RequiredArgsConstructor
 @Service
+@Slf4j
 public class DmsService {
 
     private final DmsProperties dmsProperties;
@@ -75,6 +77,7 @@ public class DmsService {
     }
 
     public void updateFile(final PscdImport data) {
+        formatForUpdate(data);
         final UpdateUserFormsDataRequestDTO dto = new UpdateUserFormsDataRequestDTO();
         dto.userformsdata(getUserFormsData(data));
         userFormsDataApi
@@ -140,5 +143,13 @@ public class DmsService {
         dto.shortname(shortname).accdef("Aktengebunden").referrednumber(referrednumber);
         return proceduresApi
                 .createProcedure(dmsProperties.getUserlogin(), dto, dmsProperties.getXAnwendung(), dmsProperties.getJoboe(), dmsProperties.getJobposition());
+    }
+
+    private void formatForUpdate(final PscdImport data) {
+        // null und "" fuehrt in der eAkte nicht zu einem Update/Entfernen des Feldes, daher workaround: " ".
+        // bei geburtsdatum geht das nicht, da " " kein Datumsformat ist.
+        data.setVorname(data.getVorname() == null || data.getVorname().isEmpty() ? " " : data.getVorname());
+        data.setName(data.getName() == null || data.getName().isEmpty() ? " " : data.getName());
+        data.setZentralakt(data.getZentralakt() == null || data.getZentralakt().isEmpty() ? " " : data.getZentralakt());
     }
 }
