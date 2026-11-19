@@ -12,6 +12,10 @@ import de.muenchen.oss.eakte.v1.generated.model.DmsObjektResponse;
 import de.muenchen.oss.eakte.v1.generated.model.ReadApentryAntwortDTO;
 import de.muenchen.oss.eakte.v1.generated.model.SearchApentryDTO;
 import de.muenchen.oss.eakte.v1.generated.model.SearchApentryResponseDTO;
+import de.muenchen.oss.eakte.v1.generated.model.SearchFileRequestDTO;
+import de.muenchen.oss.eakte.v1.generated.model.SearchFileResponseDTO;
+import de.muenchen.oss.eakte.v1.generated.model.SearchProcedureRequestDTO;
+import de.muenchen.oss.eakte.v1.generated.model.SearchProcedureResponseDTO;
 import de.muenchen.oss.eakte.v1.generated.model.UpdateFileDTO;
 import de.muenchen.oss.eakte.v1.generated.model.UpdateUserFormsDataRequestDTO;
 import de.muenchen.oss.eakte.v1.generated.model.UserFormsReferenz;
@@ -28,6 +32,8 @@ import org.springframework.stereotype.Service;
 @Slf4j
 public class DmsService {
 
+    public static final String BESTANDSAKTEN = "Bestandsakten";
+    public static final String AVS_TITEL_HAFTBEFEHLE = "AVs, Titel, Haftbefehle";
     private final DmsProperties dmsProperties;
     private final ApentriesApi apentriesApi;
     private final SubjectAreaUnitsApi subjectAreaUnitsApi;
@@ -117,7 +123,7 @@ public class DmsService {
      * @return Response der ProceduresApi
      */
     public DmsObjektResponse createProcedureBestandsakte(final String referrednumber) {
-        return createProcedure(referrednumber, "Bestandsakten");
+        return createProcedure(referrednumber, BESTANDSAKTEN);
     }
 
     /**
@@ -128,7 +134,7 @@ public class DmsService {
      * @return Response der ProceduresApi
      */
     public DmsObjektResponse createProcedureAV(final String referrednumber) {
-        return createProcedure(referrednumber, "AVs, Titel, Haftbefehle");
+        return createProcedure(referrednumber, AVS_TITEL_HAFTBEFEHLE);
     }
 
     /**
@@ -143,6 +149,18 @@ public class DmsService {
         dto.shortname(shortname).accdef("Aktengebunden").referrednumber(referrednumber);
         return proceduresApi
                 .createProcedure(dmsProperties.getUserlogin(), dto, dmsProperties.getXAnwendung(), dmsProperties.getJoboe(), dmsProperties.getJobposition());
+    }
+
+    public SearchFileResponseDTO searchFiles(final PscdImport data) {
+        SearchFileRequestDTO dto = new SearchFileRequestDTO();
+        dto.filesubj(data.getGeschaeftspartnerId()).apentry(data.getBetreffseinheit());
+        return filesApi.searchFile(dmsProperties.getUserlogin(), dto, dmsProperties.getXAnwendung(), dmsProperties.getJoboe(), dmsProperties.getJobposition());
+    }
+
+    public SearchProcedureResponseDTO searchProcedures(final String subject) {
+        SearchProcedureRequestDTO dto = new SearchProcedureRequestDTO();
+        dto.filesubj(subject);
+        return proceduresApi.searchProcedure(dmsProperties.getUserlogin(), dto, dmsProperties.getXAnwendung(), dmsProperties.getJoboe(), dmsProperties.getJobposition());
     }
 
     private void formatForUpdate(final PscdImport data) {
