@@ -94,7 +94,6 @@ public class DbToEakteService {
     private void heal(final PscdImport data) {
         if (data.getBetreffseinheit().isEmpty()) {
             data.setStatus(DatensatzStatus.STARTED);
-            this.datensatzVerarbeitung(data);
         } else if (data.getAkte().isEmpty()) {
             this.healAkte(data);
         } else if (data.getBestandsakt().isEmpty()) {
@@ -102,8 +101,9 @@ public class DbToEakteService {
         } else if (data.getAv().isEmpty()) {
             data.setAv(this.healVorgang(data, DmsService.AVS_TITEL_HAFTBEFEHLE, DatensatzStatus.BESTANDSAKT_CREATED, DatensatzStatus.DONE));
         } else {
-            dbLogger.info("keine Heilung gefunden", null, data.getGeschaeftspartnerId());
+            data.setStatus(DatensatzStatus.UPDATE);
         }
+        this.datensatzVerarbeitung(data);
     }
 
     private void healAkte(PscdImport data) {
@@ -111,22 +111,21 @@ public class DbToEakteService {
         if (dto.getGiobjecttype() != null && !dto.getGiobjecttype().isEmpty()) {
             data.setAkte(dto.getGiobjecttype().getFirst().getObjaddress());
             data.setStatus(DatensatzStatus.FILE_CREATED);
-            this.datensatzVerarbeitung(data);
         } else {
             data.setStatus(DatensatzStatus.APENTRY_EXISTS);
-            this.datensatzVerarbeitung(data);
         }
     }
 
     private String healVorgang(final PscdImport data, final String procedureName, final DatensatzStatus ohneCoo, final DatensatzStatus mitCoo) {
-        final SearchProcedureResponseDTO dto = dmsService.searchProcedures(procedureName);
+        final SearchProcedureResponseDTO dto = dmsService.searchProcedures(data.getAkte(), procedureName);
         String coo = null;
-        if (dto.getGiobjecttype() != null ) {
-            for (Objektreferenz ref : dto.getGiobjecttype()) {
-                if (procedureName.equals(ref.getObjname())) {
-                    coo = ref.getObjaddress();
-                    break;
-                }
+        if (dto.getGiobjecttype() != null) {
+            return null;
+        }
+        for (Objektreferenz ref : dto.getGiobjecttype()) {
+            if (procedureName.equals(ref.getObjname())) {
+                coo = ref.getObjaddress();
+                break;
             }
         }
         if (coo == null) {

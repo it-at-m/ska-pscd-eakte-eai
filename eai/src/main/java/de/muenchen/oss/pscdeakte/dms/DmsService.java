@@ -153,14 +153,15 @@ public class DmsService {
 
     public SearchFileResponseDTO searchFiles(final PscdImport data) {
         SearchFileRequestDTO dto = new SearchFileRequestDTO();
-        dto.filesubj(data.getGeschaeftspartnerId()).apentry(data.getBetreffseinheit());
+        dto.apentry(data.getBetreffseinheit()).objmlname(data.getGeschaeftspartnerId());
         return filesApi.searchFile(dmsProperties.getUserlogin(), dto, dmsProperties.getXAnwendung(), dmsProperties.getJoboe(), dmsProperties.getJobposition());
     }
 
-    public SearchProcedureResponseDTO searchProcedures(final String subject) {
+    public SearchProcedureResponseDTO searchProcedures(final String akteCoo, final String name) {
         SearchProcedureRequestDTO dto = new SearchProcedureRequestDTO();
-        dto.filesubj(subject);
-        return proceduresApi.searchProcedure(dmsProperties.getUserlogin(), dto, dmsProperties.getXAnwendung(), dmsProperties.getJoboe(), dmsProperties.getJobposition());
+        dto.referrednumber(akteCoo).objmlname(name);
+        return proceduresApi.searchProcedure(dmsProperties.getUserlogin(), dto, dmsProperties.getXAnwendung(), dmsProperties.getJoboe(),
+                dmsProperties.getJobposition());
     }
 
     private void formatForUpdate(final PscdImport data) {

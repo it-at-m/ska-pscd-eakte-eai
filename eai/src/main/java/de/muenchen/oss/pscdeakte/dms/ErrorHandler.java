@@ -5,13 +5,12 @@ import de.muenchen.oss.pscdeakte.database.DBLogger;
 import de.muenchen.oss.pscdeakte.database.DatensatzStatus;
 import de.muenchen.oss.pscdeakte.database.DbToEakteService;
 import de.muenchen.oss.pscdeakte.database.entity.PscdImport;
+import java.time.Duration;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.core.codec.DecodingException;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestClientResponseException;
-
-import java.time.Duration;
 
 @Service
 @RequiredArgsConstructor
@@ -20,18 +19,25 @@ public class ErrorHandler {
 
     private final DBLogger dbLogger;
     private final DbToEakteService dbToEakteService;
+    private final DmsProperties dmsProperties;
+    private String gpId = "";
+    private int retries = 1;
 
     public void handleException(final Exception exceptionToCatch, final PscdImport data) {
 
         data.setStatus(DatensatzStatus.ERROR);
-        final String gpId = data.getGeschaeftspartnerId();
-
-        final StringBuilder builder = new StringBuilder();
-        if (gpId != null && !gpId.isEmpty()) {
-            builder.append("GpId ").append(gpId).append(": ");
+        if (gpId.equals(data.getGeschaeftspartnerId())) {
+            retries++;
+        } else {
+            retries = 1;
+            gpId = data.getGeschaeftspartnerId();
         }
-        builder.append(exceptionToCatch.getClass().getSimpleName()).append(" aus der eAkte");
-        final String logPrefix = builder.toString();
+
+        if (this.retry(data)) {
+            return;
+        }
+
+        final String logPrefix = "GpId " + gpId + ": " + exceptionToCatch.getClass().getSimpleName() + " aus der eAkte";
 
         switch (exceptionToCatch) {
         case final RestClientResponseException rcre:
@@ -45,7 +51,6 @@ public class ErrorHandler {
             log.error("{}: {}", logPrefix, exceptionToCatch.getStackTrace());
             dbLogger.error(logPrefix, exceptionToCatch.getMessage(), gpId);
         }
-        this.retry(data);
     }
 
     @SuppressWarnings("PMD.EmptyCatchBlock")
@@ -68,22 +73,24 @@ public class ErrorHandler {
         }
     }
 
-    private void retry(final PscdImport data) {
-//        FIXME Dauerschleife: wegen rekursivem Aufruf von process, kommt man ueber ErrorHandler wieder hier an. => immer nur erster retry
-        for (int i = 0; i < 10; i++) {
-            try {
-                Thread.sleep(Duration.ofSeconds(i*2));
-                dbToEakteService.process(data);
-                if (DatensatzStatus.ERROR != data.getStatus()) {
-                    dbLogger.info("erfolgreich verarbeitet nach Retry " + (i + 1), null, data.getGeschaeftspartnerId());
-                    return;
-                }
-            } catch (InterruptedException e) {
-                log.debug("interrupted");
-            }
-            dbLogger.info("Retry " + (i + 1) + " von 10 erfolglos", null, data.getGeschaeftspartnerId());
+    private boolean retry(final PscdImport data) {
+        if (retries >= dmsProperties.getRetries()) {
+            dbLogger.error("Abbruch nach " + dmsProperties.getRetries() + " erfolglosen Versuchen ", null, data.getGeschaeftspartnerId());
+            return false;
         }
-        dbLogger.error("Abbruch nach 10 erfolglosen Versuchen ", null, data.getGeschaeftspartnerId());
+
+        try {
+            Thread.sleep(Duration.ofSeconds(retries * 2L));
+            dbToEakteService.process(data);
+            if (DatensatzStatus.ERROR != data.getStatus()) {
+                log.info("GpId {} erfolgreich verarbeitet nach Retry {}", data.getGeschaeftspartnerId(), retries);
+                return true;
+            }
+        } catch (InterruptedException e) {
+            log.debug("interrupted");
+        }
+        log.warn("GpId {}: Retry {} von {} erfolglos", data.getGeschaeftspartnerId(), retries, dmsProperties.getRetries());
+        return false;
     }
 
 }
