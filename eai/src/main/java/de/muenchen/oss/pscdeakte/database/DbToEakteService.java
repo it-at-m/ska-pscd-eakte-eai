@@ -168,7 +168,9 @@ public class DbToEakteService {
         try {
             Thread.sleep(Duration.ofSeconds(retries * 5L));
         } catch (InterruptedException e) {
-            log.debug("interrupted");
+            Thread.currentThread().interrupt();
+            log.warn("Retry für GpId {} unterbrochen", data.getGeschaeftspartnerId());
+            return false;
         }
 
         return true;
