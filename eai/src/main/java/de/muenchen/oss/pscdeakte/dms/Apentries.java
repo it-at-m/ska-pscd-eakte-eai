@@ -9,8 +9,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.concurrent.locks.Lock;
-import java.util.concurrent.locks.ReentrantLock;
+import java.util.concurrent.locks.ReadWriteLock;
+import java.util.concurrent.locks.ReentrantReadWriteLock;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import lombok.extern.slf4j.Slf4j;
@@ -23,7 +23,7 @@ public class Apentries {
     private final DmsApentryService dmsService;
     private final Map<Integer, String> apentryMap = new ConcurrentHashMap<>();
     private final AtomicBoolean mapInitialized = new AtomicBoolean(false);
-    private static final Lock LOCK = new ReentrantLock(true);
+    private final ReadWriteLock mapLock = new ReentrantReadWriteLock(true);
     private final Pattern pattern;
     private final DmsProperties props;
 
@@ -35,7 +35,7 @@ public class Apentries {
 
     @LogExecutionTime
     public void initMap() {
-        LOCK.lock();
+        mapLock.writeLock().lock();
         try {
             if (props.getInitialbefuellung() && !mapInitialized.get()) {
                 log.info("reading apentries");
@@ -43,12 +43,37 @@ public class Apentries {
                 final List<Objektreferenz> giObjects = response != null ? response.getGiobjecttype() : null;
                 if (giObjects != null) {
                     log.info("{} apentries found", giObjects.size());
-                    giObjects.forEach(this::fillMap);
+                    giObjects.forEach(ref -> fillMap(ref, apentryMap));
                 }
                 mapInitialized.set(true);
             }
         } finally {
-            LOCK.unlock();
+            mapLock.writeLock().unlock();
+        }
+    }
+
+    /**
+     * Liest die Map bei Initialbefüllung erneut aus der eAkte. Bei einem fehlgeschlagenen
+     * Lesevorgang bleibt der bisherige Inhalt erhalten.
+     */
+    @LogExecutionTime
+    public void refreshMap() {
+        mapLock.writeLock().lock();
+        try {
+            if (!props.getInitialbefuellung()) {
+                return;
+            }
+            final ReadApentryAntwortDTO response = dmsService.getApentries();
+            if (response == null || response.getGiobjecttype() == null) {
+                throw new IllegalStateException("Betreffseinheiten konnten nicht erneut geladen werden");
+            }
+            final Map<Integer, String> refreshedMap = new ConcurrentHashMap<>();
+            response.getGiobjecttype().forEach(ref -> fillMap(ref, refreshedMap));
+            apentryMap.clear();
+            apentryMap.putAll(refreshedMap);
+            mapInitialized.set(true);
+        } finally {
+            mapLock.writeLock().unlock();
         }
     }
 
@@ -71,7 +96,12 @@ public class Apentries {
     }
 
     private String getApentryFromMap(final int lfdNr) {
-        return apentryMap.computeIfAbsent(lfdNr, this::getNewApentry);
+        mapLock.readLock().lock();
+        try {
+            return apentryMap.computeIfAbsent(lfdNr, this::getNewApentry);
+        } finally {
+            mapLock.readLock().unlock();
+        }
     }
 
     private String getNewApentry(final Integer lfdNr) {
@@ -81,7 +111,7 @@ public class Apentries {
         return response.getObjid();
     }
 
-    private void fillMap(final Objektreferenz ref) {
+    private void fillMap(final Objektreferenz ref, final Map<Integer, String> map) {
         final String objname = ref.getObjname();
         if (objname != null && !objname.isEmpty()) {
             final Matcher matcher = pattern.matcher(objname);
@@ -89,7 +119,7 @@ public class Apentries {
                 final String objaddress = ref.getObjaddress();
                 log.debug("saving apentry name: {} coo: {}", ref.getObjname(), objaddress);
                 final int lfdNr = Integer.parseInt(matcher.group(1));
-                apentryMap.put(lfdNr, objaddress);
+                map.put(lfdNr, objaddress);
             } else {
                 log.debug("apentry does not match criteria: {}", ref.getObjname());
             }

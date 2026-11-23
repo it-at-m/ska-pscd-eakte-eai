@@ -12,6 +12,8 @@ import de.muenchen.oss.pscdeakte.dms.DmsApentryService;
 import de.muenchen.oss.pscdeakte.dms.DmsFileService;
 import de.muenchen.oss.pscdeakte.dms.DmsProcedureService;
 import de.muenchen.oss.pscdeakte.dms.DmsProperties;
+
+import java.time.Duration;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -87,7 +89,6 @@ public class DbToEakteService {
             // personenbezogene Daten entfernen wird vom Projekt nicht erwartet.
             break;
         case DatensatzStatus.ERROR:
-            this.heal(data);
             break;
         default:
             log.warn("Status steht auf {}", data.getStatus().getValue());
@@ -103,6 +104,11 @@ public class DbToEakteService {
 
         data.setStatus(DatensatzStatus.ERROR);
         if (this.retry(data)) {
+            try {
+                this.heal(data);
+            } catch (Exception e) {
+                this.handleException(e, data);
+            }
             return;
         }
 
@@ -142,7 +148,9 @@ public class DbToEakteService {
         }
     }
 
+    @SuppressWarnings("PMD.DoNotUseThreads")
     private boolean retry(final PscdImport data) {
+
         if (gpId.equals(data.getGeschaeftspartnerId())) {
             retries++;
         } else {
@@ -150,33 +158,31 @@ public class DbToEakteService {
             gpId = data.getGeschaeftspartnerId();
         }
 
-        if (retries >= dmsProperties.getRetries()) {
-            dbLogger.error("Abbruch nach " + dmsProperties.getRetries() + " erfolglosen Versuchen ", null, gpId);
+        if (retries > dmsProperties.getRetries()) {
+            log.error("GpId {}: Abbruch nach {} erfolglosen Versuchen.", gpId, dmsProperties.getRetries());
             return false;
         }
 
+        log.warn("GpId {}: Retry {} von {} ", gpId, retries, dmsProperties.getRetries());
+
         try {
-            this.wait(retries * 2000L);
-            this.process(data);
-            if (DatensatzStatus.ERROR != data.getStatus()) {
-                log.info("GpId {} erfolgreich verarbeitet nach Retry {}", gpId, retries);
-                return true;
-            }
+            Thread.sleep(Duration.ofSeconds(retries * 5L));
         } catch (InterruptedException e) {
             log.debug("interrupted");
         }
-        log.warn("GpId {}: Retry {} von {} erfolglos", gpId, retries, dmsProperties.getRetries());
-        return false;
+
+        return true;
     }
 
     private void heal(final PscdImport data) {
-        if (data.getBetreffseinheit().isEmpty()) {
+        if (data.getBetreffseinheit() == null || data.getBetreffseinheit().isEmpty()) {
+            apentries.refreshMap();
             data.setStatus(DatensatzStatus.STARTED);
-        } else if (data.getAkte().isEmpty()) {
+        } else if (data.getAkte() == null || data.getAkte().isEmpty()) {
             this.healAkte(data);
-        } else if (data.getBestandsakt().isEmpty()) {
+        } else if (data.getBestandsakt() == null || data.getBestandsakt().isEmpty()) {
             data.setBestandsakt(this.healVorgang(data, DmsApentryService.BESTANDSAKTEN, DatensatzStatus.FILE_CREATED, DatensatzStatus.BESTANDSAKT_CREATED));
-        } else if (data.getAv().isEmpty()) {
+        } else if (data.getAv() == null || data.getAv().isEmpty()) {
             data.setAv(this.healVorgang(data, DmsApentryService.AVS_TITEL_HAFTBEFEHLE, DatensatzStatus.BESTANDSAKT_CREATED, DatensatzStatus.DONE));
         } else {
             data.setStatus(DatensatzStatus.UPDATE);
@@ -186,17 +192,24 @@ public class DbToEakteService {
 
     private void healAkte(final PscdImport data) {
         final SearchFileResponseDTO dto = dmsFileService.searchFiles(data);
-        if (dto.getGiobjecttype() != null && !dto.getGiobjecttype().isEmpty()) {
-            data.setAkte(dto.getGiobjecttype().getFirst().getObjaddress());
-            data.setStatus(DatensatzStatus.FILE_CREATED);
-        } else {
+        if (dto.getGiobjecttype() == null || dto.getGiobjecttype().isEmpty()) {
             data.setStatus(DatensatzStatus.APENTRY_EXISTS);
+            return;
+        }
+        data.setAkte(dto.getGiobjecttype().getFirst().getObjaddress());
+        data.setStatus(DatensatzStatus.FILE_CREATED);
+        if (dto.getGiobjecttype().size() != 1) {
+            final StringBuilder str = new StringBuilder("Duplikat zu GpId ").append(data.getGeschaeftspartnerId()).append(" gefunden:");
+            dto.getGiobjecttype().forEach(ref -> str.append(" ").append(ref.getObjaddress()));
+            str.append(" Im weiteren Verlauf wird die Erste verwendet: ").append(data.getAkte());
+            dbLogger.error(str.toString(), null, data.getGeschaeftspartnerId());
         }
     }
 
     private String healVorgang(final PscdImport data, final String procedureName, final DatensatzStatus ohneCoo, final DatensatzStatus mitCoo) {
         final SearchProcedureResponseDTO dto = dmsProcedureService.searchProcedures(data.getAkte(), procedureName);
-        if (dto.getGiobjecttype() != null) {
+        if (dto.getGiobjecttype() == null) {
+            data.setStatus(DatensatzStatus.FILE_CREATED);
             return null;
         }
         String coo = null;
