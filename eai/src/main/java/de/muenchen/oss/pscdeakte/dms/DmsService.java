@@ -152,13 +152,13 @@ public class DmsService {
     }
 
     public SearchFileResponseDTO searchFiles(final PscdImport data) {
-        SearchFileRequestDTO dto = new SearchFileRequestDTO();
+        final SearchFileRequestDTO dto = new SearchFileRequestDTO();
         dto.apentry(data.getBetreffseinheit()).objmlname(data.getGeschaeftspartnerId());
         return filesApi.searchFile(dmsProperties.getUserlogin(), dto, dmsProperties.getXAnwendung(), dmsProperties.getJoboe(), dmsProperties.getJobposition());
     }
 
     public SearchProcedureResponseDTO searchProcedures(final String akteCoo, final String name) {
-        SearchProcedureRequestDTO dto = new SearchProcedureRequestDTO();
+        final SearchProcedureRequestDTO dto = new SearchProcedureRequestDTO();
         dto.referrednumber(akteCoo).objmlname(name);
         return proceduresApi.searchProcedure(dmsProperties.getUserlogin(), dto, dmsProperties.getXAnwendung(), dmsProperties.getJoboe(),
                 dmsProperties.getJobposition());

@@ -1,5 +1,6 @@
 package de.muenchen.oss.pscdeakte.database;
 
+import de.muenchen.oss.eakte.v1.generated.model.DmsErrorResponse;
 import de.muenchen.oss.eakte.v1.generated.model.Objektreferenz;
 import de.muenchen.oss.eakte.v1.generated.model.SearchFileResponseDTO;
 import de.muenchen.oss.eakte.v1.generated.model.SearchProcedureResponseDTO;
@@ -7,13 +8,16 @@ import de.muenchen.oss.pscdeakte.configuration.annotation.LogExecutionTime;
 import de.muenchen.oss.pscdeakte.database.entity.PscdImport;
 import de.muenchen.oss.pscdeakte.database.repository.PscdImportRepository;
 import de.muenchen.oss.pscdeakte.dms.Apentries;
+import de.muenchen.oss.pscdeakte.dms.DmsProperties;
 import de.muenchen.oss.pscdeakte.dms.DmsService;
-import de.muenchen.oss.pscdeakte.dms.ErrorHandler;
+
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
+import org.springframework.core.codec.DecodingException;
 import org.springframework.stereotype.Service;
+import org.springframework.web.client.RestClientResponseException;
 
 @RequiredArgsConstructor
 @Service
@@ -23,8 +27,10 @@ public class DbToEakteService {
     private final PscdImportRepository repo;
     private final DmsService dmsService;
     private final Apentries apentries;
-    private final ErrorHandler errorHandler;
     private final DBLogger dbLogger;
+    private final DmsProperties dmsProperties;
+    private String gpId = "";
+    private int retries = 1;
 
     @LogExecutionTime
     public void start() {
@@ -43,7 +49,7 @@ public class DbToEakteService {
         try {
             datensatzVerarbeitung(data);
         } catch (Exception e) {
-            errorHandler.handleException(e, data);
+            this.handleException(e, data);
         } finally {
             repo.save(data);
         }
@@ -91,6 +97,77 @@ public class DbToEakteService {
         log.debug("{}: {}", data.getGeschaeftspartnerId(), status.getValue());
     }
 
+    public void handleException(final Exception exceptionToCatch, final PscdImport data) {
+
+        data.setStatus(DatensatzStatus.ERROR);
+        if (this.retry(data)) {
+            return;
+        }
+
+        final String logPrefix = "GpId " + gpId + ": " + exceptionToCatch.getClass().getSimpleName() + " aus der eAkte";
+
+        switch (exceptionToCatch) {
+            case final RestClientResponseException rcre:
+                this.handleRestClientResponseException(rcre, logPrefix, gpId);
+                break;
+            case final IllegalStateException ise:
+                log.error("{}: Timeout", logPrefix);
+                dbLogger.error(logPrefix + ": Timeout", ise.getMessage(), gpId);
+                break;
+            default:
+                log.error("{}: {}", logPrefix, exceptionToCatch.getStackTrace());
+                dbLogger.error(logPrefix, exceptionToCatch.getMessage(), gpId);
+        }
+    }
+
+    @SuppressWarnings("PMD.EmptyCatchBlock")
+    private void handleRestClientResponseException(final RestClientResponseException e, final String prefix, final String gpId) {
+        final StringBuilder sb = new StringBuilder(e.getMessage()).append(" | ");
+        DmsErrorResponse errorResponse = null;
+        try {
+            errorResponse = e.getResponseBodyAs(DmsErrorResponse.class);
+        } catch (IllegalStateException | DecodingException innerEx) {
+            // wird unter finally bearbeitet
+        } finally {
+            if (errorResponse != null) {
+                log.error("{}: {} | {}", prefix, e.getMessage(), errorResponse);
+                sb.append(errorResponse);
+            } else {
+                log.error("{}: {} | {}", prefix, e.getMessage(), e.getResponseBodyAsString());
+                sb.append(e.getResponseBodyAsString());
+            }
+            dbLogger.error(prefix, sb.toString(), gpId);
+        }
+    }
+
+    private boolean retry(final PscdImport data) {
+        if (gpId.equals(data.getGeschaeftspartnerId())) {
+            retries++;
+        } else {
+            retries = 1;
+            gpId = data.getGeschaeftspartnerId();
+        }
+
+        if (retries >= dmsProperties.getRetries()) {
+            dbLogger.error("Abbruch nach " + dmsProperties.getRetries() + " erfolglosen Versuchen ", null, gpId);
+            return false;
+        }
+
+        try {
+            this.wait(retries * 2000L);
+            this.process(data);
+            if (DatensatzStatus.ERROR != data.getStatus()) {
+                log.info("GpId {} erfolgreich verarbeitet nach Retry {}", gpId, retries);
+                return true;
+            }
+        } catch (InterruptedException e) {
+            log.debug("interrupted");
+        }
+        log.warn("GpId {}: Retry {} von {} erfolglos", gpId, retries, dmsProperties.getRetries());
+        return false;
+    }
+
+
     private void heal(final PscdImport data) {
         if (data.getBetreffseinheit().isEmpty()) {
             data.setStatus(DatensatzStatus.STARTED);
@@ -106,8 +183,8 @@ public class DbToEakteService {
         this.datensatzVerarbeitung(data);
     }
 
-    private void healAkte(PscdImport data) {
-        SearchFileResponseDTO dto = dmsService.searchFiles(data);
+    private void healAkte(final PscdImport data) {
+        final SearchFileResponseDTO dto = dmsService.searchFiles(data);
         if (dto.getGiobjecttype() != null && !dto.getGiobjecttype().isEmpty()) {
             data.setAkte(dto.getGiobjecttype().getFirst().getObjaddress());
             data.setStatus(DatensatzStatus.FILE_CREATED);
@@ -118,11 +195,11 @@ public class DbToEakteService {
 
     private String healVorgang(final PscdImport data, final String procedureName, final DatensatzStatus ohneCoo, final DatensatzStatus mitCoo) {
         final SearchProcedureResponseDTO dto = dmsService.searchProcedures(data.getAkte(), procedureName);
-        String coo = null;
         if (dto.getGiobjecttype() != null) {
             return null;
         }
-        for (Objektreferenz ref : dto.getGiobjecttype()) {
+        String coo = null;
+        for (final Objektreferenz ref : dto.getGiobjecttype()) {
             if (procedureName.equals(ref.getObjname())) {
                 coo = ref.getObjaddress();
                 break;
