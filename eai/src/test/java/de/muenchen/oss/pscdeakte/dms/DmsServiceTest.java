@@ -98,7 +98,7 @@ class DmsServiceTest {
     void createFileHandlesMissingEmptyAndPopulatedOptionalFields() {
         final DmsObjektResponse response = new DmsObjektResponse();
         when(filesApi.createFile(eq(USERLOGIN), any(CreateFileDTO.class), eq(X_ANWENDUNG), eq(JOBOE), eq(JOBPOSITION))).thenReturn(response);
-        final DmsService dmsService = dmsService();
+        final DmsApentryService dmsService = dmsService();
 
         assertSame(response, dmsService.createFile(fileData(null, null, null)));
         assertSame(response, dmsService.createFile(fileData("", "", "")));
@@ -133,7 +133,7 @@ class DmsServiceTest {
         final DmsObjektResponse response = new DmsObjektResponse();
         when(proceduresApi.createProcedure(eq(USERLOGIN), any(CreateProcedureDTO.class), eq(X_ANWENDUNG), eq(JOBOE), eq(JOBPOSITION)))
                 .thenReturn(response);
-        final DmsService dmsService = dmsService();
+        final DmsApentryService dmsService = dmsService();
 
         assertSame(response, dmsService.createProcedureBestandsakte("coo-akte"));
         assertSame(response, dmsService.createProcedureAV("coo-akte"));
@@ -148,8 +148,8 @@ class DmsServiceTest {
         }
     }
 
-    private DmsService dmsService() {
-        return new DmsService(properties(), apentriesApi, subjectAreaUnitsApi, filesApi, proceduresApi, userFormsDataApi);
+    private DmsApentryService dmsService() {
+        return new DmsApentryService(properties(), apentriesApi, subjectAreaUnitsApi, filesApi, proceduresApi, userFormsDataApi);
     }
 
     private static DmsProperties properties() {

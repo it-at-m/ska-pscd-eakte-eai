@@ -20,7 +20,7 @@ import de.muenchen.oss.pscdeakte.database.entity.PscdImport;
 import de.muenchen.oss.pscdeakte.database.repository.LogEntryRepository;
 import de.muenchen.oss.pscdeakte.database.repository.PscdImportRepository;
 import de.muenchen.oss.pscdeakte.dms.Apentries;
-import de.muenchen.oss.pscdeakte.dms.DmsService;
+import de.muenchen.oss.pscdeakte.dms.DmsApentryService;
 import de.muenchen.oss.pscdeakte.dms.ErrorHandler;
 import java.util.List;
 import org.junit.jupiter.api.BeforeEach;
@@ -43,7 +43,7 @@ class DbToEakteServiceTest {
     private LogEntryRepository logEntryRepository;
 
     @Mock
-    private DmsService dmsService;
+    private DmsApentryService dmsService;
 
     @Mock
     private Apentries apentries;

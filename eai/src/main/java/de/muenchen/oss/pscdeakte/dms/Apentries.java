@@ -20,14 +20,14 @@ import org.springframework.stereotype.Service;
 @Service
 public class Apentries {
 
-    private final DmsService dmsService;
+    private final DmsApentryService dmsService;
     private final Map<Integer, String> apentryMap = new ConcurrentHashMap<>();
     private final AtomicBoolean mapInitialized = new AtomicBoolean(false);
     private static final Lock LOCK = new ReentrantLock(true);
     private final Pattern pattern;
     private final DmsProperties props;
 
-    public Apentries(final DmsService dmsService, final DmsProperties properties) {
+    public Apentries(final DmsApentryService dmsService, final DmsProperties properties) {
         this.dmsService = dmsService;
         this.props = properties;
         pattern = Pattern.compile(Pattern.quote(properties.getAktenplannummer()) + "\\.([0-9]+)/[0-9]{10}-[0-9]{10}");

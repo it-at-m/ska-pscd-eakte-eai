@@ -8,9 +8,10 @@ import de.muenchen.oss.pscdeakte.configuration.annotation.LogExecutionTime;
 import de.muenchen.oss.pscdeakte.database.entity.PscdImport;
 import de.muenchen.oss.pscdeakte.database.repository.PscdImportRepository;
 import de.muenchen.oss.pscdeakte.dms.Apentries;
+import de.muenchen.oss.pscdeakte.dms.DmsApentryService;
+import de.muenchen.oss.pscdeakte.dms.DmsFileService;
+import de.muenchen.oss.pscdeakte.dms.DmsProcedureService;
 import de.muenchen.oss.pscdeakte.dms.DmsProperties;
-import de.muenchen.oss.pscdeakte.dms.DmsService;
-
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -25,7 +26,8 @@ import org.springframework.web.client.RestClientResponseException;
 public class DbToEakteService {
 
     private final PscdImportRepository repo;
-    private final DmsService dmsService;
+    private final DmsFileService dmsFileService;
+    private final DmsProcedureService dmsProcedureService;
     private final Apentries apentries;
     private final DBLogger dbLogger;
     private final DmsProperties dmsProperties;
@@ -65,20 +67,20 @@ public class DbToEakteService {
             this.log(data, DatensatzStatus.APENTRY_EXISTS);
             // fallthrough
         case DatensatzStatus.APENTRY_EXISTS:
-            data.setAkte(dmsService.createFile(data).getObjid());
+            data.setAkte(dmsFileService.createFile(data).getObjid());
             this.log(data, DatensatzStatus.FILE_CREATED);
             // fallthrough
         case DatensatzStatus.FILE_CREATED:
-            data.setBestandsakt(dmsService.createProcedureBestandsakte(data.getAkte()).getObjid());
+            data.setBestandsakt(dmsProcedureService.createProcedureBestandsakte(data.getAkte()).getObjid());
             this.log(data, DatensatzStatus.BESTANDSAKT_CREATED);
             // fallthrough
         case DatensatzStatus.BESTANDSAKT_CREATED:
-            data.setAv(dmsService.createProcedureAV(data.getAkte()).getObjid());
+            data.setAv(dmsProcedureService.createProcedureAV(data.getAkte()).getObjid());
             this.log(data, DatensatzStatus.DONE);
             break;
         case DatensatzStatus.UPDATE:
             dbLogger.info("GpId " + data.getGeschaeftspartnerId() + " hat neue Daten. -> update", null, data.getGeschaeftspartnerId());
-            dmsService.updateFile(data);
+            dmsFileService.updateFile(data);
             this.log(data, DatensatzStatus.DONE);
             break;
         case DatensatzStatus.ARCHIVE:
@@ -107,16 +109,16 @@ public class DbToEakteService {
         final String logPrefix = "GpId " + gpId + ": " + exceptionToCatch.getClass().getSimpleName() + " aus der eAkte";
 
         switch (exceptionToCatch) {
-            case final RestClientResponseException rcre:
-                this.handleRestClientResponseException(rcre, logPrefix, gpId);
-                break;
-            case final IllegalStateException ise:
-                log.error("{}: Timeout", logPrefix);
-                dbLogger.error(logPrefix + ": Timeout", ise.getMessage(), gpId);
-                break;
-            default:
-                log.error("{}: {}", logPrefix, exceptionToCatch.getStackTrace());
-                dbLogger.error(logPrefix, exceptionToCatch.getMessage(), gpId);
+        case final RestClientResponseException rcre:
+            this.handleRestClientResponseException(rcre, logPrefix, gpId);
+            break;
+        case final IllegalStateException ise:
+            log.error("{}: Timeout", logPrefix);
+            dbLogger.error(logPrefix + ": Timeout", ise.getMessage(), gpId);
+            break;
+        default:
+            log.error("{}: {}", logPrefix, exceptionToCatch.getStackTrace());
+            dbLogger.error(logPrefix, exceptionToCatch.getMessage(), gpId);
         }
     }
 
@@ -167,16 +169,15 @@ public class DbToEakteService {
         return false;
     }
 
-
     private void heal(final PscdImport data) {
         if (data.getBetreffseinheit().isEmpty()) {
             data.setStatus(DatensatzStatus.STARTED);
         } else if (data.getAkte().isEmpty()) {
             this.healAkte(data);
         } else if (data.getBestandsakt().isEmpty()) {
-            data.setBestandsakt(this.healVorgang(data, DmsService.BESTANDSAKTEN, DatensatzStatus.FILE_CREATED, DatensatzStatus.BESTANDSAKT_CREATED));
+            data.setBestandsakt(this.healVorgang(data, DmsApentryService.BESTANDSAKTEN, DatensatzStatus.FILE_CREATED, DatensatzStatus.BESTANDSAKT_CREATED));
         } else if (data.getAv().isEmpty()) {
-            data.setAv(this.healVorgang(data, DmsService.AVS_TITEL_HAFTBEFEHLE, DatensatzStatus.BESTANDSAKT_CREATED, DatensatzStatus.DONE));
+            data.setAv(this.healVorgang(data, DmsApentryService.AVS_TITEL_HAFTBEFEHLE, DatensatzStatus.BESTANDSAKT_CREATED, DatensatzStatus.DONE));
         } else {
             data.setStatus(DatensatzStatus.UPDATE);
         }
@@ -184,7 +185,7 @@ public class DbToEakteService {
     }
 
     private void healAkte(final PscdImport data) {
-        final SearchFileResponseDTO dto = dmsService.searchFiles(data);
+        final SearchFileResponseDTO dto = dmsFileService.searchFiles(data);
         if (dto.getGiobjecttype() != null && !dto.getGiobjecttype().isEmpty()) {
             data.setAkte(dto.getGiobjecttype().getFirst().getObjaddress());
             data.setStatus(DatensatzStatus.FILE_CREATED);
@@ -194,7 +195,7 @@ public class DbToEakteService {
     }
 
     private String healVorgang(final PscdImport data, final String procedureName, final DatensatzStatus ohneCoo, final DatensatzStatus mitCoo) {
-        final SearchProcedureResponseDTO dto = dmsService.searchProcedures(data.getAkte(), procedureName);
+        final SearchProcedureResponseDTO dto = dmsProcedureService.searchProcedures(data.getAkte(), procedureName);
         if (dto.getGiobjecttype() != null) {
             return null;
         }

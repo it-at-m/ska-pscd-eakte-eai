@@ -23,7 +23,7 @@ class ApentriesTest {
     private static final String AKTENPLANNUMMER = "9512";
 
     @Mock
-    private DmsService dmsService;
+    private DmsApentryService dmsService;
 
     @Test
     void initMapDoesNotCallDmsWhenInitialFillIsDisabled() {
