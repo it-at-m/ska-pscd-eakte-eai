@@ -33,8 +33,6 @@ public class DbToEakteService {
     private final Apentries apentries;
     private final DBLogger dbLogger;
     private final DmsProperties dmsProperties;
-    private String gpId = "";
-    private int retries = 1;
 
     @LogExecutionTime
     public void start() {
@@ -48,14 +46,87 @@ public class DbToEakteService {
         log.info("Finished DB To Eakte");
     }
 
+    @SuppressWarnings("PMD.DoNotUseThreads")
     public void process(final PscdImport data) {
-        log.debug("Processing {}", data.getGeschaeftspartnerId());
         try {
-            datensatzVerarbeitung(data);
-        } catch (Exception e) {
-            this.handleException(e, data);
+            for (int retry = 0; ; retry++) {
+                if (processOrHeal(data, retry)) return;
+            }
         } finally {
             repo.save(data);
+        }
+    }
+
+    private boolean processOrHeal(PscdImport data, int retry) {
+        try {
+            if (retry == 0) {
+                datensatzVerarbeitung(data);
+            } else {
+                heal(data);
+            }
+            return true;
+        } catch (Exception e) {
+            return catchException(data, retry, e);
+        }
+    }
+
+    private boolean catchException(PscdImport data, int retry, Exception e) {
+        final int maxRetries = dmsProperties.getRetries();
+        data.setStatus(DatensatzStatus.ERROR);
+
+        if (retry >= maxRetries) {
+            logException(e, data.getGeschaeftspartnerId());
+            return true;
+        }
+
+        final int nextRetry = retry + 1;
+        log.warn("GpId {}: Retry {} von {}",
+                data.getGeschaeftspartnerId(), nextRetry, maxRetries);
+
+        try {
+            Thread.sleep(Duration.ofSeconds(nextRetry * 5L));
+        } catch (InterruptedException interrupted) {
+            Thread.currentThread().interrupt();
+            log.warn("Retry für GpId {} unterbrochen", data.getGeschaeftspartnerId());
+            return true;
+        }
+        return false;
+    }
+
+    private void logException(Exception exceptionToCatch, String gpId) {
+        final String logPrefix = "GpId " + gpId + ": " + exceptionToCatch.getClass().getSimpleName() + " aus der eAkte";
+
+        switch (exceptionToCatch) {
+            case final RestClientResponseException rcre:
+                this.handleRestClientResponseException(rcre, logPrefix, gpId);
+                break;
+            case final IllegalStateException ise:
+                log.error("{}: Timeout", logPrefix);
+                dbLogger.error(logPrefix + ": Timeout", ise.getMessage(), gpId);
+                break;
+            default:
+                log.error("{}: {}", logPrefix, exceptionToCatch.getStackTrace());
+                dbLogger.error(logPrefix, exceptionToCatch.getMessage(), gpId);
+        }
+    }
+
+    @SuppressWarnings("PMD.EmptyCatchBlock")
+    private void handleRestClientResponseException(final RestClientResponseException e, final String prefix, final String gpId) {
+        final StringBuilder sb = new StringBuilder(e.getMessage()).append(" | ");
+        DmsErrorResponse errorResponse = null;
+        try {
+            errorResponse = e.getResponseBodyAs(DmsErrorResponse.class);
+        } catch (IllegalStateException | DecodingException innerEx) {
+            // wird unter finally bearbeitet
+        } finally {
+            if (errorResponse != null) {
+                log.error("{}: {} | {}", prefix, e.getMessage(), errorResponse);
+                sb.append(errorResponse);
+            } else {
+                log.error("{}: {} | {}", prefix, e.getMessage(), e.getResponseBodyAsString());
+                sb.append(e.getResponseBodyAsString());
+            }
+            dbLogger.error(prefix, sb.toString(), gpId);
         }
     }
 
@@ -98,82 +169,6 @@ public class DbToEakteService {
     private void log(final PscdImport data, final DatensatzStatus status) {
         data.setStatus(status);
         log.debug("{}: {}", data.getGeschaeftspartnerId(), status.getValue());
-    }
-
-    public void handleException(final Exception exceptionToCatch, final PscdImport data) {
-
-        data.setStatus(DatensatzStatus.ERROR);
-        if (this.retry(data)) {
-            try {
-                this.heal(data);
-            } catch (Exception e) {
-                this.handleException(e, data);
-            }
-            return;
-        }
-
-        final String logPrefix = "GpId " + gpId + ": " + exceptionToCatch.getClass().getSimpleName() + " aus der eAkte";
-
-        switch (exceptionToCatch) {
-        case final RestClientResponseException rcre:
-            this.handleRestClientResponseException(rcre, logPrefix, gpId);
-            break;
-        case final IllegalStateException ise:
-            log.error("{}: Timeout", logPrefix);
-            dbLogger.error(logPrefix + ": Timeout", ise.getMessage(), gpId);
-            break;
-        default:
-            log.error("{}: {}", logPrefix, exceptionToCatch.getStackTrace());
-            dbLogger.error(logPrefix, exceptionToCatch.getMessage(), gpId);
-        }
-    }
-
-    @SuppressWarnings("PMD.EmptyCatchBlock")
-    private void handleRestClientResponseException(final RestClientResponseException e, final String prefix, final String gpId) {
-        final StringBuilder sb = new StringBuilder(e.getMessage()).append(" | ");
-        DmsErrorResponse errorResponse = null;
-        try {
-            errorResponse = e.getResponseBodyAs(DmsErrorResponse.class);
-        } catch (IllegalStateException | DecodingException innerEx) {
-            // wird unter finally bearbeitet
-        } finally {
-            if (errorResponse != null) {
-                log.error("{}: {} | {}", prefix, e.getMessage(), errorResponse);
-                sb.append(errorResponse);
-            } else {
-                log.error("{}: {} | {}", prefix, e.getMessage(), e.getResponseBodyAsString());
-                sb.append(e.getResponseBodyAsString());
-            }
-            dbLogger.error(prefix, sb.toString(), gpId);
-        }
-    }
-
-    @SuppressWarnings("PMD.DoNotUseThreads")
-    private boolean retry(final PscdImport data) {
-
-        if (gpId.equals(data.getGeschaeftspartnerId())) {
-            retries++;
-        } else {
-            retries = 1;
-            gpId = data.getGeschaeftspartnerId();
-        }
-
-        if (retries > dmsProperties.getRetries()) {
-            log.error("GpId {}: Abbruch nach {} erfolglosen Versuchen.", gpId, dmsProperties.getRetries());
-            return false;
-        }
-
-        log.warn("GpId {}: Retry {} von {} ", gpId, retries, dmsProperties.getRetries());
-
-        try {
-            Thread.sleep(Duration.ofSeconds(retries * 5L));
-        } catch (InterruptedException e) {
-            Thread.currentThread().interrupt();
-            log.warn("Retry für GpId {} unterbrochen", data.getGeschaeftspartnerId());
-            return false;
-        }
-
-        return true;
     }
 
     private void heal(final PscdImport data) {
