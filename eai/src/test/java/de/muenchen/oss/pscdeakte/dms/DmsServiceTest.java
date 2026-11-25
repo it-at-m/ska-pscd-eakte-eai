@@ -63,7 +63,7 @@ class DmsServiceTest {
         final ReadApentryAntwortDTO response = new ReadApentryAntwortDTO();
         when(apentriesApi.readApentry(USERLOGIN, COO_EINZELAKTE, X_ANWENDUNG, JOBOE, JOBPOSITION)).thenReturn(response);
 
-        assertSame(response, dmsService().getApentries());
+        assertSame(response, dmsApentryService().getApentries());
     }
 
     @Test
@@ -72,7 +72,7 @@ class DmsServiceTest {
         when(apentriesApi.searchApentry(eq(USERLOGIN), any(SearchApentryDTO.class), eq(X_ANWENDUNG), eq(JOBOE), eq(JOBPOSITION)))
                 .thenReturn(response);
 
-        assertSame(response, dmsService().getApentryFor(4));
+        assertSame(response, dmsApentryService().getApentryFor(4));
 
         final ArgumentCaptor<SearchApentryDTO> requestCaptor = ArgumentCaptor.forClass(SearchApentryDTO.class);
         verify(apentriesApi).searchApentry(eq(USERLOGIN), requestCaptor.capture(), eq(X_ANWENDUNG), eq(JOBOE), eq(JOBPOSITION));
@@ -85,7 +85,7 @@ class DmsServiceTest {
         when(subjectAreaUnitsApi.createSubjectAreaUnit(eq(USERLOGIN), any(CreateSubjectAreaUnitAnfrageDTO.class), eq(X_ANWENDUNG), eq(JOBOE), eq(JOBPOSITION)))
                 .thenReturn(response);
 
-        assertSame(response, dmsService().createSubjectAreaUnit(4, "bereich"));
+        assertSame(response, dmsApentryService().createSubjectAreaUnit(4, "bereich"));
 
         final ArgumentCaptor<CreateSubjectAreaUnitAnfrageDTO> requestCaptor = ArgumentCaptor.forClass(CreateSubjectAreaUnitAnfrageDTO.class);
         verify(subjectAreaUnitsApi).createSubjectAreaUnit(eq(USERLOGIN), requestCaptor.capture(), eq(X_ANWENDUNG), eq(JOBOE), eq(JOBPOSITION));
@@ -98,11 +98,11 @@ class DmsServiceTest {
     void createFileHandlesMissingEmptyAndPopulatedOptionalFields() {
         final DmsObjektResponse response = new DmsObjektResponse();
         when(filesApi.createFile(eq(USERLOGIN), any(CreateFileDTO.class), eq(X_ANWENDUNG), eq(JOBOE), eq(JOBPOSITION))).thenReturn(response);
-        final DmsApentryService dmsService = dmsService();
+        final DmsFileService dmsFileService = dmsFileService();
 
-        assertSame(response, dmsService.createFile(fileData(null, null, null)));
-        assertSame(response, dmsService.createFile(fileData("", "", "")));
-        assertSame(response, dmsService.createFile(fileData("Vorname", "Name", "01.02.2020")));
+        assertSame(response, dmsFileService.createFile(fileData(null, null, null)));
+        assertSame(response, dmsFileService.createFile(fileData("", "", "")));
+        assertSame(response, dmsFileService.createFile(fileData("Vorname", "Name", "01.02.2020")));
 
         final ArgumentCaptor<CreateFileDTO> requestCaptor = ArgumentCaptor.forClass(CreateFileDTO.class);
         verify(filesApi, times(3)).createFile(eq(USERLOGIN), requestCaptor.capture(), eq(X_ANWENDUNG), eq(JOBOE), eq(JOBPOSITION));
@@ -116,7 +116,7 @@ class DmsServiceTest {
 
     @Test
     void updateFileUpdatesUserFormsDataAndFile() {
-        dmsService().updateFile(fileData("Vorname", "Name", "01.02.2020"));
+        dmsFileService().updateFile(fileData("Vorname", "Name", "01.02.2020"));
 
         final ArgumentCaptor<UpdateUserFormsDataRequestDTO> userFormsCaptor = ArgumentCaptor.forClass(UpdateUserFormsDataRequestDTO.class);
         verify(userFormsDataApi).updateUserFormsData(eq(USERLOGIN), eq("akte"), userFormsCaptor.capture(), eq(X_ANWENDUNG), eq(JOBOE),
@@ -133,10 +133,10 @@ class DmsServiceTest {
         final DmsObjektResponse response = new DmsObjektResponse();
         when(proceduresApi.createProcedure(eq(USERLOGIN), any(CreateProcedureDTO.class), eq(X_ANWENDUNG), eq(JOBOE), eq(JOBPOSITION)))
                 .thenReturn(response);
-        final DmsApentryService dmsService = dmsService();
+        final DmsProcedureService dmsProcedureService = dmsProcedureService();
 
-        assertSame(response, dmsService.createProcedureBestandsakte("coo-akte"));
-        assertSame(response, dmsService.createProcedureAV("coo-akte"));
+        assertSame(response, dmsProcedureService.createProcedureBestandsakte("coo-akte"));
+        assertSame(response, dmsProcedureService.createProcedureAV("coo-akte"));
 
         final ArgumentCaptor<CreateProcedureDTO> requestCaptor = ArgumentCaptor.forClass(CreateProcedureDTO.class);
         verify(proceduresApi, times(2)).createProcedure(eq(USERLOGIN), requestCaptor.capture(), eq(X_ANWENDUNG), eq(JOBOE), eq(JOBPOSITION));
@@ -148,8 +148,16 @@ class DmsServiceTest {
         }
     }
 
-    private DmsApentryService dmsService() {
-        return new DmsApentryService(properties(), apentriesApi, subjectAreaUnitsApi, filesApi, proceduresApi, userFormsDataApi);
+    private DmsApentryService dmsApentryService() {
+        return new DmsApentryService(properties(), apentriesApi, subjectAreaUnitsApi);
+    }
+
+    private DmsFileService dmsFileService() {
+        return new DmsFileService(properties(), filesApi, userFormsDataApi);
+    }
+
+    private DmsProcedureService dmsProcedureService() {
+        return new DmsProcedureService(properties(), proceduresApi);
     }
 
     private static DmsProperties properties() {

@@ -64,11 +64,12 @@ public class Apentries {
                 return;
             }
             final ReadApentryAntwortDTO response = dmsService.getApentries();
-            if (response == null || response.getGiobjecttype() == null) {
+            final List<Objektreferenz> giObjects = response != null ? response.getGiobjecttype() : null;
+            if (giObjects == null) {
                 throw new IllegalStateException("Betreffseinheiten konnten nicht erneut geladen werden");
             }
             final Map<Integer, String> refreshedMap = new ConcurrentHashMap<>();
-            response.getGiobjecttype().forEach(ref -> fillMap(ref, refreshedMap));
+            giObjects.forEach(ref -> fillMap(ref, refreshedMap));
             apentryMap.clear();
             apentryMap.putAll(refreshedMap);
             mapInitialized.set(true);

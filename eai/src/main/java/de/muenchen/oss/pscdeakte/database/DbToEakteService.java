@@ -46,18 +46,19 @@ public class DbToEakteService {
         log.info("Finished DB To Eakte");
     }
 
-    @SuppressWarnings("PMD.DoNotUseThreads")
     public void process(final PscdImport data) {
         try {
-            for (int retry = 0; ; retry++) {
-                if (processOrHeal(data, retry)) return;
+            for (int retry = 0;; retry++) {
+                if (processOrHeal(data, retry)) {
+                    return;
+                }
             }
         } finally {
             repo.save(data);
         }
     }
 
-    private boolean processOrHeal(PscdImport data, int retry) {
+    private boolean processOrHeal(final PscdImport data, final int retry) {
         try {
             if (retry == 0) {
                 datensatzVerarbeitung(data);
@@ -70,10 +71,11 @@ public class DbToEakteService {
         }
     }
 
-    private boolean catchException(PscdImport data, int retry, Exception e) {
-        final int maxRetries = dmsProperties.getRetries();
+    @SuppressWarnings("PMD.DoNotUseThreads")
+    private boolean catchException(final PscdImport data, final int retry, final Exception e) {
         data.setStatus(DatensatzStatus.ERROR);
 
+        final int maxRetries = dmsProperties.getRetries();
         if (retry >= maxRetries) {
             logException(e, data.getGeschaeftspartnerId());
             return true;
@@ -93,20 +95,20 @@ public class DbToEakteService {
         return false;
     }
 
-    private void logException(Exception exceptionToCatch, String gpId) {
+    private void logException(final Exception exceptionToCatch, final String gpId) {
         final String logPrefix = "GpId " + gpId + ": " + exceptionToCatch.getClass().getSimpleName() + " aus der eAkte";
 
         switch (exceptionToCatch) {
-            case final RestClientResponseException rcre:
-                this.handleRestClientResponseException(rcre, logPrefix, gpId);
-                break;
-            case final IllegalStateException ise:
-                log.error("{}: Timeout", logPrefix);
-                dbLogger.error(logPrefix + ": Timeout", ise.getMessage(), gpId);
-                break;
-            default:
-                log.error("{}: {}", logPrefix, exceptionToCatch.getStackTrace());
-                dbLogger.error(logPrefix, exceptionToCatch.getMessage(), gpId);
+        case final RestClientResponseException rcre:
+            this.handleRestClientResponseException(rcre, logPrefix, gpId);
+            break;
+        case final IllegalStateException ise:
+            log.error("{}: Timeout", logPrefix);
+            dbLogger.error(logPrefix + ": Timeout", ise.getMessage(), gpId);
+            break;
+        default:
+            log.error("{}: {}", logPrefix, exceptionToCatch.getStackTrace());
+            dbLogger.error(logPrefix, exceptionToCatch.getMessage(), gpId);
         }
     }
 
@@ -189,39 +191,37 @@ public class DbToEakteService {
 
     private void healAkte(final PscdImport data) {
         final SearchFileResponseDTO dto = dmsFileService.searchFiles(data);
-        if (dto.getGiobjecttype() == null || dto.getGiobjecttype().isEmpty()) {
+        final List<Objektreferenz> akten = dto == null ? null : dto.getGiobjecttype();
+        if (akten == null || akten.isEmpty()) {
             data.setStatus(DatensatzStatus.APENTRY_EXISTS);
             return;
         }
-        data.setAkte(dto.getGiobjecttype().getFirst().getObjaddress());
+        data.setAkte(akten.getFirst().getObjaddress());
         data.setStatus(DatensatzStatus.FILE_CREATED);
-        if (dto.getGiobjecttype().size() != 1) {
+        if (akten.size() != 1) {
             final StringBuilder str = new StringBuilder("Duplikat zu GpId ").append(data.getGeschaeftspartnerId()).append(" gefunden:");
-            dto.getGiobjecttype().forEach(ref -> str.append(" ").append(ref.getObjaddress()));
-            str.append(" Im weiteren Verlauf wird die Erste verwendet: ").append(data.getAkte());
-            dbLogger.error(str.toString(), null, data.getGeschaeftspartnerId());
+            akten.forEach(akte -> str.append(" ").append(akte.getObjaddress()));
+            str.append(" Im weiteren Verlauf wird die erste Akte verwendet: ").append(data.getAkte());
+            dbLogger.warn(str.toString(), null, data.getGeschaeftspartnerId());
         }
     }
 
     private String healVorgang(final PscdImport data, final String procedureName, final DatensatzStatus ohneCoo, final DatensatzStatus mitCoo) {
         final SearchProcedureResponseDTO dto = dmsProcedureService.searchProcedures(data.getAkte(), procedureName);
-        if (dto.getGiobjecttype() == null) {
-            data.setStatus(DatensatzStatus.FILE_CREATED);
-            return null;
-        }
-        String coo = null;
-        for (final Objektreferenz ref : dto.getGiobjecttype()) {
-            if (procedureName.equals(ref.getObjname())) {
-                coo = ref.getObjaddress();
-                break;
-            }
-        }
-        if (coo == null) {
+        final List<Objektreferenz> vorgaenge = dto == null ? null : dto.getGiobjecttype();
+        if (vorgaenge == null || vorgaenge.isEmpty()) {
             data.setStatus(ohneCoo);
             return null;
         }
+
+        if (vorgaenge.size() > 1) {
+            final StringBuilder str = new StringBuilder("mehrere Vorgänge \"").append(procedureName).append("\" gefunden in Akte GpId ")
+                    .append(data.getGeschaeftspartnerId()).append(", coo-Adresse ").append(data.getAkte()).append(":");
+            vorgaenge.forEach(vorgang -> str.append(" ").append(vorgang.getObjaddress()));
+            dbLogger.warn(str.toString(), null, data.getGeschaeftspartnerId());
+        }
         data.setStatus(mitCoo);
-        return coo;
+        return vorgaenge.getFirst().getObjaddress();
     }
 
 }
