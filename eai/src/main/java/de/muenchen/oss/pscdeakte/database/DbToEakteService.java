@@ -85,12 +85,15 @@ public class DbToEakteService {
         log.warn("GpId {}: Retry {} von {}",
                 data.getGeschaeftspartnerId(), nextRetry, maxRetries);
 
-        try {
-            Thread.sleep(Duration.ofSeconds(nextRetry * 5L));
-        } catch (InterruptedException interrupted) {
-            Thread.currentThread().interrupt();
-            log.warn("Retry für GpId {} unterbrochen", data.getGeschaeftspartnerId());
-            return true;
+        final Integer waitTimeMultiplier = dmsProperties.getWaitTimeMultiplier();
+        if (waitTimeMultiplier != null && waitTimeMultiplier > 0) {
+            try {
+                Thread.sleep(Duration.ofSeconds((long) nextRetry * waitTimeMultiplier));
+            } catch (InterruptedException interrupted) {
+                Thread.currentThread().interrupt();
+                log.warn("Retry für GpId {} unterbrochen", data.getGeschaeftspartnerId());
+                return true;
+            }
         }
         return false;
     }

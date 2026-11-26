@@ -36,6 +36,8 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.NullAndEmptySource;
+import org.junit.jupiter.params.provider.NullSource;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -70,6 +72,7 @@ class DbToEakteServiceTest {
         dbLogger = new DBLogger(logEntryRepository);
         dmsProperties = new DmsProperties();
         dmsProperties.setRetries(0);
+        dmsProperties.setWaitTimeMultiplier(0);
     }
 
     @Test
@@ -315,9 +318,33 @@ class DbToEakteServiceTest {
         verify(repository).save(same(second));
     }
 
+    @ParameterizedTest
+    @NullSource
+    @ValueSource(ints = 0)
+    void processRetriesWithoutWaitingWhenMultiplierIsNullOrZero(final Integer multiplier) {
+        dmsProperties.setRetries(1);
+        dmsProperties.setWaitTimeMultiplier(multiplier);
+        final PscdImport data = completeErrorData();
+        data.setStatus(DatensatzStatus.UPDATE);
+        doThrow(new RuntimeException("temporary")).doNothing().when(dmsFileService).updateFile(data);
+
+        try {
+            Thread.currentThread().interrupt();
+            service().process(data);
+            assertTrue(Thread.currentThread().isInterrupted());
+        } finally {
+            Thread.interrupted();
+        }
+
+        assertEquals(DatensatzStatus.DONE, data.getStatus());
+        verify(dmsFileService, times(2)).updateFile(data);
+        verify(repository).save(data);
+    }
+
     @Test
     void processStopsWhenRetryWaitIsInterrupted() {
         dmsProperties.setRetries(1);
+        dmsProperties.setWaitTimeMultiplier(5);
         final PscdImport data = completeErrorData();
         data.setStatus(DatensatzStatus.UPDATE);
         doThrow(new RuntimeException("failure")).when(dmsFileService).updateFile(data);
@@ -415,13 +442,35 @@ class DbToEakteServiceTest {
     }
 
     @Test
-    void processErrorRecordRemainsInErrorWithoutCallingDms() {
+    void processCompleteErrorRecordHealsByUpdatingFile() {
         final PscdImport data = completeErrorData();
 
         service().process(data);
 
-        assertEquals(DatensatzStatus.ERROR, data.getStatus());
-        verifyNoInteractions(dmsFileService, dmsProcedureService, apentries);
+        assertEquals(DatensatzStatus.DONE, data.getStatus());
+        verify(dmsFileService).updateFile(data);
+        verifyNoInteractions(dmsProcedureService, apentries);
+        verifyLog(DBLogger.Level.INFO.toString(), "GpId gp-id hat neue Daten. -> update", null, GP_ID);
+        verify(repository).save(data);
+    }
+
+    @Test
+    void processIncompleteErrorRecordHealsByContinuingCreation() {
+        final PscdImport data = data(DatensatzStatus.ERROR);
+        when(apentries.getApentryCoo(GP_ID)).thenReturn("apentry-coo");
+        when(dmsFileService.createFile(data)).thenReturn(response("akte-coo"));
+        when(dmsProcedureService.createProcedureBestandsakte("akte-coo")).thenReturn(response("bestandsakt-coo"));
+        when(dmsProcedureService.createProcedureAV("akte-coo")).thenReturn(response("av-coo"));
+
+        service().process(data);
+
+        assertEquals(DatensatzStatus.DONE, data.getStatus());
+        assertEquals("apentry-coo", data.getBetreffseinheit());
+        assertEquals("akte-coo", data.getAkte());
+        assertEquals("bestandsakt-coo", data.getBestandsakt());
+        assertEquals("av-coo", data.getAv());
+        verify(apentries).refreshMap();
+        verify(dmsFileService, never()).updateFile(data);
         verify(repository).save(data);
     }
 

@@ -20,4 +20,5 @@ public class DmsProperties {
     @NotBlank private String aktenplannummer;
     private Boolean initialbefuellung = false;
     private Integer retries = 3;
+    private Integer waitTimeMultiplier = 5;
 }
