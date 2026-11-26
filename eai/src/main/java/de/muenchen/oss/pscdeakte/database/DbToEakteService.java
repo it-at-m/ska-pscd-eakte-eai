@@ -162,6 +162,7 @@ public class DbToEakteService {
             // personenbezogene Daten entfernen wird vom Projekt nicht erwartet.
             break;
         case DatensatzStatus.ERROR:
+            this.heal(data);
             break;
         default:
             log.warn("Status steht auf {}", data.getStatus().getValue());
