@@ -20,6 +20,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.core.codec.DecodingException;
 import org.springframework.stereotype.Service;
+import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestClientResponseException;
 
 @RequiredArgsConstructor
@@ -121,7 +122,7 @@ public class DbToEakteService {
         DmsErrorResponse errorResponse = null;
         try {
             errorResponse = e.getResponseBodyAs(DmsErrorResponse.class);
-        } catch (IllegalStateException | DecodingException innerEx) {
+        } catch (IllegalStateException | DecodingException | RestClientException innerEx) {
             // wird unter finally bearbeitet
         } finally {
             if (errorResponse != null) {
