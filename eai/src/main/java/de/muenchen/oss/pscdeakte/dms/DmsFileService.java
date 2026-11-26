@@ -1,17 +1,11 @@
 package de.muenchen.oss.pscdeakte.dms;
 
-import de.muenchen.oss.eakte.v1.generated.api.ApentriesApi;
 import de.muenchen.oss.eakte.v1.generated.api.FilesApi;
-import de.muenchen.oss.eakte.v1.generated.api.ProceduresApi;
-import de.muenchen.oss.eakte.v1.generated.api.SubjectAreaUnitsApi;
 import de.muenchen.oss.eakte.v1.generated.api.UserFormsDataApi;
 import de.muenchen.oss.eakte.v1.generated.model.CreateFileDTO;
-import de.muenchen.oss.eakte.v1.generated.model.CreateProcedureDTO;
-import de.muenchen.oss.eakte.v1.generated.model.CreateSubjectAreaUnitAnfrageDTO;
 import de.muenchen.oss.eakte.v1.generated.model.DmsObjektResponse;
-import de.muenchen.oss.eakte.v1.generated.model.ReadApentryAntwortDTO;
-import de.muenchen.oss.eakte.v1.generated.model.SearchApentryDTO;
-import de.muenchen.oss.eakte.v1.generated.model.SearchApentryResponseDTO;
+import de.muenchen.oss.eakte.v1.generated.model.SearchFileRequestDTO;
+import de.muenchen.oss.eakte.v1.generated.model.SearchFileResponseDTO;
 import de.muenchen.oss.eakte.v1.generated.model.UpdateFileDTO;
 import de.muenchen.oss.eakte.v1.generated.model.UpdateUserFormsDataRequestDTO;
 import de.muenchen.oss.eakte.v1.generated.model.UserFormsReferenz;
@@ -26,42 +20,11 @@ import org.springframework.stereotype.Service;
 @RequiredArgsConstructor
 @Service
 @Slf4j
-public class DmsService {
+public class DmsFileService {
 
     private final DmsProperties dmsProperties;
-    private final ApentriesApi apentriesApi;
-    private final SubjectAreaUnitsApi subjectAreaUnitsApi;
     private final FilesApi filesApi;
-    private final ProceduresApi proceduresApi;
     private final UserFormsDataApi userFormsDataApi;
-
-    public ReadApentryAntwortDTO getApentries() {
-        return apentriesApi.readApentry(dmsProperties.getUserlogin(), dmsProperties.getCooEinzelakte(), dmsProperties.getXAnwendung(), dmsProperties.getJoboe(),
-                dmsProperties.getJobposition());
-    }
-
-    public SearchApentryResponseDTO getApentryFor(final int lfdnr) {
-        final SearchApentryDTO dto = new SearchApentryDTO();
-        dto.setBasenr(dmsProperties.getAktenplannummer() + "." + lfdnr);
-        return apentriesApi.searchApentry(dmsProperties.getUserlogin(), dto, dmsProperties.getXAnwendung(), dmsProperties.getJoboe(),
-                dmsProperties.getJobposition());
-    }
-
-    /**
-     * Erzeugt in der Einzelakte eine Betreffseinheit
-     *
-     * @param laufendeNr laufende Nummer für das Geschaeftszeichen des uebergeordneten Aktenplaneintrags
-     * @param bereich Titel der anzulegenden Betreffseinheit
-     * @return Response der eAkte
-     */
-    public DmsObjektResponse createSubjectAreaUnit(final int laufendeNr, final String bereich) {
-        final CreateSubjectAreaUnitAnfrageDTO dto = new CreateSubjectAreaUnitAnfrageDTO();
-        dto.setBasenr(dmsProperties.getAktenplannummer() + "." + laufendeNr);
-        dto.setShortterm(bereich);
-        dto.setObjaddress(dmsProperties.getCooEinzelakte());
-        return subjectAreaUnitsApi.createSubjectAreaUnit(dmsProperties.getUserlogin(), dto, dmsProperties.getXAnwendung(), dmsProperties.getJoboe(),
-                dmsProperties.getJobposition());
-    }
 
     /**
      * Erzeugt in der Betreffseinheit eine Sachakte (Geschaeftspartner)
@@ -109,40 +72,10 @@ public class DmsService {
         return userFormsData;
     }
 
-    /**
-     * Bei der Erstellung einer Sachakte muss ein darin enthaltener Vorgang des Typs 'Bestandsakte'
-     * erzeugt werden.
-     *
-     * @param referrednumber uebergeordnete Sachakte
-     * @return Response der ProceduresApi
-     */
-    public DmsObjektResponse createProcedureBestandsakte(final String referrednumber) {
-        return createProcedure(referrednumber, "Bestandsakten");
-    }
-
-    /**
-     * Bei der Erstellung einer Sachakte muss ein darin enthaltener Vorgang des Typs 'AVs, Titel,
-     * Haftbefehle' erzeugt werden.
-     *
-     * @param referrednumber uebergeordnete Sachakte
-     * @return Response der ProceduresApi
-     */
-    public DmsObjektResponse createProcedureAV(final String referrednumber) {
-        return createProcedure(referrednumber, "AVs, Titel, Haftbefehle");
-    }
-
-    /**
-     * Kapselt den Aufruf der ProceduresApi.
-     *
-     * @param referrednumber uebergeordnete Sachakte
-     * @param shortname Typ des anzulegenden Vorgangs
-     * @return Response der ProceduresApi
-     */
-    private DmsObjektResponse createProcedure(final String referrednumber, final String shortname) {
-        final CreateProcedureDTO dto = new CreateProcedureDTO();
-        dto.shortname(shortname).accdef("Aktengebunden").referrednumber(referrednumber);
-        return proceduresApi
-                .createProcedure(dmsProperties.getUserlogin(), dto, dmsProperties.getXAnwendung(), dmsProperties.getJoboe(), dmsProperties.getJobposition());
+    public SearchFileResponseDTO searchFiles(final PscdImport data) {
+        final SearchFileRequestDTO dto = new SearchFileRequestDTO();
+        dto.apentry(data.getBetreffseinheit()).objmlname(data.getGeschaeftspartnerId());
+        return filesApi.searchFile(dmsProperties.getUserlogin(), dto, dmsProperties.getXAnwendung(), dmsProperties.getJoboe(), dmsProperties.getJobposition());
     }
 
     private void formatForUpdate(final PscdImport data) {

@@ -1,8 +1,10 @@
 package de.muenchen.oss.pscdeakte.dms;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
@@ -23,7 +25,7 @@ class ApentriesTest {
     private static final String AKTENPLANNUMMER = "9512";
 
     @Mock
-    private DmsService dmsService;
+    private DmsApentryService dmsService;
 
     @Test
     void initMapDoesNotCallDmsWhenInitialFillIsDisabled() {
@@ -72,6 +74,129 @@ class ApentriesTest {
 
         assertEquals("coo-cached", apentries.getApentryCoo("1000005001"));
         verify(dmsService, never()).createSubjectAreaUnit(1, "1000005001-1000010000");
+    }
+
+    @Test
+    void refreshMapReloadsAndReplacesExistingEntries() {
+        final Apentries apentries = new Apentries(dmsService, properties(true));
+        final ReadApentryAntwortDTO first = mock(ReadApentryAntwortDTO.class);
+        final ReadApentryAntwortDTO second = mock(ReadApentryAntwortDTO.class);
+        final Objektreferenz oldRef = referenceWithNameAndAddress("9512.1/1000005001-1000010000", "old-coo");
+        final Objektreferenz newRef = referenceWithNameAndAddress("9512.1/1000005001-1000010000", "new-coo");
+        when(first.getGiobjecttype()).thenReturn(List.of(oldRef));
+        when(second.getGiobjecttype()).thenReturn(List.of(newRef));
+        when(dmsService.getApentries()).thenReturn(first, second);
+
+        apentries.initMap();
+        assertEquals("old-coo", apentries.getApentryCoo("1000005001"));
+        apentries.refreshMap();
+        apentries.initMap();
+
+        assertEquals("new-coo", apentries.getApentryCoo("1000005001"));
+        verify(dmsService, times(2)).getApentries();
+        verify(dmsService, never()).createSubjectAreaUnit(1, "1000005001-1000010000");
+    }
+
+    @Test
+    void refreshMapAfterCreationTimeoutFindsPreviouslyCreatedApentry() {
+        final Apentries apentries = new Apentries(dmsService, properties(true));
+        final ReadApentryAntwortDTO response = mock(ReadApentryAntwortDTO.class);
+        final Objektreferenz reference = referenceWithNameAndAddress("9512.0/1000000001-1000005000", "coo-created");
+        when(dmsService.createSubjectAreaUnit(0, "1000000001-1000005000")).thenThrow(new IllegalStateException("timeout"));
+        when(dmsService.getApentries()).thenReturn(response);
+        when(response.getGiobjecttype()).thenReturn(List.of(reference));
+
+        assertThrows(IllegalStateException.class, () -> apentries.getApentryCoo("1000000001"));
+        apentries.refreshMap();
+
+        assertEquals("coo-created", apentries.getApentryCoo("1000000001"));
+        verify(dmsService).createSubjectAreaUnit(0, "1000000001-1000005000");
+    }
+
+    @Test
+    void refreshMapUsesTheCheckedObjectList() {
+        final Apentries apentries = new Apentries(dmsService, properties(true));
+        final ReadApentryAntwortDTO response = mock(ReadApentryAntwortDTO.class);
+        final Objektreferenz reference = referenceWithNameAndAddress("9512.0/1000000001-1000005000", "coo-existing");
+        when(dmsService.getApentries()).thenReturn(response);
+        when(response.getGiobjecttype()).thenReturn(List.of(reference)).thenReturn(null);
+
+        apentries.refreshMap();
+
+        assertEquals("coo-existing", apentries.getApentryCoo("1000000001"));
+        verify(response).getGiobjecttype();
+        verify(dmsService, never()).createSubjectAreaUnit(0, "1000000001-1000005000");
+    }
+
+    @Test
+    void refreshMapKeepsExistingEntriesWhenReloadFails() {
+        final Apentries apentries = new Apentries(dmsService, properties(true));
+        final ReadApentryAntwortDTO response = mock(ReadApentryAntwortDTO.class);
+        final Objektreferenz reference = referenceWithNameAndAddress("9512.1/1000005001-1000010000", "old-coo");
+        when(response.getGiobjecttype()).thenReturn(List.of(reference));
+        when(dmsService.getApentries()).thenReturn(response).thenThrow(new IllegalStateException("timeout"));
+
+        apentries.initMap();
+        assertThrows(IllegalStateException.class, apentries::refreshMap);
+
+        assertEquals("old-coo", apentries.getApentryCoo("1000005001"));
+    }
+
+    @Test
+    void refreshMapRejectsMissingResponseWithoutDiscardingCache() {
+        final Apentries apentries = new Apentries(dmsService, properties(true));
+        final ReadApentryAntwortDTO response = mock(ReadApentryAntwortDTO.class);
+        final Objektreferenz reference = referenceWithNameAndAddress("9512.1/1000005001-1000010000", "old-coo");
+        when(response.getGiobjecttype()).thenReturn(List.of(reference));
+        when(dmsService.getApentries()).thenReturn(response).thenReturn(null);
+
+        apentries.initMap();
+        assertThrows(IllegalStateException.class, apentries::refreshMap);
+
+        assertEquals("old-coo", apentries.getApentryCoo("1000005001"));
+    }
+
+    @Test
+    void refreshMapRejectsMissingObjectListWithoutDiscardingCache() {
+        final Apentries apentries = new Apentries(dmsService, properties(true));
+        final ReadApentryAntwortDTO first = mock(ReadApentryAntwortDTO.class);
+        final ReadApentryAntwortDTO second = mock(ReadApentryAntwortDTO.class);
+        final Objektreferenz reference = referenceWithNameAndAddress("9512.1/1000005001-1000010000", "old-coo");
+        when(first.getGiobjecttype()).thenReturn(List.of(reference));
+        when(second.getGiobjecttype()).thenReturn(null);
+        when(dmsService.getApentries()).thenReturn(first, second);
+
+        apentries.initMap();
+        assertThrows(IllegalStateException.class, apentries::refreshMap);
+
+        assertEquals("old-coo", apentries.getApentryCoo("1000005001"));
+    }
+
+    @Test
+    void refreshMapRemovesEntriesMissingFromNewResponse() {
+        final Apentries apentries = new Apentries(dmsService, properties(true));
+        final ReadApentryAntwortDTO first = mock(ReadApentryAntwortDTO.class);
+        final ReadApentryAntwortDTO second = mock(ReadApentryAntwortDTO.class);
+        final Objektreferenz reference = referenceWithNameAndAddress("9512.0/1000000001-1000005000", "old-coo");
+        when(first.getGiobjecttype()).thenReturn(List.of(reference));
+        when(second.getGiobjecttype()).thenReturn(List.of());
+        when(dmsService.getApentries()).thenReturn(first, second);
+        stubCreatedApentry();
+
+        apentries.initMap();
+        apentries.refreshMap();
+
+        assertEquals("coo-created", apentries.getApentryCoo("1000000001"));
+        verify(dmsService).createSubjectAreaUnit(0, "1000000001-1000005000");
+    }
+
+    @Test
+    void refreshMapDoesNotCallDmsWhenInitialFillIsDisabled() {
+        final Apentries apentries = new Apentries(dmsService, properties(false));
+
+        apentries.refreshMap();
+
+        verifyNoInteractions(dmsService);
     }
 
     @Test

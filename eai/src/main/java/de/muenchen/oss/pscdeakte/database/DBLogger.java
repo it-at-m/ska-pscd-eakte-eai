@@ -14,6 +14,7 @@ public class DBLogger {
 
     public enum Level {
         INFO,
+        WARN,
         ERROR
     }
 
@@ -29,6 +30,10 @@ public class DBLogger {
 
     public void info(final String message, final String exception, final String gpId) {
         this.log(Level.INFO, message, exception, gpId);
+    }
+
+    public void warn(final String message, final String exception, final String gpId) {
+        this.log(Level.WARN, message, exception, gpId);
     }
 
     public void error(final String message, final String exception, final String gpId) {
